@@ -48,13 +48,13 @@ export const ExecutiveDropSummary: React.FC<ExecutiveDropSummaryProps> = ({
 
   // 2. Traffic Sources Breakdown (Find Deepest Drop)
   const sourcesDef = [
-    { key: 'pInHome' as const, name: 'Từ Trang Bìa (In-Home)', desc: 'Độc giả bấm từ trang chủ' },
-    { key: 'pInDetail' as const, name: 'Giữa Các Bài (In-Detail)', desc: 'Đọc tiếp luồng bài chi tiết' },
-    { key: 'pExGoogle' as const, name: 'Tìm Kiếm Google (SEO)', desc: 'Organic Search ngoài site' },
-    { key: 'pExDirect' as const, name: 'Trực Tiếp (Direct)', desc: 'Gõ trực tiếp / Bookmark' },
-    { key: 'pExSocial' as const, name: 'Mạng Xã Hội (Social)', desc: 'Facebook, Zalo, chia sẻ' },
-    { key: 'pInFolder' as const, name: 'Chuyên Mục (In-Folder)', desc: 'Duyệt danh sách chuyên trang' },
-    { key: 'pInOther' as const, name: 'Nội Bộ Khác (In-Other)', desc: 'Widget, tag, tìm kiếm nội bộ' },
+    { key: 'pInHome' as const, name: 'P- In-Home', desc: 'P- In-Home' },
+    { key: 'pInDetail' as const, name: 'P- In-Detail', desc: 'P- In-Detail' },
+    { key: 'pExGoogle' as const, name: 'P- Ex-Google', desc: 'P- Ex-Google' },
+    { key: 'pExDirect' as const, name: 'P- Ex-Direct', desc: 'P- Ex-Direct' },
+    { key: 'pExSocial' as const, name: 'P- Ex-Social', desc: 'P- Ex-Social' },
+    { key: 'pInFolder' as const, name: 'P- In-Folder', desc: 'P- In-Folder' },
+    { key: 'pInOther' as const, name: 'P- In-Other', desc: 'P- In-Other' },
   ];
 
   const sourcesRanked = useMemo(() => {

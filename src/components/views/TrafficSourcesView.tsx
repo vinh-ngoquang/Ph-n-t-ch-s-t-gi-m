@@ -27,13 +27,13 @@ export const TrafficSourcesView: React.FC<Props> = ({ monthlyData, selectedMonth
     type: 'Internal' | 'External';
     color: string;
   }[] = [
-    { key: 'pInHome', code: 'I_Home', name: 'In-Home (Trang chủ)', type: 'Internal', color: '#6366f1' },
-    { key: 'pExGoogle', code: 'E_Search', name: 'Google (Search/Discover)', type: 'External', color: '#f59e0b' },
-    { key: 'pInOther', code: 'I_Other', name: 'In-Other (Nội bộ khác)', type: 'Internal', color: '#94a3b8' },
-    { key: 'pInDetail', code: 'I_Detail', name: 'In-Detail (Giữa các bài)', type: 'Internal', color: '#06b6d4' },
-    { key: 'pExDirect', code: 'E_Direct', name: 'Direct (Trực tiếp)', type: 'External', color: '#10b981' },
-    { key: 'pInFolder', code: 'I_Folder', name: 'In-Folder (Trang chuyên mục)', type: 'Internal', color: '#ec4899' },
-    { key: 'pExSocial', code: 'E_Social', name: 'Social (Mạng xã hội)', type: 'External', color: '#3b82f6' },
+    { key: 'pInHome', code: 'P- In-Home', name: 'P- In-Home', type: 'Internal', color: '#6366f1' },
+    { key: 'pExGoogle', code: 'P- Ex-Google', name: 'P- Ex-Google', type: 'External', color: '#f59e0b' },
+    { key: 'pInOther', code: 'P- In-Other', name: 'P- In-Other', type: 'Internal', color: '#94a3b8' },
+    { key: 'pInDetail', code: 'P- In-Detail', name: 'P- In-Detail', type: 'Internal', color: '#06b6d4' },
+    { key: 'pExDirect', code: 'P- Ex-Direct', name: 'P- Ex-Direct', type: 'External', color: '#10b981' },
+    { key: 'pInFolder', code: 'P- In-Folder', name: 'P- In-Folder', type: 'Internal', color: '#ec4899' },
+    { key: 'pExSocial', code: 'P- Ex-Social', name: 'P- Ex-Social', type: 'External', color: '#3b82f6' },
   ];
 
   const summary = useMemo(() => {
@@ -191,21 +191,21 @@ export const TrafficSourcesView: React.FC<Props> = ({ monthlyData, selectedMonth
               onClick={() => setFilterType('internal')}
               className={`px-2.5 py-1 rounded-md text-[11px] font-medium transition cursor-pointer ${
                 filterType === 'internal'
-                  ? 'bg-white text-slate-900 shadow-xs'
+                  ? 'bg-white text-slate-900 shadow-xs font-semibold'
                   : 'text-slate-600 hover:text-slate-900'
               }`}
             >
-              Nội bộ (I_*)
+              Nội bộ (P- In-*)
             </button>
             <button
               onClick={() => setFilterType('external')}
               className={`px-2.5 py-1 rounded-md text-[11px] font-medium transition cursor-pointer ${
                 filterType === 'external'
-                  ? 'bg-white text-slate-900 shadow-xs'
+                  ? 'bg-white text-slate-900 shadow-xs font-semibold'
                   : 'text-slate-600 hover:text-slate-900'
               }`}
             >
-              Nguồn ngoài (E_*)
+              Nguồn ngoài (P- Ex-*)
             </button>
           </div>
 
@@ -257,10 +257,10 @@ export const TrafficSourcesView: React.FC<Props> = ({ monthlyData, selectedMonth
 
         {/* Card 2: External vs Internal Balance */}
         <div className="bg-white border border-slate-200/90 rounded-xl p-4 shadow-xs">
-          <div className="text-xs font-medium text-slate-500">Cán Cân External vs. Internal</div>
+          <div className="text-xs font-medium text-slate-500">Cán Cân P- Ex-* vs. P- In-*</div>
           <div className="mt-2 space-y-1 text-xs font-mono">
             <div className="flex items-center justify-between">
-              <span className="text-slate-500 font-sans">External:</span>
+              <span className="text-slate-500 font-sans">Nguồn ngoài (P- Ex-*):</span>
               <span className="font-semibold text-slate-700">
                 {formatNumber(externalT8)} PV{' '}
                 <span className={externalDelta >= 0 ? 'text-emerald-600' : 'text-rose-600'}>
@@ -269,7 +269,7 @@ export const TrafficSourcesView: React.FC<Props> = ({ monthlyData, selectedMonth
               </span>
             </div>
             <div className="flex items-center justify-between">
-              <span className="text-slate-500 font-sans">Internal:</span>
+              <span className="text-slate-500 font-sans">Nội bộ (P- In-*):</span>
               <span className="font-semibold text-slate-700">
                 {formatNumber(internalT8)} PV{' '}
                 <span className={internalDelta >= 0 ? 'text-emerald-600' : 'text-rose-600'}>

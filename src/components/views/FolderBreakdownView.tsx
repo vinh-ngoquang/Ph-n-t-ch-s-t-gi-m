@@ -602,7 +602,10 @@ export const FolderBreakdownView: React.FC<FolderBreakdownViewProps> = ({
                 <div>Lệch vs. Trung Vị</div>
                 <div className="text-[9px] text-slate-400 font-normal">Hụt PV & % Sụt giảm</div>
               </th>
-              <th className="py-3 px-3 text-center font-sans">Đánh Giá</th>
+              <th className="py-3 px-3 text-center font-sans">
+                <div>Đánh Giá</div>
+                <div className="text-[9px] text-slate-400 font-normal">Mốc 10%</div>
+              </th>
               <th className="py-3 px-3 text-center font-sans">Thao Tác</th>
             </tr>
           </thead>
@@ -677,17 +680,25 @@ export const FolderBreakdownView: React.FC<FolderBreakdownViewProps> = ({
                       </div>
                     </td>
                     <td className="py-3 px-3 text-center font-sans">
-                      {item.pctMedianPV <= -15 ? (
-                        <span className="px-2 py-0.5 rounded text-[10px] font-semibold bg-rose-50 text-rose-600 border border-rose-200/70">
-                          Báo động
+                      {item.pctMedianPV < -10 ? (
+                        <span className="px-2 py-0.5 rounded text-[10px] font-semibold bg-rose-50 text-rose-700 border border-rose-200/70">
+                          Giảm mạnh
                         </span>
                       ) : item.pctMedianPV < 0 ? (
                         <span className="px-2 py-0.5 rounded text-[10px] font-medium bg-amber-50 text-amber-700 border border-amber-200/70">
                           Giảm nhẹ
                         </span>
-                      ) : (
+                      ) : item.pctMedianPV > 10 ? (
                         <span className="px-2 py-0.5 rounded text-[10px] font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200/70">
-                          Tăng trưởng
+                          Tăng mạnh
+                        </span>
+                      ) : item.pctMedianPV > 0 ? (
+                        <span className="px-2 py-0.5 rounded text-[10px] font-medium bg-teal-50 text-teal-700 border border-teal-200/70">
+                          Tăng nhẹ
+                        </span>
+                      ) : (
+                        <span className="px-2 py-0.5 rounded text-[10px] font-medium bg-slate-50 text-slate-600 border border-slate-200/70">
+                          Ổn định
                         </span>
                       )}
                     </td>
