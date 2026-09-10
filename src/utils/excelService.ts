@@ -136,13 +136,14 @@ export function mapRowToNewsRecord(rawRow: Record<string, any>): NewsRecord | nu
   return record;
 }
 
-// Parse an uploaded file (xlsx, xls, csv)
-export async function parseExcelOrCsvFile(file: File): Promise<ParsedExcelResult> {
-  const arrayBuffer = await file.arrayBuffer();
-  const workbook = XLSX.read(arrayBuffer, { type: 'array' });
+// Parse raw workbook data (ArrayBuffer or CSV text string)
+export function parseExcelOrCsvData(data: ArrayBuffer | string): ParsedExcelResult {
+  const workbook = typeof data === 'string'
+    ? XLSX.read(data, { type: 'string' })
+    : XLSX.read(data, { type: 'array' });
 
   if (!workbook.SheetNames || workbook.SheetNames.length === 0) {
-    throw new Error('Tệp Excel không chứa sheet nào.');
+    throw new Error('Tệp dữ liệu không chứa sheet nào.');
   }
 
   // Use the first sheet
@@ -176,7 +177,7 @@ export async function parseExcelOrCsvFile(file: File): Promise<ParsedExcelResult
   }
 
   if (records.length === 0) {
-    throw new Error('Không nhận diện được dòng dữ liệu hợp lệ nào. Vui lòng kiểm tra lại cấu trúc cột trong tệp Excel.');
+    throw new Error('Không nhận diện được dòng dữ liệu hợp lệ nào. Vui lòng kiểm tra lại cấu trúc cột trong tệp dữ liệu.');
   }
 
   return {
@@ -190,6 +191,12 @@ export async function parseExcelOrCsvFile(file: File): Promise<ParsedExcelResult
     },
     sampleRows: records.slice(0, 10),
   };
+}
+
+// Parse an uploaded file (xlsx, xls, csv)
+export async function parseExcelOrCsvFile(file: File): Promise<ParsedExcelResult> {
+  const arrayBuffer = await file.arrayBuffer();
+  return parseExcelOrCsvData(arrayBuffer);
 }
 
 // Standard header definitions for export & template

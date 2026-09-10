@@ -9,6 +9,7 @@ import { ArticleProductionView } from './components/views/ArticleProductionView'
 import { FolderBreakdownView } from './components/views/FolderBreakdownView';
 import { ExecutiveReportModal } from './components/ExecutiveReportModal';
 import { ExcelImportModal } from './components/ExcelImportModal';
+import { GoogleSheetSyncModal } from './components/GoogleSheetSyncModal';
 import { DatasetProvider, useDataset } from './context/DatasetContext';
 
 function DashboardContent() {
@@ -31,6 +32,7 @@ function DashboardContent() {
   const [selectedMonth, setSelectedMonth] = useState<string>('8/2026');
   const [isReportOpen, setIsReportOpen] = useState<boolean>(false);
   const [isExcelImportOpen, setIsExcelImportOpen] = useState<boolean>(false);
+  const [isGoogleSheetModalOpen, setIsGoogleSheetModalOpen] = useState<boolean>(false);
 
   // Time series monthly records for the selected scope & active dataset
   const monthlyData = useMemo(() => {
@@ -51,6 +53,7 @@ function DashboardContent() {
           onTabChange={setActiveTab}
           onOpenReport={() => setIsReportOpen(true)}
           onOpenExcelImport={() => setIsExcelImportOpen(true)}
+          onOpenGoogleSheetSync={() => setIsGoogleSheetModalOpen(true)}
           selectedMonth={selectedMonth}
           onMonthChange={setSelectedMonth}
         />
@@ -135,6 +138,12 @@ function DashboardContent() {
       <ExcelImportModal
         isOpen={isExcelImportOpen}
         onClose={() => setIsExcelImportOpen(false)}
+      />
+
+      {/* Google Sheet Sync Modal */}
+      <GoogleSheetSyncModal
+        isOpen={isGoogleSheetModalOpen}
+        onClose={() => setIsGoogleSheetModalOpen(false)}
       />
     </div>
   );

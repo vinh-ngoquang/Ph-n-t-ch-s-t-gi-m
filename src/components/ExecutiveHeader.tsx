@@ -10,7 +10,8 @@ import {
   FolderTree,
   FileDown,
   FileSpreadsheet,
-  RotateCcw,
+  RefreshCw,
+  ExternalLink,
 } from 'lucide-react';
 import { useDataset } from '../context/DatasetContext';
 
@@ -23,6 +24,7 @@ interface Props {
   onTabChange: (tab: string) => void;
   onOpenReport: () => void;
   onOpenExcelImport: () => void;
+  onOpenGoogleSheetSync: () => void;
   selectedMonth: string;
   onMonthChange: (month: string) => void;
 }
@@ -36,10 +38,16 @@ export const ExecutiveHeader: React.FC<Props> = ({
   onTabChange,
   onOpenReport,
   onOpenExcelImport,
+  onOpenGoogleSheetSync,
   selectedMonth,
   onMonthChange,
 }) => {
-  const { isCustomData, customMeta, resetToDefault } = useDataset();
+  const {
+    isCustomData,
+    customMeta,
+    googleSheetConfig,
+    isSyncingSheet,
+  } = useDataset();
   const months2026 = monthlyData.filter((d) => d.year === 2026);
 
   // Available months list for selection (in reverse chronological order)
@@ -125,31 +133,49 @@ export const ExecutiveHeader: React.FC<Props> = ({
                 Chuẩn Trung vị 2026
               </span>
             </div>
-            <p className="text-xs text-slate-500">
-              Đối chiếu số liệu Tháng {currentMonthLabel} với <strong>Mốc Trung vị chu kỳ năm 2026</strong>.
+            <p className="text-xs text-slate-500 mt-1 flex items-center gap-1.5 flex-wrap">
+              <span>
+                Đối chiếu số liệu Tháng {currentMonthLabel} với <strong>Mốc Trung vị chu kỳ năm 2026</strong>.
+              </span>
+              {googleSheetConfig?.url ? (
+                <>
+                  <span className="text-slate-300">•</span>
+                  <span className="text-slate-500">
+                    Nguồn:{' '}
+                    <a
+                      href={googleSheetConfig.url}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="inline-flex items-center gap-1 font-semibold text-emerald-700 hover:text-emerald-900 underline underline-offset-2 cursor-pointer transition"
+                      title={googleSheetConfig.url}
+                    >
+                      <span>Google Sheets</span>
+                      <ExternalLink className="w-3 h-3" />
+                    </a>
+                  </span>
+                </>
+              ) : isCustomData && customMeta ? (
+                <>
+                  <span className="text-slate-300">•</span>
+                  <span className="text-slate-500">
+                    Nguồn:{' '}
+                    {customMeta.sourceType === 'google_sheet' ? (
+                      <a
+                        href="https://docs.google.com/spreadsheets"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="inline-flex items-center gap-1 font-semibold text-emerald-700 hover:text-emerald-900 underline underline-offset-2 cursor-pointer transition"
+                      >
+                        <span>Google Sheets</span>
+                        <ExternalLink className="w-3 h-3" />
+                      </a>
+                    ) : (
+                      <strong className="text-slate-700">{customMeta.fileName}</strong>
+                    )}
+                  </span>
+                </>
+              ) : null}
             </p>
-            {isCustomData && customMeta && (
-              <div className="flex items-center gap-2 mt-2">
-                <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-md text-[11px] font-semibold bg-emerald-50 text-emerald-800 border border-emerald-200 shadow-2xs">
-                  <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
-                  Đang dùng dữ liệu nạp: <strong>{customMeta.fileName}</strong> ({customMeta.rowsCount} dòng, {customMeta.months.join(', ')})
-                </span>
-                <button
-                  onClick={onOpenExcelImport}
-                  className="text-[11px] text-blue-600 hover:text-blue-800 font-medium hover:underline cursor-pointer"
-                >
-                  Đổi file
-                </button>
-                <span className="text-slate-300">•</span>
-                <button
-                  onClick={resetToDefault}
-                  className="text-[11px] text-rose-600 hover:text-rose-800 font-medium hover:underline cursor-pointer flex items-center gap-1"
-                >
-                  <RotateCcw className="w-3 h-3" />
-                  Khôi phục gốc
-                </button>
-              </div>
-            )}
           </div>
 
           {/* Month filter, Scope selection & Action buttons */}
@@ -220,11 +246,28 @@ export const ExecutiveHeader: React.FC<Props> = ({
               </select>
             </div>
 
+            {/* Google Sheets Sync Button */}
+            <button
+              onClick={onOpenGoogleSheetSync}
+              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg font-medium text-xs transition shadow-xs cursor-pointer whitespace-nowrap ${
+                googleSheetConfig?.url
+                  ? 'bg-emerald-50 text-emerald-800 border border-emerald-300 hover:bg-emerald-100'
+                  : 'bg-emerald-700 hover:bg-emerald-800 text-white'
+              }`}
+              title={googleSheetConfig?.url ? `Đang kết nối: ${googleSheetConfig.url}` : 'Đồng bộ tự động từ Google Sheets'}
+            >
+              <RefreshCw className={`w-3.5 h-3.5 ${isSyncingSheet ? 'animate-spin' : ''}`} />
+              <span>{googleSheetConfig?.url ? 'Google Sheets' : 'Đồng Bộ Sheets'}</span>
+              {googleSheetConfig?.url && (
+                <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse ml-0.5" />
+              )}
+            </button>
+
             {/* Import Excel / CSV Button */}
             <button
               onClick={onOpenExcelImport}
-              className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white font-medium text-xs transition shadow-xs cursor-pointer whitespace-nowrap"
-              title="Tải lên tệp Excel (.xlsx, .xls) hoặc CSV"
+              className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-700 border border-slate-200 font-medium text-xs transition shadow-xs cursor-pointer whitespace-nowrap"
+              title="Tải lên tệp Excel (.xlsx, .xls) hoặc CSV thủ công"
             >
               <FileSpreadsheet className="w-3.5 h-3.5" />
               <span>Import Excel</span>

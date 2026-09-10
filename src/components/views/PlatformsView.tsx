@@ -21,10 +21,10 @@ interface Props {
 
 export const PlatformsView: React.FC<Props> = ({ monthlyData, selectedMonth }) => {
   const platformConfig: { key: keyof NewsRecord; code: string; name: string; type: string; color: string }[] = [
-    { key: 'pMobile', code: 'D_Mobile', name: 'Mobile Web (Điện thoại)', type: 'Web', color: '#10b981' },
-    { key: 'pPC', code: 'D_PC', name: 'PC Desktop (Máy tính)', type: 'Desktop', color: '#3b82f6' },
-    { key: 'pApp', code: 'D_App', name: 'VnExpress App (Ứng dụng)', type: 'App', color: '#8b5cf6' },
-    { key: 'pTablet', code: 'D_Tablet', name: 'Tablet (Máy tính bảng)', type: 'Tablet', color: '#f59e0b' },
+    { key: 'pMobile', code: 'Mobile', name: 'Mobile Web', type: 'Web', color: '#10b981' },
+    { key: 'pPC', code: 'PC', name: 'PC Desktop', type: 'Desktop', color: '#3b82f6' },
+    { key: 'pApp', code: 'App', name: 'VnExpress App', type: 'App', color: '#8b5cf6' },
+    { key: 'pTablet', code: 'Tablet', name: 'Tablet', type: 'Tablet', color: '#f59e0b' },
   ];
 
   const summary = useMemo(() => {
