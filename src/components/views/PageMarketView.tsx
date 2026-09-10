@@ -16,9 +16,10 @@ import { NewsRecord } from '../../types';
 
 interface Props {
   monthlyData: MonthlyDataPoint[];
+  selectedMonth?: string;
 }
 
-export const PageMarketView: React.FC<Props> = ({ monthlyData }) => {
+export const PageMarketView: React.FC<Props> = ({ monthlyData, selectedMonth }) => {
   const [showPageChart, setShowPageChart] = useState(false);
   const [showMarketChart, setShowMarketChart] = useState(false);
 
@@ -27,14 +28,14 @@ export const PageMarketView: React.FC<Props> = ({ monthlyData }) => {
     { key: 'pDetail', code: 'P_Detail', name: 'Trang Bài viết (Detail)', color: '#10b981' },
     { key: 'pListing', code: 'P_Listing', name: 'Trang Danh mục (Listing)', color: '#3b82f6' },
   ];
-  const pageTypeSummary = analyzeDimensionSeries(monthlyData, pageTypeConfig, 'pageviews');
+  const pageTypeSummary = analyzeDimensionSeries(monthlyData, pageTypeConfig, 'pageviews', selectedMonth);
 
   // Config for Markets
   const marketConfig: { key: keyof NewsRecord; code: string; name: string; color: string }[] = [
     { key: 'pDO', code: 'M_Domestic', name: 'Trong nước (Domestic - DO)', color: '#0ea5e9' },
     { key: 'pOV', code: 'M_Overseas', name: 'Nước ngoài (Overseas - OV)', color: '#f59e0b' },
   ];
-  const marketSummary = analyzeDimensionSeries(monthlyData, marketConfig, 'pageviews');
+  const marketSummary = analyzeDimensionSeries(monthlyData, marketConfig, 'pageviews', selectedMonth);
 
   // Charts data
   const pageChartData = pageTypeSummary.trendSeries.map((item) => ({
@@ -124,7 +125,9 @@ export const PageMarketView: React.FC<Props> = ({ monthlyData }) => {
               <tr>
                 <th className="py-3 px-4 font-sans">Lớp Trang (Page Layer)</th>
                 <th className="py-3 px-4 text-right font-sans">Tỷ Trọng Tháng Này</th>
-                <th className="py-3 px-4 text-right font-sans">Tháng Này (Tháng 8)</th>
+                <th className="py-3 px-4 text-right font-sans">
+                  {selectedMonth ? `Tháng ${selectedMonth}` : 'Tháng Này (Tháng 8)'}
+                </th>
                 <th className="py-3 px-4 text-right font-sans">Mốc Trung Vị (2026)</th>
                 <th className="py-3 px-4 text-right font-sans min-w-[200px]">Lệch vs. Trung Vị</th>
               </tr>
@@ -150,9 +153,6 @@ export const PageMarketView: React.FC<Props> = ({ monthlyData }) => {
                     </td>
                     <td className="py-3.5 px-4 text-right font-mono">
                       <div className="font-bold text-slate-900">{formatNumber(row.t8)}</div>
-                      <div className={`text-[10px] font-sans ${row.deltaMoM >= 0 ? 'text-emerald-600' : 'text-rose-600'}`}>
-                        MoM: {formatPercent(row.pctChangeMoM)}
-                      </div>
                     </td>
                     <td className="py-3.5 px-4 text-right font-mono">
                       <div className="font-semibold text-slate-700">{formatNumber(row.median)}</div>
@@ -247,7 +247,9 @@ export const PageMarketView: React.FC<Props> = ({ monthlyData }) => {
               <tr>
                 <th className="py-3 px-4 font-sans">Thị Trường Địa Lý</th>
                 <th className="py-3 px-4 text-right font-sans">Tỷ Trọng Tháng Này</th>
-                <th className="py-3 px-4 text-right font-sans">Tháng Này (Tháng 8)</th>
+                <th className="py-3 px-4 text-right font-sans">
+                  {selectedMonth ? `Tháng ${selectedMonth}` : 'Tháng Này (Tháng 8)'}
+                </th>
                 <th className="py-3 px-4 text-right font-sans">Mốc Trung Vị (2026)</th>
                 <th className="py-3 px-4 text-right font-sans min-w-[200px]">Lệch vs. Trung Vị</th>
               </tr>
@@ -273,9 +275,6 @@ export const PageMarketView: React.FC<Props> = ({ monthlyData }) => {
                     </td>
                     <td className="py-3.5 px-4 text-right font-mono">
                       <div className="font-bold text-slate-900">{formatNumber(row.t8)}</div>
-                      <div className={`text-[10px] font-sans ${row.deltaMoM >= 0 ? 'text-emerald-600' : 'text-rose-600'}`}>
-                        MoM: {formatPercent(row.pctChangeMoM)}
-                      </div>
                     </td>
                     <td className="py-3.5 px-4 text-right font-mono">
                       <div className="font-semibold text-slate-700">{formatNumber(row.median)}</div>

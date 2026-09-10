@@ -63,9 +63,20 @@ export function calculateMean(values: number[]): number {
   return values.reduce((sum, v) => sum + v, 0) / values.length;
 }
 
+// Check if a folder belongs to specialized standalone publication (Ngôi Sao or English)
+export function isSpecialPublication(folderId: string, folderName: string = ''): boolean {
+  const lower = (folderName || '').toLowerCase().trim();
+  return (
+    folderId === '1002835' ||
+    folderId === '1003888' ||
+    lower.includes('ngôi sao') ||
+    lower.includes('english')
+  );
+}
+
 // Get synthesized monthly records for a given folder scope across months
 export function getMonthlyRecordsForScope(
-  scope: string, // "ALL_FOLDERS_AGG", "1000000", or folder name
+  scope: string, // "ALL_FOLDERS_AGG", "ALL_VNE_AGG", "1000000", or folder name/id
   dataset: NewsRecord[] = RAW_DATASET
 ): MonthlyDataPoint[] {
   const months2026 = ['1/2026', '2/2026', '3/2026', '4/2026', '5/2026', '6/2026', '7/2026', '8/2026'];
@@ -83,10 +94,17 @@ export function getMonthlyRecordsForScope(
 
     let synthRecord: NewsRecord;
 
-    if (scope === 'ALL_FOLDERS_AGG' || scope === 'ALL') {
-      // Sum across ALL sections/departments present in the dataset (without excluding any folder)
+    if (scope === 'ALL_VNE_AGG') {
+      // Sum across ONLY sections/departments belonging to VnExpress (excluding Ngôi Sao & English)
+      const folderRecs = matched.filter((r) => {
+        if (r.folder_id === '-1') return false;
+        return !isSpecialPublication(r.folder_id, r.folder);
+      });
+      synthRecord = sumRecords(folderRecs, m, 'ALL_VNE_AGG', 'Toàn bộ VnExpress (Chỉ các ban VnE)');
+    } else if (scope === 'ALL_FOLDERS_AGG' || scope === 'ALL') {
+      // Sum across ALL sections/departments present in the dataset (including Ngôi Sao & English)
       const folderRecs = matched.filter((r) => r.folder_id !== '-1' || (r.pageviews || 0) > 0);
-      synthRecord = sumRecords(folderRecs, m, 'ALL_FOLDERS_AGG', 'Toàn bộ VnExpress (Tổng tất cả các ban)');
+      synthRecord = sumRecords(folderRecs, m, 'ALL_FOLDERS_AGG', 'Toàn bộ hệ thống (Tổng tất cả)');
     } else {
       // Specific folder by ID or name
       const fRec = matched.find((r) => r.folder_id === scope || r.folder === scope);
@@ -293,22 +311,26 @@ export function analyzeDimensionSeries(
 export interface FolderComparisonItem {
   folderId: string;
   folderName: string;
-  t8PV: number;
-  momPV: number;
-  deltaMoMPV: number;
-  pctMoMPV: number;
+  curPV: number;
+  t8PV: number; // alias for curPV
   median2026PV: number;
   deltaMedianPV: number;
   pctMedianPV: number;
-  t8Articles: number;
+  curArticles: number;
+  t8Articles: number; // alias for curArticles
   median2026Articles: number;
-  t8Yield: number;
-  median2026Yield: number;
-  deltaYield: number;
+  curDetail: number;
+  t8Detail: number; // alias for curDetail
+  median2026Detail: number;
+  deltaMedianDetail: number;
+  pctMedianDetail: number;
   trend: number[];
 }
 
-export function computeFolderRanking(dataset: NewsRecord[] = RAW_DATASET): FolderComparisonItem[] {
+export function computeFolderRanking(
+  dataset: NewsRecord[] = RAW_DATASET,
+  selectedMonth: string = '8/2026'
+): FolderComparisonItem[] {
   const months2026 = ['1/2026', '2/2026', '3/2026', '4/2026', '5/2026', '6/2026', '7/2026', '8/2026'];
   const folderMap = new Map<string, string>();
 
@@ -317,6 +339,10 @@ export function computeFolderRanking(dataset: NewsRecord[] = RAW_DATASET): Folde
       folderMap.set(r.folder_id, r.folder);
     }
   });
+
+  // Target index for selectedMonth
+  const targetIdx = months2026.indexOf(selectedMonth);
+  const safeIdx = targetIdx >= 0 ? targetIdx : months2026.length - 1;
 
   const items: FolderComparisonItem[] = [];
 
@@ -328,43 +354,37 @@ export function computeFolderRanking(dataset: NewsRecord[] = RAW_DATASET): Folde
 
     const pvs = recs2026.map((r) => r.pageviews || 0);
     const arts = recs2026.map((r) => r.articles || 0);
+    const details = recs2026.map((r) => r.pDetail ?? 0);
 
-    const t8PV = pvs[7];
-    const momPV = pvs[6];
-    const deltaMoMPV = t8PV - momPV;
-    const pctMoMPV = momPV > 0 ? (deltaMoMPV / momPV) * 100 : 0;
-
+    const curPV = pvs[safeIdx] || 0;
     const median2026PV = calculateMedian(pvs);
-    const deltaMedianPV = t8PV - median2026PV;
+    const deltaMedianPV = curPV - median2026PV;
     const pctMedianPV = median2026PV > 0 ? (deltaMedianPV / median2026PV) * 100 : 0;
 
-    const t8Articles = arts[7];
+    const curArticles = arts[safeIdx] || 0;
     const median2026Articles = calculateMedian(arts);
 
-    const details = recs2026.map((r) => r.pDetail ?? 0);
-    const t8Detail = details[7];
+    const curDetail = details[safeIdx] || 0;
     const median2026Detail = calculateMedian(details);
-
-    // Yield calculated using P-Detail / Articles (Lượt xem chi tiết trên mỗi bài)
-    const t8Yield = t8Articles > 0 ? (t8Detail > 0 ? t8Detail / t8Articles : t8PV / t8Articles) : 0;
-    const median2026Yield = median2026Articles > 0 ? (median2026Detail > 0 ? median2026Detail / median2026Articles : median2026PV / median2026Articles) : 0;
-    const deltaYield = t8Yield - median2026Yield;
+    const deltaMedianDetail = curDetail - median2026Detail;
+    const pctMedianDetail = median2026Detail > 0 ? (deltaMedianDetail / median2026Detail) * 100 : 0;
 
     items.push({
       folderId: fId,
       folderName: fName,
-      t8PV,
-      momPV,
-      deltaMoMPV,
-      pctMoMPV,
+      curPV,
+      t8PV: curPV,
       median2026PV,
       deltaMedianPV,
       pctMedianPV,
-      t8Articles,
+      curArticles,
+      t8Articles: curArticles,
       median2026Articles,
-      t8Yield,
-      median2026Yield,
-      deltaYield,
+      curDetail,
+      t8Detail: curDetail,
+      median2026Detail,
+      deltaMedianDetail,
+      pctMedianDetail,
       trend: pvs,
     });
   }

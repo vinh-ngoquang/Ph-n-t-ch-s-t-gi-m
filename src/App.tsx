@@ -2,7 +2,6 @@ import React, { useState, useMemo } from 'react';
 import { getMonthlyRecordsForScope } from './utils/timeSeriesAnalytics';
 import { ExecutiveHeader } from './components/ExecutiveHeader';
 import { ExecutiveDropSummary } from './components/ExecutiveDropSummary';
-import { OverviewVolumeYieldView } from './components/views/OverviewVolumeYieldView';
 import { TrafficSourcesView } from './components/views/TrafficSourcesView';
 import { PlatformsView } from './components/views/PlatformsView';
 import { PageMarketView } from './components/views/PageMarketView';
@@ -62,6 +61,8 @@ function DashboardContent() {
           selectedMonth={selectedMonth}
           dataset={dataset}
           onTabChange={setActiveTab}
+          currentScope={currentScope}
+          onScopeChange={setCurrentScope}
         />
 
         {/* Content Views */}
@@ -69,42 +70,40 @@ function DashboardContent() {
           {/* 1. Traffic Sources (Default View) */}
           {(activeTab === 'all' || activeTab === 'sources') && (
             <section id="view-sources">
-              <TrafficSourcesView monthlyData={monthlyData} />
+              <TrafficSourcesView monthlyData={monthlyData} selectedMonth={selectedMonth} />
             </section>
           )}
 
-          {/* 2. Overview Volume & Yield */}
-          {(activeTab === 'all' || activeTab === 'overview') && (
-            <section id="view-overview">
-              <OverviewVolumeYieldView monthlyData={monthlyData} />
-            </section>
-          )}
-
-          {/* 3. Platforms */}
+          {/* 2. Platforms */}
           {(activeTab === 'all' || activeTab === 'platforms') && (
             <section id="view-platforms">
-              <PlatformsView monthlyData={monthlyData} />
+              <PlatformsView monthlyData={monthlyData} selectedMonth={selectedMonth} />
             </section>
           )}
 
           {/* 4. 24 Folders Matrix */}
           {(activeTab === 'all' || activeTab === 'folders') && (
             <section id="view-folders">
-              <FolderBreakdownView dataset={dataset} />
+              <FolderBreakdownView
+                dataset={dataset}
+                currentScope={currentScope}
+                onScopeChange={setCurrentScope}
+                selectedMonth={selectedMonth}
+              />
             </section>
           )}
 
           {/* 5. Page Layers & Markets */}
           {(activeTab === 'all' || activeTab === 'pages') && (
             <section id="view-pages">
-              <PageMarketView monthlyData={monthlyData} />
+              <PageMarketView monthlyData={monthlyData} selectedMonth={selectedMonth} />
             </section>
           )}
 
           {/* 6. Articles & Build Top */}
           {(activeTab === 'all' || activeTab === 'articles') && (
             <section id="view-articles">
-              <ArticleProductionView monthlyData={monthlyData} />
+              <ArticleProductionView monthlyData={monthlyData} selectedMonth={selectedMonth} />
             </section>
           )}
         </div>
@@ -116,7 +115,7 @@ function DashboardContent() {
           <div className="flex items-center gap-2">
             <span className="font-semibold text-slate-800">VnExpress Content Performance Analytics</span>
             <span>•</span>
-            <span className="text-blue-600 font-mono font-medium">Tháng 8/2026 vs MoM vs Trung vị 2026</span>
+            <span className="text-blue-600 font-mono font-medium">Tháng 8/2026 vs Trung vị 2026</span>
           </div>
           <div className="flex items-center gap-3 text-slate-400">
             <span>Chuẩn hóa: LMDI, Kitagawa Decomposition, Median Benchmark</span>

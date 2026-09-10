@@ -172,16 +172,6 @@ export const Header: React.FC<HeaderProps> = ({
               >
                 YoY 8/2026 vs 8/2025
               </button>
-              <button
-                onClick={() => onQuickPreset('7/2026', '8/2026')}
-                className={`px-2.5 py-1 text-xs rounded border transition ${
-                  periodT1 === '7/2026' && periodT === '8/2026'
-                    ? 'bg-emerald-600 text-white border-emerald-500 font-medium'
-                    : 'bg-slate-800 text-slate-300 border-slate-700 hover:bg-slate-700'
-                }`}
-              >
-                MoM 8/2026 vs 7/2026
-              </button>
             </div>
 
             {/* Normalization Toggle */}

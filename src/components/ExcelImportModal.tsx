@@ -291,7 +291,7 @@ export const ExcelImportModal: React.FC<ExcelImportModalProps> = ({ isOpen, onCl
                     <div>
                       <span className="font-bold block">Cập nhật theo tháng (Khuyên dùng)</span>
                       <span className="text-[11px] text-slate-500 leading-tight block mt-0.5">
-                        Chỉ ghi đè các tháng có trong tệp Excel (ví dụ T8/2026), giữ nguyên dữ liệu các tháng cũ để tính MoM và Trung vị chuẩn xác.
+                        Chỉ ghi đè các tháng có trong tệp Excel (ví dụ T8/2026), giữ nguyên dữ liệu các tháng cũ để tính Trung vị chuẩn xác.
                       </span>
                     </div>
                   </label>

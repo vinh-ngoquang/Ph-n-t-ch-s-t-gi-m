@@ -22,52 +22,48 @@ export const ExecutiveReportModal: React.FC<Props> = ({
 
   const months2026 = monthlyData.filter((d) => d.year === 2026);
   const t8 = months2026.find((d) => d.month === '8/2026') || months2026[months2026.length - 1];
-  const t7 = months2026.find((d) => d.month === '7/2026') || months2026[months2026.length - 2];
 
   const pvs = months2026.map((d) => d.record.pageviews || 0);
   const arts = months2026.map((d) => d.record.articles || 0);
 
   const t8PV = t8?.record.pageviews || 0;
-  const t7PV = t7?.record.pageviews || 0;
   const medPV = calculateMedian(pvs);
 
   const t8Art = t8?.record.articles || 0;
-  const t7Art = t7?.record.articles || 0;
   const medArt = calculateMedian(arts);
 
   const details = months2026.map((d) => d.record.pDetail || 0);
   const t8Detail = t8?.record.pDetail || 0;
-  const t7Detail = t7?.record.pDetail || 0;
   const medDetail = calculateMedian(details);
 
   // Yield = P-Detail / Bài viết
   const t8Yield = t8Art > 0 ? t8Detail / t8Art : 0;
-  const t7Yield = t7Art > 0 ? t7Detail / t7Art : 0;
   const medYield = medArt > 0 ? medDetail / medArt : 0;
 
-  const deltaPVMom = t8PV - t7PV;
   const deltaPVMed = t8PV - medPV;
 
   const scopeName =
     currentScope === 'ALL_FOLDERS_AGG'
-      ? 'Toàn bộ VnExpress (Tổng tất cả các ban)'
+      ? 'Toàn bộ hệ thống (Tổng tất cả các ban & chuyên trang)'
+      : currentScope === 'ALL_VNE_AGG'
+      ? 'Toàn bộ VnExpress (Chỉ các ban thuộc VnE)'
       : (monthlyData.find((d) => d.record?.folder)?.record?.folder || currentScope);
 
   const reportMarkdown = `# BÁO CÁO ĐIỀU HÀNH HIỆU QUẢ NỘI DUNG VNEXPRESS — THÁNG 8/2026
 **Phạm vi khảo sát:** ${scopeName}
 **Kỳ phân tích chính:** Tháng 8/2026 (T8-2026)
-**Kỳ đối chiếu:** MoM (Tháng 7/2026) & Trung vị năm 2026 (Median T1-T8/2026)
+**Kỳ đối chiếu:** Trung vị năm 2026 (Median T1-T8/2026)
 *(Lưu ý: Chỉ số Yield được tính theo công thức: Lượt xem bài chi tiết / Sản lượng bài viết = P-Detail / Bài)*
 
 ---
 
 ## 1. TỔNG QUAN CHỈ SỐ CỐT LÕI
-| Chỉ số | Tháng 8/2026 | MoM (T7/2026) | Δ MoM (%) | Trung vị 2026 | Δ vs Trung vị (%) |
-| :--- | :---: | :---: | :---: | :---: | :---: |
-| **Tổng Pageviews (PV)** | **${formatNumber(t8PV)}** | ${formatNumber(t7PV)} | ${formatDelta(deltaPVMom)} (${formatPercent(t7PV > 0 ? (deltaPVMom / t7PV) * 100 : 0)}) | ${formatNumber(medPV)} | ${formatDelta(deltaPVMed)} (${formatPercent(medPV > 0 ? (deltaPVMed / medPV) * 100 : 0)}) |
-| **Lượt Xem Bài Chi Tiết (P-Detail)** | **${formatNumber(t8Detail)}** | ${formatNumber(t7Detail)} | ${formatDelta(t8Detail - t7Detail)} (${formatPercent(t7Detail > 0 ? ((t8Detail - t7Detail) / t7Detail) * 100 : 0)}) | ${formatNumber(medDetail)} | ${formatDelta(t8Detail - medDetail)} (${formatPercent(medDetail > 0 ? ((t8Detail - medDetail) / medDetail) * 100 : 0)}) |
-| **Sản lượng Bài viết** | **${formatNumber(t8Art)}** | ${formatNumber(t7Art)} | ${formatDelta(t8Art - t7Art, false)} (${formatPercent(t7Art > 0 ? ((t8Art - t7Art) / t7Art) * 100 : 0)}) | ${formatNumber(medArt)} | ${formatDelta(t8Art - medArt, false)} (${formatPercent(medArt > 0 ? ((t8Art - medArt) / medArt) * 100 : 0)}) |
-| **Hiệu suất Yield (P-Detail/Bài)** | **${formatNumber(t8Yield)}** | ${formatNumber(t7Yield)} | ${formatDelta(t8Yield - t7Yield, false)} | ${formatNumber(medYield)} | ${formatDelta(t8Yield - medYield, false)} (${formatPercent(medYield > 0 ? ((t8Yield - medYield) / medYield) * 100 : 0)}) |
+| Chỉ số | Tháng 8/2026 | Trung vị 2026 | Δ vs Trung vị | Tỷ lệ lệch (%) |
+| :--- | :---: | :---: | :---: | :---: |
+| **Tổng Pageviews (PV)** | **${formatNumber(t8PV)}** | ${formatNumber(medPV)} | ${formatDelta(deltaPVMed)} | ${formatPercent(medPV > 0 ? (deltaPVMed / medPV) * 100 : 0)} |
+| **Lượt Xem Bài Chi Tiết (P-Detail)** | **${formatNumber(t8Detail)}** | ${formatNumber(medDetail)} | ${formatDelta(t8Detail - medDetail)} | ${formatPercent(medDetail > 0 ? ((t8Detail - medDetail) / medDetail) * 100 : 0)} |
+| **Sản lượng Bài viết** | **${formatNumber(t8Art)}** | ${formatNumber(medArt)} | ${formatDelta(t8Art - medArt, false)} | ${formatPercent(medArt > 0 ? ((t8Art - medArt) / medArt) * 100 : 0)} |
+| **Hiệu suất Yield (P-Detail/Bài)** | **${formatNumber(t8Yield)}** | ${formatNumber(medYield)} | ${formatDelta(t8Yield - medYield, false)} | ${formatPercent(medYield > 0 ? ((t8Yield - medYield) / medYield) * 100 : 0)} |
 
 ---
 

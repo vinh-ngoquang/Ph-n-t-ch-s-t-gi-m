@@ -33,7 +33,7 @@ export const Step2Overview: React.FC<Step2OverviewProps> = ({
           </div>
         </div>
         <div className="text-xs font-semibold px-3 py-1 bg-slate-100 border border-slate-300 rounded-full text-slate-700">
-          Phạm vi: {folderName === '1000000' ? 'Toàn trang VnExpress' : folderName}
+          Ban: {folderName === '1000000' ? 'Toàn trang VnExpress' : folderName}
         </div>
       </div>
 

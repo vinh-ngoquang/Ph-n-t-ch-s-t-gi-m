@@ -15,14 +15,18 @@ import { LineChart as LineChartIcon } from 'lucide-react';
 
 interface Props {
   monthlyData: MonthlyDataPoint[];
+  selectedMonth?: string;
 }
 
-export const ArticleProductionView: React.FC<Props> = ({ monthlyData }) => {
+export const ArticleProductionView: React.FC<Props> = ({ monthlyData, selectedMonth }) => {
   const [showChart, setShowChart] = useState(false);
 
   const months2026 = monthlyData.filter((d) => d.year === 2026);
-  const t8 = months2026.find((d) => d.month === '8/2026') || months2026[months2026.length - 1];
-  const t7 = months2026.find((d) => d.month === '7/2026') || months2026[months2026.length - 2];
+  const targetIdx = selectedMonth
+    ? months2026.findIndex((d) => d.month === selectedMonth)
+    : months2026.length - 1;
+  const safeIdx = targetIdx >= 0 ? targetIdx : months2026.length - 1;
+  const t8 = months2026[safeIdx] || months2026[months2026.length - 1];
 
   // Raw arrays for production
   const artThuongList = months2026.map((d) => d.record.articleThuong || 0);
@@ -53,7 +57,6 @@ export const ArticleProductionView: React.FC<Props> = ({ monthlyData }) => {
     type: string;
     color: string;
     t8: number;
-    mom: number;
     median: number;
     isPercent?: boolean;
   }
@@ -65,7 +68,6 @@ export const ArticleProductionView: React.FC<Props> = ({ monthlyData }) => {
       type: 'All',
       color: '#3b82f6',
       t8: t8?.record.articles || 0,
-      mom: t7?.record.articles || 0,
       median: calculateMedian(totalArtList),
     },
     {
@@ -74,7 +76,6 @@ export const ArticleProductionView: React.FC<Props> = ({ monthlyData }) => {
       type: 'Editorial',
       color: '#10b981',
       t8: t8?.record.articleThuong || 0,
-      mom: t7?.record.articleThuong || 0,
       median: calculateMedian(artThuongList),
     },
     {
@@ -83,7 +84,6 @@ export const ArticleProductionView: React.FC<Props> = ({ monthlyData }) => {
       type: 'Commercial',
       color: '#f59e0b',
       t8: t8?.record.articleThuongMai || 0,
-      mom: t7?.record.articleThuongMai || 0,
       median: calculateMedian(artTmaiList),
     },
     {
@@ -92,7 +92,6 @@ export const ArticleProductionView: React.FC<Props> = ({ monthlyData }) => {
       type: 'Featured',
       color: '#8b5cf6',
       t8: t8?.record.aBuildTop || 0,
-      mom: t7?.record.aBuildTop || 0,
       median: calculateMedian(buildTopList),
     },
     {
@@ -101,7 +100,6 @@ export const ArticleProductionView: React.FC<Props> = ({ monthlyData }) => {
       type: 'Ratio',
       color: '#ec4899',
       t8: (t8?.record.articles || 0) > 0 ? ((t8?.record.aBuildTop || 0) / t8.record.articles) * 100 : 0,
-      mom: (t7?.record.articles || 0) > 0 ? ((t7?.record.aBuildTop || 0) / t7.record.articles) * 100 : 0,
       median: calculateMedian(buildRateList),
       isPercent: true,
     },
@@ -262,15 +260,15 @@ export const ArticleProductionView: React.FC<Props> = ({ monthlyData }) => {
           <thead className="bg-slate-50 text-[11px] font-semibold text-slate-500 border-b border-slate-200">
             <tr>
               <th className="py-3 px-4 font-sans">Loại Nội Dung</th>
-              <th className="py-3 px-4 text-right font-sans">Tháng 8/2026</th>
-              <th className="py-3 px-4 text-right font-sans">MoM (T7/2026)</th>
+              <th className="py-3 px-4 text-right font-sans">
+                {selectedMonth ? `Tháng ${selectedMonth}` : 'Tháng 8/2026'}
+              </th>
               <th className="py-3 px-4 text-right font-sans">Mốc Trung Vị (2026)</th>
               <th className="py-3 px-4 text-right font-sans min-w-[200px]">Lệch vs. Trung Vị</th>
             </tr>
           </thead>
           <tbody className="divide-y divide-slate-100">
             {items.map((row) => {
-              const deltaMom = row.t8 - row.mom;
               const deltaMed = row.t8 - row.median;
               const isDrop = deltaMed < 0;
 
@@ -289,17 +287,6 @@ export const ArticleProductionView: React.FC<Props> = ({ monthlyData }) => {
 
                   <td className="py-3.5 px-4 text-right font-mono font-bold text-slate-900">
                     {row.isPercent ? `${row.t8.toFixed(1)}%` : formatNumber(row.t8)}
-                  </td>
-
-                  <td className="py-3.5 px-4 text-right font-mono">
-                    <div>{row.isPercent ? `${row.mom.toFixed(1)}%` : formatNumber(row.mom)}</div>
-                    <div
-                      className={`text-[10px] font-sans ${
-                        deltaMom >= 0 ? 'text-emerald-600' : 'text-rose-600'
-                      }`}
-                    >
-                      MoM: {row.isPercent ? `${deltaMom > 0 ? '+' : ''}${deltaMom.toFixed(1)}%` : formatDelta(deltaMom, false)}
-                    </div>
                   </td>
 
                   <td className="py-3.5 px-4 text-right font-mono font-semibold text-slate-700">

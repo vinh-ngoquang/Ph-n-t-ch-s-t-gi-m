@@ -1,4 +1,5 @@
 import { NewsRecord } from '../types';
+import { isSpecialPublication } from './timeSeriesAnalytics';
 
 export interface ValidationIssue {
   date: string;
@@ -185,6 +186,9 @@ export function filterRecords(
 
   if (months.length === 1) {
     let matched = dataset.filter((r) => r.month === period);
+    if (folderFilter === 'ALL_VNE_AGG') {
+      return matched.filter((r) => r.folder_id !== '-1' && !isSpecialPublication(r.folder_id, r.folder));
+    }
     if (folderFilter === 'ALL_FOLDERS_AGG' || folderFilter === 'ALL') {
       return matched.filter((r) => r.folder_id !== '-1' || (r.pageviews || 0) > 0);
     }
@@ -194,7 +198,9 @@ export function filterRecords(
   // Multi-month average
   const matchingRecords = dataset.filter((r) => months.includes(r.month));
   let filtered = matchingRecords;
-  if (folderFilter === 'ALL_FOLDERS_AGG' || folderFilter === 'ALL') {
+  if (folderFilter === 'ALL_VNE_AGG') {
+    filtered = matchingRecords.filter((r) => r.folder_id !== '-1' && !isSpecialPublication(r.folder_id, r.folder));
+  } else if (folderFilter === 'ALL_FOLDERS_AGG' || folderFilter === 'ALL') {
     filtered = matchingRecords.filter((r) => r.folder_id !== '-1' || (r.pageviews || 0) > 0);
   } else {
     filtered = matchingRecords.filter((r) => r.folder_id === folderFilter || r.folder === folderFilter);

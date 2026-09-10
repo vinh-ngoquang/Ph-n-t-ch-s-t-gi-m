@@ -16,9 +16,10 @@ import { NewsRecord } from '../../types';
 
 interface Props {
   monthlyData: MonthlyDataPoint[];
+  selectedMonth?: string;
 }
 
-export const TrafficSourcesView: React.FC<Props> = ({ monthlyData }) => {
+export const TrafficSourcesView: React.FC<Props> = ({ monthlyData, selectedMonth }) => {
   const sourcesConfig: {
     key: keyof NewsRecord;
     code: string;
@@ -36,8 +37,8 @@ export const TrafficSourcesView: React.FC<Props> = ({ monthlyData }) => {
   ];
 
   const summary = useMemo(() => {
-    return analyzeDimensionSeries(monthlyData, sourcesConfig, 'pageviews');
-  }, [monthlyData]);
+    return analyzeDimensionSeries(monthlyData, sourcesConfig, 'pageviews', selectedMonth);
+  }, [monthlyData, selectedMonth]);
 
   // States
   const [showChart, setShowChart] = useState(false);
@@ -47,10 +48,8 @@ export const TrafficSourcesView: React.FC<Props> = ({ monthlyData }) => {
 
   // Total metrics
   const totalT8 = summary.totalT8;
-  const totalMom = summary.totalMoM;
   const totalMed = summary.totalMedian;
   const totalDeltaMed = totalT8 - totalMed;
-  const totalDeltaMom = totalT8 - totalMom;
 
   // Process rows with internal/external classification
   const processedRows = useMemo(() => {
@@ -247,12 +246,12 @@ export const TrafficSourcesView: React.FC<Props> = ({ monthlyData }) => {
                 <span className="text-xs font-semibold">({formatPercent(deepestDrop.pctChangeMedian)})</span>
               </div>
               <div className="text-xs text-slate-500 font-mono">
-                Tháng này: <strong className="text-slate-700">{formatNumber(deepestDrop.t8)}</strong>
+                {selectedMonth ? `Tháng ${selectedMonth}` : 'Tháng này'}: <strong className="text-slate-700">{formatNumber(deepestDrop.t8)}</strong>
                 {'  '}| Trung vị: <strong className="text-slate-700">{formatNumber(deepestDrop.median)}</strong>
               </div>
             </div>
           ) : (
-            <div className="text-xs text-slate-400 mt-2">Không có nguồn sụt giảm</div>
+            <div className="text-xs text-emerald-700 font-semibold mt-2">Không có nguồn sụt giảm (≥ mốc trung vị)</div>
           )}
         </div>
 
@@ -360,7 +359,9 @@ export const TrafficSourcesView: React.FC<Props> = ({ monthlyData }) => {
             <tr>
               <th className="py-3 px-4 font-sans">Kênh Nguồn (Channel)</th>
               <th className="py-3 px-4 text-right font-sans">Tỷ Trọng Tháng Này</th>
-              <th className="py-3 px-4 text-right font-sans">Tháng Này (Tháng 8)</th>
+              <th className="py-3 px-4 text-right font-sans">
+                {selectedMonth ? `Tháng ${selectedMonth}` : 'Tháng Này (Tháng 8)'}
+              </th>
               <th className="py-3 px-4 text-right font-sans">Mốc Trung Vị (2026)</th>
               <th className="py-3 px-4 text-right font-sans min-w-[200px]">Lệch vs. Trung Vị</th>
             </tr>
@@ -404,16 +405,9 @@ export const TrafficSourcesView: React.FC<Props> = ({ monthlyData }) => {
                     </div>
                   </td>
 
-                  {/* Month 8 Value + MoM subtext */}
+                  {/* Month 8 Value */}
                   <td className="py-3.5 px-4 text-right font-mono">
                     <div className="font-bold text-slate-900">{formatNumber(row.t8)}</div>
-                    <div
-                      className={`text-[10px] font-sans ${
-                        row.deltaMoM >= 0 ? 'text-emerald-600' : 'text-rose-600'
-                      }`}
-                    >
-                      MoM: {formatPercent(row.pctChangeMoM)}
-                    </div>
                   </td>
 
                   {/* Median Benchmark */}
@@ -454,13 +448,6 @@ export const TrafficSourcesView: React.FC<Props> = ({ monthlyData }) => {
               </td>
               <td className="py-3.5 px-4 text-right font-mono">
                 <div className="font-bold text-xs text-slate-900">{formatNumber(totalT8)}</div>
-                <div
-                  className={`text-[10px] font-sans ${
-                    totalDeltaMom >= 0 ? 'text-emerald-600' : 'text-rose-600'
-                  }`}
-                >
-                  MoM: {formatPercent(totalMom > 0 ? (totalDeltaMom / totalMom) * 100 : 0)}
-                </div>
               </td>
               <td className="py-3.5 px-4 text-right font-mono">
                 <div className="font-bold text-xs text-slate-900">{formatNumber(totalMed)}</div>
