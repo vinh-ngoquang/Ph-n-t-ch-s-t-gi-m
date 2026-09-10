@@ -1,0 +1,6 @@
+{
+  "name": "News Content Performance Analytics",
+  "description": "Hệ thống phân tích hiệu quả nội dung tin tức, kiểm tra hợp lệ, bóc tách Lượng vs Chất, Mix vs Rate, tỷ trọng đóng góp 5 chiều và định vị nguyên nhân sụt giảm.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
