@@ -12,6 +12,7 @@ import {
   FileSpreadsheet,
   RefreshCw,
   ExternalLink,
+  Pencil,
 } from 'lucide-react';
 import { useDataset } from '../context/DatasetContext';
 
@@ -145,44 +146,39 @@ export const ExecutiveHeader: React.FC<Props> = ({
               <span>
                 Đối chiếu số liệu Tháng {currentMonthLabel} với <strong>Mốc Trung vị chu kỳ năm 2026</strong>.
               </span>
-              {googleSheetConfig?.url ? (
-                <>
-                  <span className="text-slate-300">•</span>
-                  <span className="text-slate-500">
-                    Nguồn:{' '}
-                    <a
-                      href={googleSheetConfig.url}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="inline-flex items-center gap-1 font-semibold text-emerald-700 hover:text-emerald-900 underline underline-offset-2 cursor-pointer transition"
-                      title={googleSheetConfig.url}
-                    >
-                      <span>Google Sheets</span>
-                      <ExternalLink className="w-3 h-3" />
-                    </a>
-                  </span>
-                </>
-              ) : isCustomData && customMeta ? (
-                <>
-                  <span className="text-slate-300">•</span>
-                  <span className="text-slate-500">
-                    Nguồn:{' '}
-                    {customMeta.sourceType === 'google_sheet' ? (
-                      <a
-                        href="https://docs.google.com/spreadsheets"
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="inline-flex items-center gap-1 font-semibold text-emerald-700 hover:text-emerald-900 underline underline-offset-2 cursor-pointer transition"
-                      >
-                        <span>Google Sheets</span>
-                        <ExternalLink className="w-3 h-3" />
-                      </a>
-                    ) : (
-                      <strong className="text-slate-700">{customMeta.fileName}</strong>
-                    )}
-                  </span>
-                </>
-              ) : null}
+              <span className="text-slate-300">•</span>
+              <span className="text-slate-500 inline-flex items-center gap-1.5 flex-wrap">
+                <span>Nguồn:</span>
+                {googleSheetConfig?.url ? (
+                  <a
+                    href={googleSheetConfig.url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-flex items-center gap-1 font-semibold text-emerald-700 hover:text-emerald-900 underline underline-offset-2 cursor-pointer transition"
+                    title={googleSheetConfig.url}
+                  >
+                    <span>Google Sheets</span>
+                    <ExternalLink className="w-3 h-3" />
+                  </a>
+                ) : (
+                  <button
+                    onClick={onOpenGoogleSheetSync}
+                    className="inline-flex items-center gap-1 font-semibold text-emerald-700 hover:text-emerald-900 underline underline-offset-2 cursor-pointer transition"
+                    title="Bấm để cấu hình link Google Sheets"
+                  >
+                    <span>Google Sheets</span>
+                    <ExternalLink className="w-3 h-3" />
+                  </button>
+                )}
+                <button
+                  onClick={onOpenGoogleSheetSync}
+                  className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[11px] font-medium text-slate-600 hover:text-emerald-700 bg-slate-100 hover:bg-emerald-50 border border-slate-200 hover:border-emerald-200 cursor-pointer transition"
+                  title="Sửa đường link kết nối Google Sheets"
+                >
+                  <Pencil className="w-2.5 h-2.5" />
+                  <span>Sửa kết nối</span>
+                </button>
+              </span>
             </p>
           </div>
 

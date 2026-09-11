@@ -39,6 +39,14 @@ export const GoogleSheetSyncModal: React.FC<GoogleSheetSyncModalProps> = ({ isOp
   const [localSuccess, setLocalSuccess] = useState<string | null>(null);
   const [localError, setLocalError] = useState<string | null>(null);
 
+  React.useEffect(() => {
+    if (isOpen) {
+      setInputUrl(googleSheetConfig?.url || '');
+      setLocalError(null);
+      setLocalSuccess(null);
+    }
+  }, [isOpen, googleSheetConfig?.url]);
+
   if (!isOpen) return null;
 
   const handleSync = async (overrideUrl?: string) => {
@@ -207,6 +215,20 @@ export const GoogleSheetSyncModal: React.FC<GoogleSheetSyncModalProps> = ({ isOp
             <p className="text-[11px] text-slate-500">
               Hỗ trợ link chỉnh sửa thông thường (edit), link chia sẻ xem (view), hoặc link xuất bản lên web (pub/csv).
             </p>
+
+            {isConnected && googleSheetConfig?.url && (
+              <div className="flex items-center justify-between text-xs pt-1 pb-1 px-2 py-1.5 rounded-lg bg-emerald-50/70 border border-emerald-200/70">
+                <span className="text-emerald-800 font-medium">Link hiện tại:</span>
+                <a
+                  href={googleSheetConfig.url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="font-semibold text-emerald-700 hover:text-emerald-900 inline-flex items-center gap-1 underline underline-offset-2 transition"
+                >
+                  <span>Mở bảng tính Google Sheets ↗</span>
+                </a>
+              </div>
+            )}
           </div>
 
           {/* Options: Auto Sync & Merge Mode */}
