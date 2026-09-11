@@ -108,13 +108,13 @@ export const ExecutiveHeader: React.FC<Props> = ({
   const deltaMedArt = curArt - medArt;
   const pctMedArt = medArt > 0 ? ((curArt - medArt) / medArt) * 100 : 0;
 
-  // 4. Build Top Rate
-  const buildTopRateList = months2026.map((d) =>
-    (d.record.articles || 0) > 0 ? ((d.record.aBuildTop || 0) / (d.record.articles || 1)) * 100 : 0
-  );
-  const curBuildRate = curArt > 0 ? ((currentMonthPoint?.record.aBuildTop || 0) / curArt) * 100 : 0;
-  const medBuildRate = calculateMedian(buildTopRateList);
-  const deltaMedBuildRate = curBuildRate - medBuildRate;
+  // 4. Số bài Build Top
+  const buildTopList = months2026.map((d) => d.record.aBuildTop || 0);
+  const curBuildTop = currentMonthPoint?.record.aBuildTop || 0;
+  const medBuildTop = calculateMedian(buildTopList);
+  const deltaMedBuildTop = curBuildTop - medBuildTop;
+  const pctMedBuildTop = medBuildTop > 0 ? ((curBuildTop - medBuildTop) / medBuildTop) * 100 : 0;
+  const curBuildRate = curArt > 0 ? (curBuildTop / curArt) * 100 : 0;
 
   const tabs = [
     { id: 'all', name: 'Toàn Bộ Góc Nhìn', icon: Layers },
@@ -395,35 +395,38 @@ export const ExecutiveHeader: React.FC<Props> = ({
             </div>
           </div>
 
-          {/* Card 4: Build Top Rate */}
+          {/* Card 4: Build Top Articles */}
           <div className="bg-white rounded-xl p-4 border border-slate-200/90 shadow-2xs flex flex-col justify-between">
             <div className="flex items-center justify-between gap-2">
               <span className="text-xs sm:text-[13px] font-bold text-slate-800 tracking-tight whitespace-nowrap">
-                Tỷ lệ Lên Trang Bìa
+                Số bài Build Top
               </span>
-              <span className="px-2 py-0.5 rounded text-[10px] sm:text-[11px] font-medium text-slate-500 bg-slate-50 border border-slate-200/70 whitespace-nowrap">
-                Tổng tháng
+              <span
+                className="px-2 py-0.5 rounded text-[10px] sm:text-[11px] font-medium text-purple-700 bg-purple-50 border border-purple-200/70 whitespace-nowrap"
+                title="Tỷ lệ bài viết được build top lên trang bìa trên tổng sản lượng bài"
+              >
+                {curBuildRate > 0 ? `${curBuildRate.toFixed(1)}% sản lượng` : 'Tổng tháng'}
               </span>
             </div>
 
             <div className="my-2.5 flex items-baseline gap-1.5">
               <span className="text-xl sm:text-2xl font-extrabold text-slate-900 font-mono tracking-tight">
-                {`${curBuildRate.toFixed(1)}%`}
+                {formatNumber(curBuildTop)}
               </span>
-              <span className="text-xs font-semibold text-slate-400 font-sans">Build Top</span>
+              <span className="text-xs font-semibold text-slate-400 font-sans">Bài</span>
             </div>
 
             <div className="border-t border-slate-100 pt-2.5">
               <div className="flex items-center justify-between text-xs">
                 <span className="text-[11px] text-slate-400 font-medium">Mốc Trung vị 2026:</span>
                 <span className="font-bold text-slate-800 font-mono">
-                  {`${medBuildRate.toFixed(1)}%`}
+                  {formatNumber(medBuildTop)}
                 </span>
               </div>
               <div className="flex items-center justify-between text-xs mt-1">
                 <span className="text-[11px] text-slate-400 font-medium">Lệch vs Trung vị:</span>
-                <span className={`font-bold font-mono ${deltaMedBuildRate >= 0 ? 'text-emerald-600' : 'text-rose-600'}`}>
-                  {`${deltaMedBuildRate >= 0 ? '+' : ''}${deltaMedBuildRate.toFixed(1)}%`}
+                <span className={`font-bold font-mono ${deltaMedBuildTop >= 0 ? 'text-emerald-600' : 'text-rose-600'}`}>
+                  {formatDelta(deltaMedBuildTop)} ({formatPercent(pctMedBuildTop)})
                 </span>
               </div>
             </div>

@@ -106,6 +106,7 @@ export const ArticleProductionView: React.FC<Props> = ({ monthlyData, selectedMo
   ];
 
   const totalArtRow = items[0];
+  const buildTopRow = items[3];
   const buildRateRow = items[4];
   const commercialRow = items[2];
 
@@ -164,18 +165,24 @@ export const ArticleProductionView: React.FC<Props> = ({ monthlyData, selectedMo
           </div>
         </div>
 
-        {/* Card 2: Build Top Rate */}
+        {/* Card 2: Build Top Articles */}
         <div className="bg-white border border-slate-200/90 rounded-xl p-4 shadow-xs">
-          <div className="text-xs font-medium text-slate-500">Tỷ Lệ Bài Viết Lên Trang Bìa</div>
+          <div className="flex items-center justify-between">
+            <span className="text-xs font-medium text-slate-500">Số Bài Build Top (Trang Bìa)</span>
+            <span className="px-2 py-0.5 rounded text-[10px] font-semibold bg-purple-50 text-purple-700 border border-purple-200/70">
+              {buildRateRow.t8.toFixed(1)}% tổng bài
+            </span>
+          </div>
           <div className="mt-2 space-y-1">
             <div className="text-base font-bold text-purple-700 font-mono flex items-center gap-2">
-              <span>{buildRateRow.t8.toFixed(1)}%</span>
-              <span className="text-xs font-semibold text-slate-500">
-                (Chuẩn: {buildRateRow.median.toFixed(1)}%)
+              <span>{formatNumber(buildTopRow.t8)} bài</span>
+              <span className={`text-xs font-semibold ${buildTopRow.t8 >= buildTopRow.median ? 'text-emerald-600' : 'text-rose-600'}`}>
+                ({formatDelta(buildTopRow.t8 - buildTopRow.median, false)})
               </span>
             </div>
-            <div className="text-xs text-slate-500 font-sans">
-              Đảm bảo bài nổi bật được đẩy mạnh lên vị trí đắc địa nhất của trang chủ.
+            <div className="text-xs text-slate-500 font-mono">
+              Tháng này: <strong className="text-slate-700">{formatNumber(buildTopRow.t8)}</strong>
+              {'  '}| Trung vị: <strong className="text-slate-700">{formatNumber(buildTopRow.median)}</strong>
             </div>
           </div>
         </div>
