@@ -10,6 +10,7 @@ export interface NewsRecord {
   pageviews: number;
   pageviewsNoAds: number; // (-$)
   pageviewsAds: number;   // ($)
+  sessions?: number;      // Lượt truy cập / Phiên (Cột Z)
   pExDirect: number;
   pExGoogle: number;
   pExSocial: number;

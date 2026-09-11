@@ -8,6 +8,7 @@ export interface ParsedExcelResult {
     months: string[];
     totalPV: number;
     totalArticles: number;
+    totalSessions?: number;
     folderCount: number;
   };
   sampleRows: Partial<NewsRecord>[];
@@ -103,6 +104,25 @@ export function mapRowToNewsRecord(rawRow: Record<string, any>): NewsRecord | nu
     pageviews = pageviewsNoAds + pageviewsAds;
   }
 
+  // Session (Cột Z) - ngang hàng với cột Pageviews
+  const sessions = cleanNumeric(
+    rawRow['Session'] ??
+    rawRow['session'] ??
+    rawRow['Sessions'] ??
+    rawRow['sessions'] ??
+    rawRow['SESSION'] ??
+    rawRow['SESSIONS'] ??
+    rawRow['Z (Session)'] ??
+    rawRow['Session (Z)'] ??
+    rawRow['Phiên'] ??
+    rawRow['Phien'] ??
+    rawRow['Lượt truy cập'] ??
+    rawRow['Luot truy cap'] ??
+    rawRow['Z'] ??
+    rawRow['z'] ??
+    getVal('session', 'sessions', 'zsession', 'sessionz', 'z', 'cotz', 'phien', 'luottruycap', 'totalsession', 'totalsessions', 'tongsession')
+  );
+
   const record: NewsRecord = {
     month,
     folder_id,
@@ -115,6 +135,7 @@ export function mapRowToNewsRecord(rawRow: Record<string, any>): NewsRecord | nu
     pageviews,
     pageviewsNoAds,
     pageviewsAds,
+    sessions,
     pExDirect: cleanNumeric(getVal('pexdirect', 'p-ex-direct', 'direct', 'tructiep')),
     pExGoogle: cleanNumeric(getVal('pexgoogle', 'p-ex-google', 'google', 'search')),
     pExSocial: cleanNumeric(getVal('pexsocial', 'p-ex-social', 'social', 'mangxahoi')),
@@ -162,6 +183,7 @@ export function parseExcelOrCsvData(data: ArrayBuffer | string): ParsedExcelResu
   const folderSet = new Set<string>();
   let totalPV = 0;
   let totalArticles = 0;
+  let totalSessions = 0;
 
   for (const raw of rawRows) {
     const parsed = mapRowToNewsRecord(raw);
@@ -173,6 +195,7 @@ export function parseExcelOrCsvData(data: ArrayBuffer | string): ParsedExcelResu
       }
       totalPV += parsed.pageviews || 0;
       totalArticles += parsed.articles || 0;
+      totalSessions += parsed.sessions || 0;
     }
   }
 
@@ -187,6 +210,7 @@ export function parseExcelOrCsvData(data: ArrayBuffer | string): ParsedExcelResu
       months: Array.from(monthSet),
       totalPV,
       totalArticles,
+      totalSessions,
       folderCount: folderSet.size,
     },
     sampleRows: records.slice(0, 10),
@@ -212,6 +236,7 @@ export const STANDARD_COLUMNS: { key: keyof NewsRecord; header: string }[] = [
   { key: 'pageviews', header: 'Pageviews' },
   { key: 'pageviewsNoAds', header: 'Pageviews (-$)' },
   { key: 'pageviewsAds', header: 'Pageviews ($)' },
+  { key: 'sessions', header: 'Session' },
   { key: 'pExDirect', header: 'P- Ex-Direct' },
   { key: 'pExGoogle', header: 'P- Ex-Google' },
   { key: 'pExSocial', header: 'P- Ex-Social' },
@@ -288,6 +313,7 @@ export function downloadExcelTemplate() {
       Pageviews: 0,
       'Pageviews (-$)': 0,
       'Pageviews ($)': 0,
+      Session: 0,
       'P- Ex-Direct': 0,
       'P- Ex-Google': 0,
       'P- Ex-Social': 0,

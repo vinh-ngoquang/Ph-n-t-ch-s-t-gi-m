@@ -25,9 +25,14 @@ export const ExecutiveReportModal: React.FC<Props> = ({
 
   const pvs = months2026.map((d) => d.record.pageviews || 0);
   const arts = months2026.map((d) => d.record.articles || 0);
+  const sessions = months2026.map((d) => d.record.sessions || 0);
 
   const t8PV = t8?.record.pageviews || 0;
   const medPV = calculateMedian(pvs);
+
+  const t8Session = t8?.record.sessions || 0;
+  const medSession = calculateMedian(sessions);
+  const deltaSessionMed = t8Session - medSession;
 
   const t8Art = t8?.record.articles || 0;
   const medArt = calculateMedian(arts);
@@ -61,6 +66,8 @@ export const ExecutiveReportModal: React.FC<Props> = ({
 | Chỉ số | Tháng 8/2026 | Trung vị 2026 | Δ vs Trung vị | Tỷ lệ lệch (%) |
 | :--- | :---: | :---: | :---: | :---: |
 | **Tổng Pageviews (PV)** | **${formatNumber(t8PV)}** | ${formatNumber(medPV)} | ${formatDelta(deltaPVMed)} | ${formatPercent(medPV > 0 ? (deltaPVMed / medPV) * 100 : 0)} |
+| **Tổng Lượt Truy Cập (Session - Cột Z)** | **${formatNumber(t8Session)}** | ${formatNumber(medSession)} | ${formatDelta(deltaSessionMed)} | ${formatPercent(medSession > 0 ? (deltaSessionMed / medSession) * 100 : 0)} |
+| **Độ sâu tương tác (PV / Session)** | **${t8Session > 0 ? (t8PV / t8Session).toFixed(2) : '-'}** | ${medSession > 0 ? (medPV / medSession).toFixed(2) : '-'} | - | - |
 | **Lượt Xem Bài Chi Tiết (P-Detail)** | **${formatNumber(t8Detail)}** | ${formatNumber(medDetail)} | ${formatDelta(t8Detail - medDetail)} | ${formatPercent(medDetail > 0 ? ((t8Detail - medDetail) / medDetail) * 100 : 0)} |
 | **Sản lượng Bài viết** | **${formatNumber(t8Art)}** | ${formatNumber(medArt)} | ${formatDelta(t8Art - medArt, false)} | ${formatPercent(medArt > 0 ? ((t8Art - medArt) / medArt) * 100 : 0)} |
 | **Hiệu suất Yield (P-Detail/Bài)** | **${formatNumber(t8Yield)}** | ${formatNumber(medYield)} | ${formatDelta(t8Yield - medYield, false)} | ${formatPercent(medYield > 0 ? ((t8Yield - medYield) / medYield) * 100 : 0)} |

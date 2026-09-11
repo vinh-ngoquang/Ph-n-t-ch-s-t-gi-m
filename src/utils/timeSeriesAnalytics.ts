@@ -109,7 +109,10 @@ export function getMonthlyRecordsForScope(
       // Specific folder by ID or name
       const fRec = matched.find((r) => r.folder_id === scope || r.folder === scope);
       if (fRec) {
-        synthRecord = { ...fRec };
+        synthRecord = {
+          ...fRec,
+          sessions: fRec.sessions !== undefined ? fRec.sessions : Math.round((fRec.pageviews || 0) / 2.38),
+        };
       } else {
         synthRecord = createEmptyRecord(m, scope, scope);
       }
@@ -139,6 +142,8 @@ function sumRecords(records: NewsRecord[], month: string, folderId: string, fold
     init.pageviews += r.pageviews || 0;
     init.pageviewsNoAds += r.pageviewsNoAds || 0;
     init.pageviewsAds += r.pageviewsAds || 0;
+    const sVal = r.sessions !== undefined ? r.sessions : Math.round((r.pageviews || 0) / 2.38);
+    init.sessions = (init.sessions || 0) + sVal;
     init.pExDirect += r.pExDirect || 0;
     init.pExGoogle += r.pExGoogle || 0;
     init.pExSocial += r.pExSocial || 0;
@@ -172,6 +177,7 @@ function createEmptyRecord(month: string, folderId: string, folderName: string):
     pageviews: 0,
     pageviewsNoAds: 0,
     pageviewsAds: 0,
+    sessions: 0,
     pExDirect: 0,
     pExGoogle: 0,
     pExSocial: 0,

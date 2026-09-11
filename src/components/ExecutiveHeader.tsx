@@ -92,14 +92,22 @@ export const ExecutiveHeader: React.FC<Props> = ({
   const deltaMedPV = curPV - medPV;
   const pctMedPV = medPV > 0 ? ((curPV - medPV) / medPV) * 100 : 0;
 
-  // 2. Articles
+  // 2. Sessions (Cột Z - Session)
+  const sessionList = months2026.map((d) => d.record.sessions || 0);
+  const curSession = currentMonthPoint?.record.sessions || 0;
+  const medSession = calculateMedian(sessionList);
+  const deltaMedSession = curSession - medSession;
+  const pctMedSession = medSession > 0 ? ((curSession - medSession) / medSession) * 100 : 0;
+  const curPvPerSession = curSession > 0 ? curPV / curSession : 0;
+
+  // 3. Articles
   const artList = months2026.map((d) => d.record.articles || 0);
   const curArt = currentMonthPoint?.record.articles || 0;
   const medArt = calculateMedian(artList);
   const deltaMedArt = curArt - medArt;
   const pctMedArt = medArt > 0 ? ((curArt - medArt) / medArt) * 100 : 0;
 
-  // 3. Build Top Rate
+  // 4. Build Top Rate
   const buildTopRateList = months2026.map((d) =>
     (d.record.articles || 0) > 0 ? ((d.record.aBuildTop || 0) / (d.record.articles || 1)) * 100 : 0
   );
@@ -284,8 +292,8 @@ export const ExecutiveHeader: React.FC<Props> = ({
           </div>
         </div>
 
-        {/* 3 Clean Key Metrics - Styled matching reference scorecard */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-3.5 mt-4 pt-4 border-t border-slate-100">
+        {/* 4 Clean Key Metrics - Styled matching reference scorecard */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3.5 mt-4 pt-4 border-t border-slate-100">
           {/* Card 1: Pageviews */}
           <div className="bg-white rounded-xl p-4 border border-slate-200/90 shadow-2xs flex flex-col justify-between">
             <div className="flex items-center justify-between gap-2">
@@ -320,7 +328,44 @@ export const ExecutiveHeader: React.FC<Props> = ({
             </div>
           </div>
 
-          {/* Card 2: Articles */}
+          {/* Card 2: Session (Cột Z) */}
+          <div className="bg-white rounded-xl p-4 border border-slate-200/90 shadow-2xs flex flex-col justify-between">
+            <div className="flex items-center justify-between gap-2">
+              <span className="text-xs sm:text-[13px] font-bold text-slate-800 tracking-tight whitespace-nowrap">
+                Tổng Session
+              </span>
+              <span
+                className="px-2 py-0.5 rounded text-[10px] sm:text-[11px] font-medium text-blue-700 bg-blue-50 border border-blue-200/70 whitespace-nowrap"
+                title="Lượt xem trung bình trên mỗi phiên (PV / Session)"
+              >
+                {curPvPerSession > 0 ? `${curPvPerSession.toFixed(2)} PV/phiên` : 'Cột Z'}
+              </span>
+            </div>
+
+            <div className="my-2.5 flex items-baseline gap-1.5">
+              <span className="text-xl sm:text-2xl font-extrabold text-slate-900 font-mono tracking-tight">
+                {formatNumber(curSession)}
+              </span>
+              <span className="text-xs font-semibold text-slate-400 font-sans">Phiên</span>
+            </div>
+
+            <div className="border-t border-slate-100 pt-2.5">
+              <div className="flex items-center justify-between text-xs">
+                <span className="text-[11px] text-slate-400 font-medium">Mốc Trung vị 2026:</span>
+                <span className="font-bold text-slate-800 font-mono">
+                  {formatNumber(medSession)}
+                </span>
+              </div>
+              <div className="flex items-center justify-between text-xs mt-1">
+                <span className="text-[11px] text-slate-400 font-medium">Lệch vs Trung vị:</span>
+                <span className={`font-bold font-mono ${deltaMedSession >= 0 ? 'text-emerald-600' : 'text-rose-600'}`}>
+                  {formatDelta(deltaMedSession)} ({formatPercent(pctMedSession)})
+                </span>
+              </div>
+            </div>
+          </div>
+
+          {/* Card 3: Articles */}
           <div className="bg-white rounded-xl p-4 border border-slate-200/90 shadow-2xs flex flex-col justify-between">
             <div className="flex items-center justify-between gap-2">
               <span className="text-xs sm:text-[13px] font-bold text-slate-800 tracking-tight whitespace-nowrap">
@@ -354,7 +399,7 @@ export const ExecutiveHeader: React.FC<Props> = ({
             </div>
           </div>
 
-          {/* Card 3: Build Top Rate */}
+          {/* Card 4: Build Top Rate */}
           <div className="bg-white rounded-xl p-4 border border-slate-200/90 shadow-2xs flex flex-col justify-between">
             <div className="flex items-center justify-between gap-2">
               <span className="text-xs sm:text-[13px] font-bold text-slate-800 tracking-tight whitespace-nowrap">
