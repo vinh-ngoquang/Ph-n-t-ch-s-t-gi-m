@@ -123,6 +123,61 @@ export function mapRowToNewsRecord(rawRow: Record<string, any>): NewsRecord | nu
     getVal('session', 'sessions', 'zsession', 'sessionz', 'z', 'cotz', 'phien', 'luottruycap', 'totalsession', 'totalsessions', 'tongsession')
   );
 
+  // Direct breakdown (Brandname - Dữ liệu tham khảo cho P- Ex-Direct)
+  const pExDirectBrandnameVal = cleanNumeric(
+    rawRow['P- Ex-Direct | Brandname'] ??
+    rawRow['P- Ex-Direct|Brandname'] ??
+    rawRow['P-Ex-Direct | Brandname'] ??
+    rawRow['P-Ex-Direct|Brandname'] ??
+    rawRow['P- Ex-Direct - Brandname'] ??
+    rawRow['P- Ex-Direct Brandname'] ??
+    rawRow['P-Ex Direct Brandname'] ??
+    rawRow['Direct | Brandname'] ??
+    rawRow['Direct Brandname'] ??
+    rawRow['Brandname'] ??
+    rawRow['Brand Name'] ??
+    getVal('pexdirectbrandname', 'p_ex_direct_brandname', 'directbrandname', 'brandname', 'brand_name')
+  );
+
+  // Google breakdown (Search & Discover - Dữ liệu tham khảo)
+  const pExGoogleSearchVal = cleanNumeric(
+    rawRow['P- Ex-Google | Search'] ??
+    rawRow['P- Ex-Google|Search'] ??
+    rawRow['P-Ex-Google | Search'] ??
+    rawRow['P-Ex-Google|Search'] ??
+    rawRow['P- Ex-Google - Search'] ??
+    rawRow['P- Ex-Google Search'] ??
+    rawRow['Google Search'] ??
+    rawRow['Google | Search'] ??
+    getVal('pexgooglesearch', 'p_ex_google_search', 'pex_google_search', 'googlesearch', 'pexsearch')
+  );
+
+  const pExGoogleDiscoverVal = cleanNumeric(
+    rawRow['P- Ex-Google | Discover'] ??
+    rawRow['P- Ex-Google|Discover'] ??
+    rawRow['P-Ex-Google | Discover'] ??
+    rawRow['P-Ex-Google|Discover'] ??
+    rawRow['P- Ex-Google - Discover'] ??
+    rawRow['P- Ex-Google Discover'] ??
+    rawRow['Google Discover'] ??
+    rawRow['Google | Discover'] ??
+    getVal('pexgooglediscover', 'p_ex_google_discover', 'pex_google_discover', 'googlediscover', 'pexdiscover', 'discover')
+  );
+
+  let pExGoogle = cleanNumeric(
+    rawRow['P- Ex-Google'] ??
+    rawRow['P-Ex-Google'] ??
+    rawRow['p-ex-google'] ??
+    rawRow['P-Ex Google'] ??
+    rawRow['Google'] ??
+    getVal('pexgoogle', 'p_ex_google', 'pex_google', 'google')
+  );
+
+  // Fallback: If P- Ex-Google is 0 but Search and Discover are provided
+  if (pExGoogle === 0 && (pExGoogleSearchVal > 0 || pExGoogleDiscoverVal > 0)) {
+    pExGoogle = pExGoogleSearchVal + pExGoogleDiscoverVal;
+  }
+
   const record: NewsRecord = {
     month,
     folder_id,
@@ -137,7 +192,10 @@ export function mapRowToNewsRecord(rawRow: Record<string, any>): NewsRecord | nu
     pageviewsAds,
     sessions,
     pExDirect: cleanNumeric(getVal('pexdirect', 'p-ex-direct', 'direct', 'tructiep')),
-    pExGoogle: cleanNumeric(getVal('pexgoogle', 'p-ex-google', 'google', 'search')),
+    pExDirectBrandname: pExDirectBrandnameVal > 0 ? pExDirectBrandnameVal : undefined,
+    pExGoogle,
+    pExGoogleSearch: pExGoogleSearchVal > 0 ? pExGoogleSearchVal : undefined,
+    pExGoogleDiscover: pExGoogleDiscoverVal > 0 ? pExGoogleDiscoverVal : undefined,
     pExSocial: cleanNumeric(getVal('pexsocial', 'p-ex-social', 'social', 'mangxahoi')),
     pInHome: cleanNumeric(getVal('pinhome', 'p-in-home', 'home', 'trangchu', 'trangbia')),
     pInFolder: cleanNumeric(getVal('pinfolder', 'p-in-folder', 'folder', 'trangchuyenmuc')),
@@ -238,7 +296,10 @@ export const STANDARD_COLUMNS: { key: keyof NewsRecord; header: string }[] = [
   { key: 'pageviewsAds', header: 'Pageviews ($)' },
   { key: 'sessions', header: 'Session' },
   { key: 'pExDirect', header: 'P- Ex-Direct' },
+  { key: 'pExDirectBrandname', header: 'P- Ex-Direct | Brandname' },
   { key: 'pExGoogle', header: 'P- Ex-Google' },
+  { key: 'pExGoogleSearch', header: 'P- Ex-Google | Search' },
+  { key: 'pExGoogleDiscover', header: 'P- Ex-Google | Discover' },
   { key: 'pExSocial', header: 'P- Ex-Social' },
   { key: 'pInHome', header: 'P- In-Home' },
   { key: 'pInFolder', header: 'P- In-Folder' },
@@ -316,6 +377,8 @@ export function downloadExcelTemplate() {
       Session: 0,
       'P- Ex-Direct': 0,
       'P- Ex-Google': 0,
+      'P- Ex-Google | Search': 0,
+      'P- Ex-Google | Discover': 0,
       'P- Ex-Social': 0,
       'P- In-Home': 0,
       'P- In-Folder': 0,

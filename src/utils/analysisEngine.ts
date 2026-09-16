@@ -232,6 +232,9 @@ export function filterRecords(
       pageviewsNoAds: recs.reduce((acc, r) => acc + r.pageviewsNoAds, 0) / count,
       pageviewsAds: recs.reduce((acc, r) => acc + r.pageviewsAds, 0) / count,
       pExDirect: recs.reduce((acc, r) => acc + r.pExDirect, 0) / count,
+      pExDirectBrandname: recs.some((r) => r.pExDirectBrandname !== undefined)
+        ? recs.reduce((acc, r) => acc + (r.pExDirectBrandname || 0), 0) / count
+        : undefined,
       pExGoogle: recs.reduce((acc, r) => acc + r.pExGoogle, 0) / count,
       pExSocial: recs.reduce((acc, r) => acc + r.pExSocial, 0) / count,
       pInHome: recs.reduce((acc, r) => acc + r.pInHome, 0) / count,
@@ -296,6 +299,9 @@ export function sumRecords(records: NewsRecord[], month: string, folderName: str
     sum.pageviewsNoAds += r.pageviewsNoAds;
     sum.pageviewsAds += r.pageviewsAds;
     sum.pExDirect += r.pExDirect;
+    if (r.pExDirectBrandname !== undefined) {
+      sum.pExDirectBrandname = (sum.pExDirectBrandname || 0) + r.pExDirectBrandname;
+    }
     sum.pExGoogle += r.pExGoogle;
     sum.pExSocial += r.pExSocial;
     sum.pInHome += r.pInHome;

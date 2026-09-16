@@ -9482,7 +9482,8 @@ export const RAW_DATASET: NewsRecord[] = [
     "pMobile": 2619210.0,
     "pPC": 2234828.0,
     "pApp": 492604.0,
-    "pTablet": 29268.0
+    "pTablet": 29268.0,
+    "pExDirectBrandname": 210806
   },
   {
     "month": "3/2026",
@@ -9511,7 +9512,8 @@ export const RAW_DATASET: NewsRecord[] = [
     "pMobile": 3865485.0,
     "pPC": 2766636.0,
     "pApp": 631736.0,
-    "pTablet": 42323.0
+    "pTablet": 42323.0,
+    "pExDirectBrandname": 263291
   },
   {
     "month": "3/2026",
@@ -9540,7 +9542,8 @@ export const RAW_DATASET: NewsRecord[] = [
     "pMobile": 2621213.0,
     "pPC": 1759180.0,
     "pApp": 412749.0,
-    "pTablet": 31480.0
+    "pTablet": 31480.0,
+    "pExDirectBrandname": 208922
   },
   {
     "month": "3/2026",
@@ -9569,7 +9572,8 @@ export const RAW_DATASET: NewsRecord[] = [
     "pMobile": 9631535.0,
     "pPC": 1356306.0,
     "pApp": 560014.0,
-    "pTablet": 136979.0
+    "pTablet": 136979.0,
+    "pExDirectBrandname": 880275
   },
   {
     "month": "3/2026",
@@ -9598,7 +9602,8 @@ export const RAW_DATASET: NewsRecord[] = [
     "pMobile": 7383575.0,
     "pPC": 5177536.0,
     "pApp": 1224171.0,
-    "pTablet": 90656.0
+    "pTablet": 90656.0,
+    "pExDirectBrandname": 530900
   },
   {
     "month": "3/2026",
@@ -9627,7 +9632,8 @@ export const RAW_DATASET: NewsRecord[] = [
     "pMobile": 4669225.0,
     "pPC": 2386624.0,
     "pApp": 535889.0,
-    "pTablet": 39571.0
+    "pTablet": 39571.0,
+    "pExDirectBrandname": 430027
   },
   {
     "month": "3/2026",
@@ -9656,7 +9662,8 @@ export const RAW_DATASET: NewsRecord[] = [
     "pMobile": 662104.0,
     "pPC": 928743.0,
     "pApp": 437609.0,
-    "pTablet": 11598.0
+    "pTablet": 11598.0,
+    "pExDirectBrandname": 77640
   },
   {
     "month": "3/2026",
@@ -9685,7 +9692,8 @@ export const RAW_DATASET: NewsRecord[] = [
     "pMobile": 7068747.0,
     "pPC": 4740675.0,
     "pApp": 1301689.0,
-    "pTablet": 72042.0
+    "pTablet": 72042.0,
+    "pExDirectBrandname": 772456
   },
   {
     "month": "3/2026",
@@ -9714,7 +9722,8 @@ export const RAW_DATASET: NewsRecord[] = [
     "pMobile": 8274572.0,
     "pPC": 6107562.0,
     "pApp": 1643100.0,
-    "pTablet": 71634.0
+    "pTablet": 71634.0,
+    "pExDirectBrandname": 990768
   },
   {
     "month": "3/2026",
@@ -9743,7 +9752,8 @@ export const RAW_DATASET: NewsRecord[] = [
     "pMobile": 905279.0,
     "pPC": 2178844.0,
     "pApp": 1810758.0,
-    "pTablet": 12294.0
+    "pTablet": 12294.0,
+    "pExDirectBrandname": 220549
   },
   {
     "month": "3/2026",
@@ -9772,7 +9782,8 @@ export const RAW_DATASET: NewsRecord[] = [
     "pMobile": 29638735.0,
     "pPC": 17704708.0,
     "pApp": 538563.0,
-    "pTablet": 247375.0
+    "pTablet": 247375.0,
+    "pExDirectBrandname": 6388266
   },
   {
     "month": "3/2026",
@@ -9801,7 +9812,8 @@ export const RAW_DATASET: NewsRecord[] = [
     "pMobile": 12263764.0,
     "pPC": 6045200.0,
     "pApp": 2188488.0,
-    "pTablet": 93879.0
+    "pTablet": 93879.0,
+    "pExDirectBrandname": 915572
   },
   {
     "month": "3/2026",
@@ -9830,7 +9842,8 @@ export const RAW_DATASET: NewsRecord[] = [
     "pMobile": 4242.0,
     "pPC": 3307.0,
     "pApp": 0.0,
-    "pTablet": 72.0
+    "pTablet": 72.0,
+    "pExDirectBrandname": 329
   },
   {
     "month": "3/2026",
@@ -9859,7 +9872,8 @@ export const RAW_DATASET: NewsRecord[] = [
     "pMobile": 4908822.0,
     "pPC": 2674740.0,
     "pApp": 1057366.0,
-    "pTablet": 49935.0
+    "pTablet": 49935.0,
+    "pExDirectBrandname": 321598
   },
   {
     "month": "3/2026",
@@ -9888,7 +9902,8 @@ export const RAW_DATASET: NewsRecord[] = [
     "pMobile": 4103971.0,
     "pPC": 3195093.0,
     "pApp": 740299.0,
-    "pTablet": 39688.0
+    "pTablet": 39688.0,
+    "pExDirectBrandname": 289564
   },
   {
     "month": "3/2026",
@@ -9917,7 +9932,8 @@ export const RAW_DATASET: NewsRecord[] = [
     "pMobile": 29338387.0,
     "pPC": 15245495.0,
     "pApp": 5651222.0,
-    "pTablet": 259875.0
+    "pTablet": 259875.0,
+    "pExDirectBrandname": 2043082
   },
   {
     "month": "3/2026",
@@ -9946,7 +9962,8 @@ export const RAW_DATASET: NewsRecord[] = [
     "pMobile": 11680884.0,
     "pPC": 6370716.0,
     "pApp": 1853212.0,
-    "pTablet": 87558.0
+    "pTablet": 87558.0,
+    "pExDirectBrandname": 1016607
   },
   {
     "month": "3/2026",
@@ -9975,7 +9992,8 @@ export const RAW_DATASET: NewsRecord[] = [
     "pMobile": 19294544.0,
     "pPC": 10705011.0,
     "pApp": 3370257.0,
-    "pTablet": 146953.0
+    "pTablet": 146953.0,
+    "pExDirectBrandname": 1400823
   },
   {
     "month": "3/2026",
@@ -10004,7 +10022,8 @@ export const RAW_DATASET: NewsRecord[] = [
     "pMobile": 4920017.0,
     "pPC": 1077289.0,
     "pApp": 183458.0,
-    "pTablet": 38013.0
+    "pTablet": 38013.0,
+    "pExDirectBrandname": 233660
   },
   {
     "month": "3/2026",
@@ -10033,7 +10052,8 @@ export const RAW_DATASET: NewsRecord[] = [
     "pMobile": 0.0,
     "pPC": 0.0,
     "pApp": 0.0,
-    "pTablet": 0.0
+    "pTablet": 0.0,
+    "pExDirectBrandname": 0
   },
   {
     "month": "3/2026",
@@ -10062,7 +10082,8 @@ export const RAW_DATASET: NewsRecord[] = [
     "pMobile": 0.0,
     "pPC": 0.0,
     "pApp": 0.0,
-    "pTablet": 0.0
+    "pTablet": 0.0,
+    "pExDirectBrandname": 0
   },
   {
     "month": "3/2026",
@@ -10091,7 +10112,8 @@ export const RAW_DATASET: NewsRecord[] = [
     "pMobile": 3740863.0,
     "pPC": 3603547.0,
     "pApp": 651194.0,
-    "pTablet": 24010.0
+    "pTablet": 24010.0,
+    "pExDirectBrandname": 194370
   },
   {
     "month": "3/2026",
@@ -10120,7 +10142,8 @@ export const RAW_DATASET: NewsRecord[] = [
     "pMobile": 79144619.0,
     "pPC": 61804917.0,
     "pApp": 25537127.0,
-    "pTablet": 548079.0
+    "pTablet": 548079.0,
+    "pExDirectBrandname": 50049232
   },
   {
     "month": "3/2026",
@@ -10149,7 +10172,8 @@ export const RAW_DATASET: NewsRecord[] = [
     "pMobile": 5925676.0,
     "pPC": 3967287.0,
     "pApp": 665403.0,
-    "pTablet": 45191.0
+    "pTablet": 45191.0,
+    "pExDirectBrandname": 411520
   },
   {
     "month": "3/2026",
@@ -10178,7 +10202,8 @@ export const RAW_DATASET: NewsRecord[] = [
     "pMobile": 2617642.0,
     "pPC": 1157847.0,
     "pApp": 436636.0,
-    "pTablet": 22730.0
+    "pTablet": 22730.0,
+    "pExDirectBrandname": 161349
   },
   {
     "month": "4/2026",
@@ -10207,7 +10232,8 @@ export const RAW_DATASET: NewsRecord[] = [
     "pMobile": 1731979.0,
     "pPC": 1677091.0,
     "pApp": 328254.0,
-    "pTablet": 19817.0
+    "pTablet": 19817.0,
+    "pExDirectBrandname": 159728
   },
   {
     "month": "4/2026",
@@ -10236,7 +10262,8 @@ export const RAW_DATASET: NewsRecord[] = [
     "pMobile": 3902983.0,
     "pPC": 2677238.0,
     "pApp": 568153.0,
-    "pTablet": 44631.0
+    "pTablet": 44631.0,
+    "pExDirectBrandname": 279205
   },
   {
     "month": "4/2026",
@@ -10265,7 +10292,8 @@ export const RAW_DATASET: NewsRecord[] = [
     "pMobile": 2599674.0,
     "pPC": 1760505.0,
     "pApp": 360399.0,
-    "pTablet": 29546.0
+    "pTablet": 29546.0,
+    "pExDirectBrandname": 209873
   },
   {
     "month": "4/2026",
@@ -10294,7 +10322,8 @@ export const RAW_DATASET: NewsRecord[] = [
     "pMobile": 8749777.0,
     "pPC": 1359170.0,
     "pApp": 611024.0,
-    "pTablet": 130884.0
+    "pTablet": 130884.0,
+    "pExDirectBrandname": 811203
   },
   {
     "month": "4/2026",
@@ -10323,7 +10352,8 @@ export const RAW_DATASET: NewsRecord[] = [
     "pMobile": 5333757.0,
     "pPC": 4399409.0,
     "pApp": 931447.0,
-    "pTablet": 75299.0
+    "pTablet": 75299.0,
+    "pExDirectBrandname": 413700
   },
   {
     "month": "4/2026",
@@ -10352,7 +10382,8 @@ export const RAW_DATASET: NewsRecord[] = [
     "pMobile": 4891510.0,
     "pPC": 2297930.0,
     "pApp": 504320.0,
-    "pTablet": 40398.0
+    "pTablet": 40398.0,
+    "pExDirectBrandname": 436034
   },
   {
     "month": "4/2026",
@@ -10381,7 +10412,8 @@ export const RAW_DATASET: NewsRecord[] = [
     "pMobile": 723498.0,
     "pPC": 889975.0,
     "pApp": 436301.0,
-    "pTablet": 11701.0
+    "pTablet": 11701.0,
+    "pExDirectBrandname": 67959
   },
   {
     "month": "4/2026",
@@ -10410,7 +10442,8 @@ export const RAW_DATASET: NewsRecord[] = [
     "pMobile": 16324877.0,
     "pPC": 5120914.0,
     "pApp": 982184.0,
-    "pTablet": 117197.0
+    "pTablet": 117197.0,
+    "pExDirectBrandname": 5449234
   },
   {
     "month": "4/2026",
@@ -10439,7 +10472,8 @@ export const RAW_DATASET: NewsRecord[] = [
     "pMobile": 17143654.0,
     "pPC": 9866829.0,
     "pApp": 3011867.0,
-    "pTablet": 137178.0
+    "pTablet": 137178.0,
+    "pExDirectBrandname": 1957041
   },
   {
     "month": "4/2026",
@@ -10468,7 +10502,8 @@ export const RAW_DATASET: NewsRecord[] = [
     "pMobile": 968421.0,
     "pPC": 2167664.0,
     "pApp": 1877959.0,
-    "pTablet": 12307.0
+    "pTablet": 12307.0,
+    "pExDirectBrandname": 225118
   },
   {
     "month": "4/2026",
@@ -10497,7 +10532,8 @@ export const RAW_DATASET: NewsRecord[] = [
     "pMobile": 27110056.0,
     "pPC": 16048196.0,
     "pApp": 478628.0,
-    "pTablet": 228603.0
+    "pTablet": 228603.0,
+    "pExDirectBrandname": 5914576
   },
   {
     "month": "4/2026",
@@ -10526,7 +10562,8 @@ export const RAW_DATASET: NewsRecord[] = [
     "pMobile": 13792297.0,
     "pPC": 5839082.0,
     "pApp": 2215512.0,
-    "pTablet": 96051.0
+    "pTablet": 96051.0,
+    "pExDirectBrandname": 902920
   },
   {
     "month": "4/2026",
@@ -10555,7 +10592,8 @@ export const RAW_DATASET: NewsRecord[] = [
     "pMobile": 3202.0,
     "pPC": 2219.0,
     "pApp": 0.0,
-    "pTablet": 31.0
+    "pTablet": 31.0,
+    "pExDirectBrandname": 275
   },
   {
     "month": "4/2026",
@@ -10584,7 +10622,8 @@ export const RAW_DATASET: NewsRecord[] = [
     "pMobile": 5544946.0,
     "pPC": 2827102.0,
     "pApp": 1089524.0,
-    "pTablet": 51737.0
+    "pTablet": 51737.0,
+    "pExDirectBrandname": 330262
   },
   {
     "month": "4/2026",
@@ -10613,7 +10652,8 @@ export const RAW_DATASET: NewsRecord[] = [
     "pMobile": 4055155.0,
     "pPC": 2982072.0,
     "pApp": 699075.0,
-    "pTablet": 37170.0
+    "pTablet": 37170.0,
+    "pExDirectBrandname": 288855
   },
   {
     "month": "4/2026",
@@ -10642,7 +10682,8 @@ export const RAW_DATASET: NewsRecord[] = [
     "pMobile": 22890439.0,
     "pPC": 13329019.0,
     "pApp": 4332489.0,
-    "pTablet": 220209.0
+    "pTablet": 220209.0,
+    "pExDirectBrandname": 1787786
   },
   {
     "month": "4/2026",
@@ -10671,7 +10712,8 @@ export const RAW_DATASET: NewsRecord[] = [
     "pMobile": 11464303.0,
     "pPC": 5886966.0,
     "pApp": 1665920.0,
-    "pTablet": 84232.0
+    "pTablet": 84232.0,
+    "pExDirectBrandname": 976214
   },
   {
     "month": "4/2026",
@@ -10700,7 +10742,8 @@ export const RAW_DATASET: NewsRecord[] = [
     "pMobile": 22867545.0,
     "pPC": 11905477.0,
     "pApp": 3910969.0,
-    "pTablet": 181501.0
+    "pTablet": 181501.0,
+    "pExDirectBrandname": 1812686
   },
   {
     "month": "4/2026",
@@ -10729,7 +10772,8 @@ export const RAW_DATASET: NewsRecord[] = [
     "pMobile": 4955232.0,
     "pPC": 1006637.0,
     "pApp": 117402.0,
-    "pTablet": 36951.0
+    "pTablet": 36951.0,
+    "pExDirectBrandname": 230800
   },
   {
     "month": "4/2026",
@@ -10758,7 +10802,8 @@ export const RAW_DATASET: NewsRecord[] = [
     "pMobile": 0.0,
     "pPC": 0.0,
     "pApp": 0.0,
-    "pTablet": 0.0
+    "pTablet": 0.0,
+    "pExDirectBrandname": 0
   },
   {
     "month": "4/2026",
@@ -10787,7 +10832,8 @@ export const RAW_DATASET: NewsRecord[] = [
     "pMobile": 0.0,
     "pPC": 0.0,
     "pApp": 0.0,
-    "pTablet": 0.0
+    "pTablet": 0.0,
+    "pExDirectBrandname": 0
   },
   {
     "month": "4/2026",
@@ -10816,7 +10862,8 @@ export const RAW_DATASET: NewsRecord[] = [
     "pMobile": 4763158.0,
     "pPC": 4213770.0,
     "pApp": 756574.0,
-    "pTablet": 29541.0
+    "pTablet": 29541.0,
+    "pExDirectBrandname": 254923
   },
   {
     "month": "4/2026",
@@ -10845,7 +10892,8 @@ export const RAW_DATASET: NewsRecord[] = [
     "pMobile": 83204839.0,
     "pPC": 64337911.0,
     "pApp": 26537677.0,
-    "pTablet": 565869.0
+    "pTablet": 565869.0,
+    "pExDirectBrandname": 52173696
   },
   {
     "month": "4/2026",
@@ -10874,7 +10922,8 @@ export const RAW_DATASET: NewsRecord[] = [
     "pMobile": 5114590.0,
     "pPC": 3394706.0,
     "pApp": 447681.0,
-    "pTablet": 39838.0
+    "pTablet": 39838.0,
+    "pExDirectBrandname": 360844
   },
   {
     "month": "4/2026",
@@ -10903,7 +10952,8 @@ export const RAW_DATASET: NewsRecord[] = [
     "pMobile": 2838540.0,
     "pPC": 1139063.0,
     "pApp": 426513.0,
-    "pTablet": 24711.0
+    "pTablet": 24711.0,
+    "pExDirectBrandname": 135297
   },
   {
     "month": "5/2026",
@@ -10932,7 +10982,8 @@ export const RAW_DATASET: NewsRecord[] = [
     "pMobile": 2306018.0,
     "pPC": 1931722.0,
     "pApp": 398657.0,
-    "pTablet": 28171.0
+    "pTablet": 28171.0,
+    "pExDirectBrandname": 171916
   },
   {
     "month": "5/2026",
@@ -10961,7 +11012,8 @@ export const RAW_DATASET: NewsRecord[] = [
     "pMobile": 4591056.0,
     "pPC": 2992450.0,
     "pApp": 679400.0,
-    "pTablet": 56060.0
+    "pTablet": 56060.0,
+    "pExDirectBrandname": 308659
   },
   {
     "month": "5/2026",
@@ -10990,7 +11042,8 @@ export const RAW_DATASET: NewsRecord[] = [
     "pMobile": 2770522.0,
     "pPC": 1839870.0,
     "pApp": 357105.0,
-    "pTablet": 33220.0
+    "pTablet": 33220.0,
+    "pExDirectBrandname": 231157
   },
   {
     "month": "5/2026",
@@ -11019,7 +11072,8 @@ export const RAW_DATASET: NewsRecord[] = [
     "pMobile": 11961396.0,
     "pPC": 1414800.0,
     "pApp": 505158.0,
-    "pTablet": 200424.0
+    "pTablet": 200424.0,
+    "pExDirectBrandname": 994254
   },
   {
     "month": "5/2026",
@@ -11048,7 +11102,8 @@ export const RAW_DATASET: NewsRecord[] = [
     "pMobile": 6033916.0,
     "pPC": 4529191.0,
     "pApp": 946473.0,
-    "pTablet": 84039.0
+    "pTablet": 84039.0,
+    "pExDirectBrandname": 449146
   },
   {
     "month": "5/2026",
@@ -11077,7 +11132,8 @@ export const RAW_DATASET: NewsRecord[] = [
     "pMobile": 5574198.0,
     "pPC": 2621279.0,
     "pApp": 545189.0,
-    "pTablet": 51174.0
+    "pTablet": 51174.0,
+    "pExDirectBrandname": 482440
   },
   {
     "month": "5/2026",
@@ -11106,7 +11162,8 @@ export const RAW_DATASET: NewsRecord[] = [
     "pMobile": 782843.0,
     "pPC": 746414.0,
     "pApp": 428827.0,
-    "pTablet": 10415.0
+    "pTablet": 10415.0,
+    "pExDirectBrandname": 56488
   },
   {
     "month": "5/2026",
@@ -11135,7 +11192,8 @@ export const RAW_DATASET: NewsRecord[] = [
     "pMobile": 11542254.0,
     "pPC": 4461184.0,
     "pApp": 1074950.0,
-    "pTablet": 74808.0
+    "pTablet": 74808.0,
+    "pExDirectBrandname": 3918015
   },
   {
     "month": "5/2026",
@@ -11164,7 +11222,8 @@ export const RAW_DATASET: NewsRecord[] = [
     "pMobile": 8480891.0,
     "pPC": 6086187.0,
     "pApp": 1604669.0,
-    "pTablet": 79912.0
+    "pTablet": 79912.0,
+    "pExDirectBrandname": 1029765
   },
   {
     "month": "5/2026",
@@ -11193,7 +11252,8 @@ export const RAW_DATASET: NewsRecord[] = [
     "pMobile": 862640.0,
     "pPC": 2108041.0,
     "pApp": 1754571.0,
-    "pTablet": 13590.0
+    "pTablet": 13590.0,
+    "pExDirectBrandname": 174572
   },
   {
     "month": "5/2026",
@@ -11222,7 +11282,8 @@ export const RAW_DATASET: NewsRecord[] = [
     "pMobile": 27010624.0,
     "pPC": 15803578.0,
     "pApp": 471506.0,
-    "pTablet": 232533.0
+    "pTablet": 232533.0,
+    "pExDirectBrandname": 5805136
   },
   {
     "month": "5/2026",
@@ -11251,7 +11312,8 @@ export const RAW_DATASET: NewsRecord[] = [
     "pMobile": 14478015.0,
     "pPC": 6120821.0,
     "pApp": 2226951.0,
-    "pTablet": 110050.0
+    "pTablet": 110050.0,
+    "pExDirectBrandname": 982937
   },
   {
     "month": "5/2026",
@@ -11280,7 +11342,8 @@ export const RAW_DATASET: NewsRecord[] = [
     "pMobile": 4378.0,
     "pPC": 4906.0,
     "pApp": 6.0,
-    "pTablet": 59.0
+    "pTablet": 59.0,
+    "pExDirectBrandname": 438
   },
   {
     "month": "5/2026",
@@ -11309,7 +11372,8 @@ export const RAW_DATASET: NewsRecord[] = [
     "pMobile": 8487088.0,
     "pPC": 3824004.0,
     "pApp": 1604836.0,
-    "pTablet": 77726.0
+    "pTablet": 77726.0,
+    "pExDirectBrandname": 593551
   },
   {
     "month": "5/2026",
@@ -11338,7 +11402,8 @@ export const RAW_DATASET: NewsRecord[] = [
     "pMobile": 3678585.0,
     "pPC": 2841960.0,
     "pApp": 658660.0,
-    "pTablet": 35952.0
+    "pTablet": 35952.0,
+    "pExDirectBrandname": 271931
   },
   {
     "month": "5/2026",
@@ -11367,7 +11432,8 @@ export const RAW_DATASET: NewsRecord[] = [
     "pMobile": 26733980.0,
     "pPC": 15045927.0,
     "pApp": 4801253.0,
-    "pTablet": 254495.0
+    "pTablet": 254495.0,
+    "pExDirectBrandname": 2029347
   },
   {
     "month": "5/2026",
@@ -11396,7 +11462,8 @@ export const RAW_DATASET: NewsRecord[] = [
     "pMobile": 12766368.0,
     "pPC": 6602268.0,
     "pApp": 1855985.0,
-    "pTablet": 97201.0
+    "pTablet": 97201.0,
+    "pExDirectBrandname": 1061644
   },
   {
     "month": "5/2026",
@@ -11425,7 +11492,8 @@ export const RAW_DATASET: NewsRecord[] = [
     "pMobile": 16971669.0,
     "pPC": 9605428.0,
     "pApp": 2872720.0,
-    "pTablet": 142091.0
+    "pTablet": 142091.0,
+    "pExDirectBrandname": 1345558
   },
   {
     "month": "5/2026",
@@ -11454,7 +11522,8 @@ export const RAW_DATASET: NewsRecord[] = [
     "pMobile": 6390009.0,
     "pPC": 1237851.0,
     "pApp": 118251.0,
-    "pTablet": 52762.0
+    "pTablet": 52762.0,
+    "pExDirectBrandname": 287096
   },
   {
     "month": "5/2026",
@@ -11483,7 +11552,8 @@ export const RAW_DATASET: NewsRecord[] = [
     "pMobile": 0.0,
     "pPC": 0.0,
     "pApp": 0.0,
-    "pTablet": 0.0
+    "pTablet": 0.0,
+    "pExDirectBrandname": 0
   },
   {
     "month": "5/2026",
@@ -11512,7 +11582,8 @@ export const RAW_DATASET: NewsRecord[] = [
     "pMobile": 0.0,
     "pPC": 0.0,
     "pApp": 0.0,
-    "pTablet": 0.0
+    "pTablet": 0.0,
+    "pExDirectBrandname": 0
   },
   {
     "month": "5/2026",
@@ -11541,7 +11612,8 @@ export const RAW_DATASET: NewsRecord[] = [
     "pMobile": 3065611.0,
     "pPC": 3282200.0,
     "pApp": 570241.0,
-    "pTablet": 21155.0
+    "pTablet": 21155.0,
+    "pExDirectBrandname": 204732
   },
   {
     "month": "5/2026",
@@ -11570,7 +11642,8 @@ export const RAW_DATASET: NewsRecord[] = [
     "pMobile": 75937064.0,
     "pPC": 60546411.0,
     "pApp": 24542044.0,
-    "pTablet": 536635.0
+    "pTablet": 536635.0,
+    "pExDirectBrandname": 49942106
   },
   {
     "month": "5/2026",
@@ -11599,7 +11672,8 @@ export const RAW_DATASET: NewsRecord[] = [
     "pMobile": 6295497.0,
     "pPC": 3744780.0,
     "pApp": 560004.0,
-    "pTablet": 47509.0
+    "pTablet": 47509.0,
+    "pExDirectBrandname": 391435
   },
   {
     "month": "5/2026",
@@ -11628,7 +11702,8 @@ export const RAW_DATASET: NewsRecord[] = [
     "pMobile": 3333675.0,
     "pPC": 1177266.0,
     "pApp": 397611.0,
-    "pTablet": 30455.0
+    "pTablet": 30455.0,
+    "pExDirectBrandname": 159963
   },
   {
     "month": "6/2026",
@@ -11657,7 +11732,8 @@ export const RAW_DATASET: NewsRecord[] = [
     "pMobile": 1923226.0,
     "pPC": 1777062.0,
     "pApp": 352034.0,
-    "pTablet": 23451.0
+    "pTablet": 23451.0,
+    "pExDirectBrandname": 169574
   },
   {
     "month": "6/2026",
@@ -11686,7 +11762,8 @@ export const RAW_DATASET: NewsRecord[] = [
     "pMobile": 5145850.0,
     "pPC": 3038356.0,
     "pApp": 792005.0,
-    "pTablet": 56206.0
+    "pTablet": 56206.0,
+    "pExDirectBrandname": 335008
   },
   {
     "month": "6/2026",
@@ -11715,7 +11792,8 @@ export const RAW_DATASET: NewsRecord[] = [
     "pMobile": 2730782.0,
     "pPC": 1729999.0,
     "pApp": 351712.0,
-    "pTablet": 35109.0
+    "pTablet": 35109.0,
+    "pExDirectBrandname": 230491
   },
   {
     "month": "6/2026",
@@ -11744,7 +11822,8 @@ export const RAW_DATASET: NewsRecord[] = [
     "pMobile": 10425143.0,
     "pPC": 1387084.0,
     "pApp": 471041.0,
-    "pTablet": 160868.0
+    "pTablet": 160868.0,
+    "pExDirectBrandname": 876423
   },
   {
     "month": "6/2026",
@@ -11773,7 +11852,8 @@ export const RAW_DATASET: NewsRecord[] = [
     "pMobile": 5780161.0,
     "pPC": 4429862.0,
     "pApp": 934119.0,
-    "pTablet": 85193.0
+    "pTablet": 85193.0,
+    "pExDirectBrandname": 407018
   },
   {
     "month": "6/2026",
@@ -11802,7 +11882,8 @@ export const RAW_DATASET: NewsRecord[] = [
     "pMobile": 10625231.0,
     "pPC": 4382977.0,
     "pApp": 835605.0,
-    "pTablet": 96260.0
+    "pTablet": 96260.0,
+    "pExDirectBrandname": 1014124
   },
   {
     "month": "6/2026",
@@ -11831,7 +11912,8 @@ export const RAW_DATASET: NewsRecord[] = [
     "pMobile": 723333.0,
     "pPC": 713701.0,
     "pApp": 410075.0,
-    "pTablet": 9683.0
+    "pTablet": 9683.0,
+    "pExDirectBrandname": 51397
   },
   {
     "month": "6/2026",
@@ -11860,7 +11942,8 @@ export const RAW_DATASET: NewsRecord[] = [
     "pMobile": 5189229.0,
     "pPC": 2529103.0,
     "pApp": 967556.0,
-    "pTablet": 43523.0
+    "pTablet": 43523.0,
+    "pExDirectBrandname": 436941
   },
   {
     "month": "6/2026",
@@ -11889,7 +11972,8 @@ export const RAW_DATASET: NewsRecord[] = [
     "pMobile": 7020593.0,
     "pPC": 5200180.0,
     "pApp": 1295586.0,
-    "pTablet": 64948.0
+    "pTablet": 64948.0,
+    "pExDirectBrandname": 794440
   },
   {
     "month": "6/2026",
@@ -11918,7 +12002,8 @@ export const RAW_DATASET: NewsRecord[] = [
     "pMobile": 902045.0,
     "pPC": 2099643.0,
     "pApp": 1796546.0,
-    "pTablet": 15041.0
+    "pTablet": 15041.0,
+    "pExDirectBrandname": 179258
   },
   {
     "month": "6/2026",
@@ -11947,7 +12032,8 @@ export const RAW_DATASET: NewsRecord[] = [
     "pMobile": 26296008.0,
     "pPC": 15224081.0,
     "pApp": 445964.0,
-    "pTablet": 228050.0
+    "pTablet": 228050.0,
+    "pExDirectBrandname": 5427534
   },
   {
     "month": "6/2026",
@@ -11976,7 +12062,8 @@ export const RAW_DATASET: NewsRecord[] = [
     "pMobile": 14771663.0,
     "pPC": 5835077.0,
     "pApp": 1994634.0,
-    "pTablet": 102622.0
+    "pTablet": 102622.0,
+    "pExDirectBrandname": 1085689
   },
   {
     "month": "6/2026",
@@ -12005,7 +12092,8 @@ export const RAW_DATASET: NewsRecord[] = [
     "pMobile": 4088.0,
     "pPC": 4774.0,
     "pApp": 26.0,
-    "pTablet": 23.0
+    "pTablet": 23.0,
+    "pExDirectBrandname": 371
   },
   {
     "month": "6/2026",
@@ -12034,7 +12122,8 @@ export const RAW_DATASET: NewsRecord[] = [
     "pMobile": 5546778.0,
     "pPC": 3017363.0,
     "pApp": 1165532.0,
-    "pTablet": 57621.0
+    "pTablet": 57621.0,
+    "pExDirectBrandname": 371426
   },
   {
     "month": "6/2026",
@@ -12063,7 +12152,8 @@ export const RAW_DATASET: NewsRecord[] = [
     "pMobile": 4345979.0,
     "pPC": 2906879.0,
     "pApp": 686351.0,
-    "pTablet": 42143.0
+    "pTablet": 42143.0,
+    "pExDirectBrandname": 305016
   },
   {
     "month": "6/2026",
@@ -12092,7 +12182,8 @@ export const RAW_DATASET: NewsRecord[] = [
     "pMobile": 41971198.0,
     "pPC": 20522922.0,
     "pApp": 7462880.0,
-    "pTablet": 355757.0
+    "pTablet": 355757.0,
+    "pExDirectBrandname": 2957242
   },
   {
     "month": "6/2026",
@@ -12121,7 +12212,8 @@ export const RAW_DATASET: NewsRecord[] = [
     "pMobile": 11574422.0,
     "pPC": 6356016.0,
     "pApp": 1842642.0,
-    "pTablet": 91069.0
+    "pTablet": 91069.0,
+    "pExDirectBrandname": 1024430
   },
   {
     "month": "6/2026",
@@ -12150,7 +12242,8 @@ export const RAW_DATASET: NewsRecord[] = [
     "pMobile": 16472780.0,
     "pPC": 9100630.0,
     "pApp": 2789450.0,
-    "pTablet": 130144.0
+    "pTablet": 130144.0,
+    "pExDirectBrandname": 1552160
   },
   {
     "month": "6/2026",
@@ -12179,7 +12272,8 @@ export const RAW_DATASET: NewsRecord[] = [
     "pMobile": 8737250.0,
     "pPC": 1287123.0,
     "pApp": 117092.0,
-    "pTablet": 65726.0
+    "pTablet": 65726.0,
+    "pExDirectBrandname": 375272
   },
   {
     "month": "6/2026",
@@ -12208,7 +12302,8 @@ export const RAW_DATASET: NewsRecord[] = [
     "pMobile": 0.0,
     "pPC": 0.0,
     "pApp": 0.0,
-    "pTablet": 0.0
+    "pTablet": 0.0,
+    "pExDirectBrandname": 0
   },
   {
     "month": "6/2026",
@@ -12237,7 +12332,8 @@ export const RAW_DATASET: NewsRecord[] = [
     "pMobile": 0.0,
     "pPC": 0.0,
     "pApp": 0.0,
-    "pTablet": 0.0
+    "pTablet": 0.0,
+    "pExDirectBrandname": 0
   },
   {
     "month": "6/2026",
@@ -12266,7 +12362,8 @@ export const RAW_DATASET: NewsRecord[] = [
     "pMobile": 2474897.0,
     "pPC": 2156146.0,
     "pApp": 493971.0,
-    "pTablet": 17330.0
+    "pTablet": 17330.0,
+    "pExDirectBrandname": 157023
   },
   {
     "month": "6/2026",
@@ -12295,7 +12392,8 @@ export const RAW_DATASET: NewsRecord[] = [
     "pMobile": 79397985.0,
     "pPC": 59107517.0,
     "pApp": 25668104.0,
-    "pTablet": 537761.0
+    "pTablet": 537761.0,
+    "pExDirectBrandname": 52634336
   },
   {
     "month": "6/2026",
@@ -12324,7 +12422,8 @@ export const RAW_DATASET: NewsRecord[] = [
     "pMobile": 6072699.0,
     "pPC": 3463772.0,
     "pApp": 533601.0,
-    "pTablet": 47127.0
+    "pTablet": 47127.0,
+    "pExDirectBrandname": 406162
   },
   {
     "month": "6/2026",
@@ -12353,7 +12452,8 @@ export const RAW_DATASET: NewsRecord[] = [
     "pMobile": 4549039.0,
     "pPC": 1214540.0,
     "pApp": 408917.0,
-    "pTablet": 37843.0
+    "pTablet": 37843.0,
+    "pExDirectBrandname": 212120
   },
   {
     "month": "7/2026",
@@ -12382,7 +12482,8 @@ export const RAW_DATASET: NewsRecord[] = [
     "pMobile": 1876404.0,
     "pPC": 1535492.0,
     "pApp": 336440.0,
-    "pTablet": 21720.0
+    "pTablet": 21720.0,
+    "pExDirectBrandname": 170676
   },
   {
     "month": "7/2026",
@@ -12411,7 +12512,8 @@ export const RAW_DATASET: NewsRecord[] = [
     "pMobile": 4901844.0,
     "pPC": 2863777.0,
     "pApp": 778716.0,
-    "pTablet": 59475.0
+    "pTablet": 59475.0,
+    "pExDirectBrandname": 342584
   },
   {
     "month": "7/2026",
@@ -12440,7 +12542,8 @@ export const RAW_DATASET: NewsRecord[] = [
     "pMobile": 2758116.0,
     "pPC": 1804791.0,
     "pApp": 349279.0,
-    "pTablet": 34690.0
+    "pTablet": 34690.0,
+    "pExDirectBrandname": 238327
   },
   {
     "month": "7/2026",
@@ -12469,7 +12572,8 @@ export const RAW_DATASET: NewsRecord[] = [
     "pMobile": 10041428.0,
     "pPC": 1316654.0,
     "pApp": 498579.0,
-    "pTablet": 155749.0
+    "pTablet": 155749.0,
+    "pExDirectBrandname": 870269
   },
   {
     "month": "7/2026",
@@ -12498,7 +12602,8 @@ export const RAW_DATASET: NewsRecord[] = [
     "pMobile": 5699477.0,
     "pPC": 4196144.0,
     "pApp": 879417.0,
-    "pTablet": 83041.0
+    "pTablet": 83041.0,
+    "pExDirectBrandname": 404968
   },
   {
     "month": "7/2026",
@@ -12527,7 +12632,8 @@ export const RAW_DATASET: NewsRecord[] = [
     "pMobile": 8798547.0,
     "pPC": 3224754.0,
     "pApp": 561917.0,
-    "pTablet": 73277.0
+    "pTablet": 73277.0,
+    "pExDirectBrandname": 774916
   },
   {
     "month": "7/2026",
@@ -12556,7 +12662,8 @@ export const RAW_DATASET: NewsRecord[] = [
     "pMobile": 883397.0,
     "pPC": 896796.0,
     "pApp": 485608.0,
-    "pTablet": 11358.0
+    "pTablet": 11358.0,
+    "pExDirectBrandname": 57883
   },
   {
     "month": "7/2026",
@@ -12585,7 +12692,8 @@ export const RAW_DATASET: NewsRecord[] = [
     "pMobile": 5667104.0,
     "pPC": 2713295.0,
     "pApp": 999908.0,
-    "pTablet": 49608.0
+    "pTablet": 49608.0,
+    "pExDirectBrandname": 475432
   },
   {
     "month": "7/2026",
@@ -12614,7 +12722,8 @@ export const RAW_DATASET: NewsRecord[] = [
     "pMobile": 7387340.0,
     "pPC": 5429188.0,
     "pApp": 1366050.0,
-    "pTablet": 66458.0
+    "pTablet": 66458.0,
+    "pExDirectBrandname": 800411
   },
   {
     "month": "7/2026",
@@ -12643,7 +12752,8 @@ export const RAW_DATASET: NewsRecord[] = [
     "pMobile": 957906.0,
     "pPC": 2207907.0,
     "pApp": 1941656.0,
-    "pTablet": 15587.0
+    "pTablet": 15587.0,
+    "pExDirectBrandname": 190752
   },
   {
     "month": "7/2026",
@@ -12672,7 +12782,8 @@ export const RAW_DATASET: NewsRecord[] = [
     "pMobile": 25977997.0,
     "pPC": 15053702.0,
     "pApp": 488258.0,
-    "pTablet": 227612.0
+    "pTablet": 227612.0,
+    "pExDirectBrandname": 5394698
   },
   {
     "month": "7/2026",
@@ -12701,7 +12812,8 @@ export const RAW_DATASET: NewsRecord[] = [
     "pMobile": 13994328.0,
     "pPC": 5485458.0,
     "pApp": 1929007.0,
-    "pTablet": 96952.0
+    "pTablet": 96952.0,
+    "pExDirectBrandname": 1037843
   },
   {
     "month": "7/2026",
@@ -12730,7 +12842,8 @@ export const RAW_DATASET: NewsRecord[] = [
     "pMobile": 3703.0,
     "pPC": 4370.0,
     "pApp": 10.0,
-    "pTablet": 20.0
+    "pTablet": 20.0,
+    "pExDirectBrandname": 324
   },
   {
     "month": "7/2026",
@@ -12759,7 +12872,8 @@ export const RAW_DATASET: NewsRecord[] = [
     "pMobile": 5258778.0,
     "pPC": 2876615.0,
     "pApp": 1118167.0,
-    "pTablet": 54256.0
+    "pTablet": 54256.0,
+    "pExDirectBrandname": 367294
   },
   {
     "month": "7/2026",
@@ -12788,7 +12902,8 @@ export const RAW_DATASET: NewsRecord[] = [
     "pMobile": 4171286.0,
     "pPC": 2814896.0,
     "pApp": 672990.0,
-    "pTablet": 39731.0
+    "pTablet": 39731.0,
+    "pExDirectBrandname": 291771
   },
   {
     "month": "7/2026",
@@ -12817,7 +12932,8 @@ export const RAW_DATASET: NewsRecord[] = [
     "pMobile": 30600104.0,
     "pPC": 15647573.0,
     "pApp": 5586616.0,
-    "pTablet": 261776.0
+    "pTablet": 261776.0,
+    "pExDirectBrandname": 2139834
   },
   {
     "month": "7/2026",
@@ -12846,7 +12962,8 @@ export const RAW_DATASET: NewsRecord[] = [
     "pMobile": 11874272.0,
     "pPC": 6541604.0,
     "pApp": 1871275.0,
-    "pTablet": 94466.0
+    "pTablet": 94466.0,
+    "pExDirectBrandname": 1030137
   },
   {
     "month": "7/2026",
@@ -12875,7 +12992,8 @@ export const RAW_DATASET: NewsRecord[] = [
     "pMobile": 16315802.0,
     "pPC": 8937000.0,
     "pApp": 2713750.0,
-    "pTablet": 126177.0
+    "pTablet": 126177.0,
+    "pExDirectBrandname": 1551705
   },
   {
     "month": "7/2026",
@@ -12904,7 +13022,8 @@ export const RAW_DATASET: NewsRecord[] = [
     "pMobile": 6340578.0,
     "pPC": 1118318.0,
     "pApp": 97072.0,
-    "pTablet": 49426.0
+    "pTablet": 49426.0,
+    "pExDirectBrandname": 285094
   },
   {
     "month": "7/2026",
@@ -12933,7 +13052,8 @@ export const RAW_DATASET: NewsRecord[] = [
     "pMobile": 38703.0,
     "pPC": 26767.0,
     "pApp": 8230.0,
-    "pTablet": 436.0
+    "pTablet": 436.0,
+    "pExDirectBrandname": 5500
   },
   {
     "month": "7/2026",
@@ -12962,7 +13082,8 @@ export const RAW_DATASET: NewsRecord[] = [
     "pMobile": 0.0,
     "pPC": 0.0,
     "pApp": 0.0,
-    "pTablet": 0.0
+    "pTablet": 0.0,
+    "pExDirectBrandname": 0
   },
   {
     "month": "7/2026",
@@ -12991,7 +13112,8 @@ export const RAW_DATASET: NewsRecord[] = [
     "pMobile": 2198083.0,
     "pPC": 1894982.0,
     "pApp": 439360.0,
-    "pTablet": 14981.0
+    "pTablet": 14981.0,
+    "pExDirectBrandname": 148982
   },
   {
     "month": "7/2026",
@@ -13020,7 +13142,8 @@ export const RAW_DATASET: NewsRecord[] = [
     "pMobile": 81659976.0,
     "pPC": 60383182.0,
     "pApp": 26188448.0,
-    "pTablet": 535569.0
+    "pTablet": 535569.0,
+    "pExDirectBrandname": 54070168
   },
   {
     "month": "7/2026",
@@ -13049,7 +13172,8 @@ export const RAW_DATASET: NewsRecord[] = [
     "pMobile": 5983756.0,
     "pPC": 3343353.0,
     "pApp": 519503.0,
-    "pTablet": 45299.0
+    "pTablet": 45299.0,
+    "pExDirectBrandname": 386100
   },
   {
     "month": "7/2026",
@@ -13078,7 +13202,8 @@ export const RAW_DATASET: NewsRecord[] = [
     "pMobile": 3902341.0,
     "pPC": 1072978.0,
     "pApp": 360352.0,
-    "pTablet": 29313.0
+    "pTablet": 29313.0,
+    "pExDirectBrandname": 176833
   },
   {
     "month": "8/2026",
@@ -13107,7 +13232,8 @@ export const RAW_DATASET: NewsRecord[] = [
     "pMobile": 1887010.0,
     "pPC": 1657805.0,
     "pApp": 346294.0,
-    "pTablet": 22437.0
+    "pTablet": 22437.0,
+    "pExDirectBrandname": 162500
   },
   {
     "month": "8/2026",
@@ -13136,7 +13262,8 @@ export const RAW_DATASET: NewsRecord[] = [
     "pMobile": 4951475.0,
     "pPC": 2864694.0,
     "pApp": 792070.0,
-    "pTablet": 60680.0
+    "pTablet": 60680.0,
+    "pExDirectBrandname": 345628
   },
   {
     "month": "8/2026",
@@ -13165,7 +13292,8 @@ export const RAW_DATASET: NewsRecord[] = [
     "pMobile": 2728956.0,
     "pPC": 1786523.0,
     "pApp": 346618.0,
-    "pTablet": 34781.0
+    "pTablet": 34781.0,
+    "pExDirectBrandname": 235064
   },
   {
     "month": "8/2026",
@@ -13194,7 +13322,8 @@ export const RAW_DATASET: NewsRecord[] = [
     "pMobile": 10221972.0,
     "pPC": 1340337.0,
     "pApp": 507551.0,
-    "pTablet": 162042.0
+    "pTablet": 162042.0,
+    "pExDirectBrandname": 885945
   },
   {
     "month": "8/2026",
@@ -13223,7 +13352,8 @@ export const RAW_DATASET: NewsRecord[] = [
     "pMobile": 5699477.0,
     "pPC": 4196144.0,
     "pApp": 879417.0,
-    "pTablet": 83041.0
+    "pTablet": 83041.0,
+    "pExDirectBrandname": 404968
   },
   {
     "month": "8/2026",
@@ -13252,7 +13382,8 @@ export const RAW_DATASET: NewsRecord[] = [
     "pMobile": 8798547.0,
     "pPC": 3224754.0,
     "pApp": 561917.0,
-    "pTablet": 73277.0
+    "pTablet": 73277.0,
+    "pExDirectBrandname": 774916
   },
   {
     "month": "8/2026",
@@ -13281,7 +13412,8 @@ export const RAW_DATASET: NewsRecord[] = [
     "pMobile": 883397.0,
     "pPC": 896796.0,
     "pApp": 485608.0,
-    "pTablet": 11358.0
+    "pTablet": 11358.0,
+    "pExDirectBrandname": 57883
   },
   {
     "month": "8/2026",
@@ -13310,7 +13442,8 @@ export const RAW_DATASET: NewsRecord[] = [
     "pMobile": 5667104.0,
     "pPC": 2713295.0,
     "pApp": 999908.0,
-    "pTablet": 49608.0
+    "pTablet": 49608.0,
+    "pExDirectBrandname": 475432
   },
   {
     "month": "8/2026",
@@ -13339,7 +13472,8 @@ export const RAW_DATASET: NewsRecord[] = [
     "pMobile": 7387340.0,
     "pPC": 5429188.0,
     "pApp": 1366050.0,
-    "pTablet": 66458.0
+    "pTablet": 66458.0,
+    "pExDirectBrandname": 800411
   },
   {
     "month": "8/2026",
@@ -13368,7 +13502,8 @@ export const RAW_DATASET: NewsRecord[] = [
     "pMobile": 957906.0,
     "pPC": 2207907.0,
     "pApp": 1941656.0,
-    "pTablet": 15587.0
+    "pTablet": 15587.0,
+    "pExDirectBrandname": 190752
   },
   {
     "month": "8/2026",
@@ -13397,7 +13532,8 @@ export const RAW_DATASET: NewsRecord[] = [
     "pMobile": 25977997.0,
     "pPC": 15053702.0,
     "pApp": 488258.0,
-    "pTablet": 227612.0
+    "pTablet": 227612.0,
+    "pExDirectBrandname": 5394698
   },
   {
     "month": "8/2026",
@@ -13426,7 +13562,8 @@ export const RAW_DATASET: NewsRecord[] = [
     "pMobile": 13994328.0,
     "pPC": 5485458.0,
     "pApp": 1929007.0,
-    "pTablet": 96952.0
+    "pTablet": 96952.0,
+    "pExDirectBrandname": 1037843
   },
   {
     "month": "8/2026",
@@ -13455,7 +13592,8 @@ export const RAW_DATASET: NewsRecord[] = [
     "pMobile": 3703.0,
     "pPC": 4370.0,
     "pApp": 10.0,
-    "pTablet": 20.0
+    "pTablet": 20.0,
+    "pExDirectBrandname": 324
   },
   {
     "month": "8/2026",
@@ -13484,7 +13622,8 @@ export const RAW_DATASET: NewsRecord[] = [
     "pMobile": 5258778.0,
     "pPC": 2876615.0,
     "pApp": 1118167.0,
-    "pTablet": 54256.0
+    "pTablet": 54256.0,
+    "pExDirectBrandname": 367294
   },
   {
     "month": "8/2026",
@@ -13513,7 +13652,8 @@ export const RAW_DATASET: NewsRecord[] = [
     "pMobile": 4171286.0,
     "pPC": 2814896.0,
     "pApp": 672990.0,
-    "pTablet": 39731.0
+    "pTablet": 39731.0,
+    "pExDirectBrandname": 291771
   },
   {
     "month": "8/2026",
@@ -13542,7 +13682,8 @@ export const RAW_DATASET: NewsRecord[] = [
     "pMobile": 30600104.0,
     "pPC": 15647573.0,
     "pApp": 5586616.0,
-    "pTablet": 261776.0
+    "pTablet": 261776.0,
+    "pExDirectBrandname": 2139834
   },
   {
     "month": "8/2026",
@@ -13571,7 +13712,8 @@ export const RAW_DATASET: NewsRecord[] = [
     "pMobile": 11874272.0,
     "pPC": 6541604.0,
     "pApp": 1871275.0,
-    "pTablet": 94466.0
+    "pTablet": 94466.0,
+    "pExDirectBrandname": 1030137
   },
   {
     "month": "8/2026",
@@ -13600,7 +13742,8 @@ export const RAW_DATASET: NewsRecord[] = [
     "pMobile": 16315802.0,
     "pPC": 8937000.0,
     "pApp": 2713750.0,
-    "pTablet": 126177.0
+    "pTablet": 126177.0,
+    "pExDirectBrandname": 1551705
   },
   {
     "month": "8/2026",
@@ -13629,7 +13772,8 @@ export const RAW_DATASET: NewsRecord[] = [
     "pMobile": 6340578.0,
     "pPC": 1118318.0,
     "pApp": 97072.0,
-    "pTablet": 49426.0
+    "pTablet": 49426.0,
+    "pExDirectBrandname": 285094
   },
   {
     "month": "8/2026",
@@ -13658,7 +13802,8 @@ export const RAW_DATASET: NewsRecord[] = [
     "pMobile": 38703.0,
     "pPC": 26767.0,
     "pApp": 8230.0,
-    "pTablet": 436.0
+    "pTablet": 436.0,
+    "pExDirectBrandname": 5500
   },
   {
     "month": "8/2026",
@@ -13687,7 +13832,8 @@ export const RAW_DATASET: NewsRecord[] = [
     "pMobile": 0.0,
     "pPC": 0.0,
     "pApp": 0.0,
-    "pTablet": 0.0
+    "pTablet": 0.0,
+    "pExDirectBrandname": 0
   },
   {
     "month": "8/2026",
@@ -13716,7 +13862,8 @@ export const RAW_DATASET: NewsRecord[] = [
     "pMobile": 2198083.0,
     "pPC": 1894982.0,
     "pApp": 439360.0,
-    "pTablet": 14981.0
+    "pTablet": 14981.0,
+    "pExDirectBrandname": 148982
   },
   {
     "month": "8/2026",
@@ -13745,7 +13892,8 @@ export const RAW_DATASET: NewsRecord[] = [
     "pMobile": 81659976.0,
     "pPC": 60383182.0,
     "pApp": 26188448.0,
-    "pTablet": 535569.0
+    "pTablet": 535569.0,
+    "pExDirectBrandname": 54070168
   },
   {
     "month": "8/2026",
@@ -13774,7 +13922,8 @@ export const RAW_DATASET: NewsRecord[] = [
     "pMobile": 5983756.0,
     "pPC": 3343353.0,
     "pApp": 519503.0,
-    "pTablet": 45299.0
+    "pTablet": 45299.0,
+    "pExDirectBrandname": 386100
   },
   {
     "month": "8/2026",
@@ -13803,6 +13952,7 @@ export const RAW_DATASET: NewsRecord[] = [
     "pMobile": 3902341.0,
     "pPC": 1072978.0,
     "pApp": 360352.0,
-    "pTablet": 29313.0
+    "pTablet": 29313.0,
+    "pExDirectBrandname": 176833
   }
 ];

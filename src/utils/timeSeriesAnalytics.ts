@@ -79,12 +79,28 @@ export function getMonthlyRecordsForScope(
   scope: string, // "ALL_FOLDERS_AGG", "ALL_VNE_AGG", "1000000", or folder name/id
   dataset: NewsRecord[] = RAW_DATASET
 ): MonthlyDataPoint[] {
-  const months2026 = ['1/2026', '2/2026', '3/2026', '4/2026', '5/2026', '6/2026', '7/2026', '8/2026'];
-  const months2025 = [
-    '1/2025', '2/2025', '3/2025', '4/2025', '5/2025', '6/2025',
-    '7/2025', '8/2025', '9/2025', '10/2025', '11/2025', '12/2025'
-  ];
-  const allMonths = [...months2025, ...months2026];
+  // Extract all distinct months present in the dataset and sort chronologically
+  const monthSet = new Set<string>();
+  dataset.forEach((r) => {
+    if (r.month && r.month.includes('/')) {
+      monthSet.add(r.month.trim());
+    }
+  });
+
+  const allMonths = Array.from(monthSet).sort((a, b) => {
+    const [m1, y1] = a.split('/').map(Number);
+    const [m2, y2] = b.split('/').map(Number);
+    return y1 !== y2 ? y1 - y2 : m1 - m2;
+  });
+
+  // Fallback if dataset is somehow empty
+  if (allMonths.length === 0) {
+    allMonths.push(
+      '1/2025', '2/2025', '3/2025', '4/2025', '5/2025', '6/2025',
+      '7/2025', '8/2025', '9/2025', '10/2025', '11/2025', '12/2025',
+      '1/2026', '2/2026', '3/2026', '4/2026', '5/2026', '6/2026', '7/2026', '8/2026'
+    );
+  }
 
   const results: MonthlyDataPoint[] = [];
 
@@ -145,7 +161,16 @@ function sumRecords(records: NewsRecord[], month: string, folderId: string, fold
     const sVal = r.sessions !== undefined ? r.sessions : Math.round((r.pageviews || 0) / 2.38);
     init.sessions = (init.sessions || 0) + sVal;
     init.pExDirect += r.pExDirect || 0;
+    if (r.pExDirectBrandname !== undefined && r.pExDirectBrandname !== null && r.pExDirectBrandname > 0) {
+      init.pExDirectBrandname = (init.pExDirectBrandname || 0) + r.pExDirectBrandname;
+    }
     init.pExGoogle += r.pExGoogle || 0;
+    if (r.pExGoogleSearch !== undefined && r.pExGoogleSearch !== null && r.pExGoogleSearch > 0) {
+      init.pExGoogleSearch = (init.pExGoogleSearch || 0) + r.pExGoogleSearch;
+    }
+    if (r.pExGoogleDiscover !== undefined && r.pExGoogleDiscover !== null && r.pExGoogleDiscover > 0) {
+      init.pExGoogleDiscover = (init.pExGoogleDiscover || 0) + r.pExGoogleDiscover;
+    }
     init.pExSocial += r.pExSocial || 0;
     init.pInHome += r.pInHome || 0;
     init.pInFolder += r.pInFolder || 0;
@@ -179,7 +204,10 @@ function createEmptyRecord(month: string, folderId: string, folderName: string):
     pageviewsAds: 0,
     sessions: 0,
     pExDirect: 0,
+    pExDirectBrandname: undefined,
     pExGoogle: 0,
+    pExGoogleSearch: undefined,
+    pExGoogleDiscover: undefined,
     pExSocial: 0,
     pInHome: 0,
     pInFolder: 0,

@@ -12,7 +12,10 @@ export interface NewsRecord {
   pageviewsAds: number;   // ($)
   sessions?: number;      // Lượt truy cập / Phiên (Cột Z)
   pExDirect: number;
+  pExDirectBrandname?: number; // P- Ex-Direct | Brandname (Chỉ số tham khảo cho P- Ex-Direct)
   pExGoogle: number;
+  pExGoogleSearch?: number;   // P- Ex-Google | Search (Cấu phần tham khảo tạo nên P- Ex-Google)
+  pExGoogleDiscover?: number; // P- Ex-Google | Discover (Cấu phần tham khảo tạo nên P- Ex-Google)
   pExSocial: number;
   pInHome: number;
   pInFolder: number;

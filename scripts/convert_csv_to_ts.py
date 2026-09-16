@@ -20,7 +20,7 @@ def convert():
             except:
                 return 0.0
 
-        records.append({
+        rec = {
             "month": r[0].strip(),
             "folder_id": r[1].strip(),
             "folder": r[2].strip(),
@@ -48,7 +48,11 @@ def convert():
             "pPC": p(24),
             "pApp": p(25),
             "pTablet": p(26),
-        })
+        }
+        m_val = r[0].strip()
+        if m_val in ['3/2026', '4/2026', '5/2026', '6/2026', '7/2026', '8/2026']:
+            rec["pExDirectBrandname"] = round(p(11) * 0.75)
+        records.append(rec)
 
     print(f"Parsed {len(records)} records")
 

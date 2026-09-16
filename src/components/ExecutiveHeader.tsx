@@ -53,11 +53,11 @@ export const ExecutiveHeader: React.FC<Props> = ({
 
   // Available months list for selection (in reverse chronological order)
   const availableMonths = useMemo(() => {
-    return [...months2026].reverse().map((d) => ({
+    return [...monthlyData].reverse().map((d) => ({
       value: d.month,
       label: `Tháng ${d.month}`,
     }));
-  }, [months2026]);
+  }, [monthlyData]);
 
   // Split folders into VnExpress departments and Specialized standalone publications (Ngôi Sao, English)
   const { vnExpressFolders, specialFolders } = useMemo(() => {
