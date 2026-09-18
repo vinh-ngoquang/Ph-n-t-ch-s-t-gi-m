@@ -10,7 +10,7 @@ import {
   CartesianGrid,
   ReferenceLine,
 } from 'recharts';
-import { MonthlyDataPoint, analyzeDimensionSeries, calculateMedian } from '../../utils/timeSeriesAnalytics';
+import { MonthlyDataPoint, analyzeDimensionSeries, analyzeDimensionSeriesYoY, calculateMedian } from '../../utils/timeSeriesAnalytics';
 import { formatNumber, formatPercent, formatDelta } from '../../utils/formatters';
 import {
   LineChart as LineChartIcon,
@@ -33,6 +33,7 @@ interface Props {
   selectedMonth?: string;
   currentScope?: string;
   folderOptions?: { id: string; name: string }[];
+  isYoYMode?: boolean;
 }
 
 export const TrafficSourcesView: React.FC<Props> = ({
@@ -40,6 +41,7 @@ export const TrafficSourcesView: React.FC<Props> = ({
   selectedMonth,
   currentScope,
   folderOptions,
+  isYoYMode,
 }) => {
   const sourcesConfig: {
     key: keyof NewsRecord;
@@ -96,26 +98,23 @@ export const TrafficSourcesView: React.FC<Props> = ({
   const isBrandnameAllowed = isSearchDiscoverAllowed;
 
   const summary = useMemo(() => {
+    if (isYoYMode) {
+      return analyzeDimensionSeriesYoY(monthlyData, sourcesConfig, 'pageviews');
+    }
     return analyzeDimensionSeries(monthlyData, sourcesConfig, 'pageviews', selectedMonth);
-  }, [monthlyData, selectedMonth]);
+  }, [monthlyData, selectedMonth, isYoYMode]);
 
   // Google Details: Bóc tách Search & Discover cấu thành nên P- Ex-Google (Dữ liệu tham khảo)
   const googleDetails = useMemo(() => {
     if (!isSearchDiscoverAllowed) return null;
 
     const months2026 = monthlyData.filter((d) => d.year === 2026);
+    const months2025 = monthlyData.filter((d) => d.year === 2025);
     const targetIdx = selectedMonth
       ? months2026.findIndex((d) => d.month === selectedMonth)
       : months2026.length - 1;
     const safeTargetIdx = targetIdx >= 0 ? targetIdx : months2026.length - 1;
     const curPoint = months2026[safeTargetIdx] || months2026[months2026.length - 1];
-
-    const curGoogleTotal = curPoint?.record.pExGoogle || 0;
-
-    // Kiểm tra xem dữ liệu đồng bộ đã có 2 cột này chưa
-    const hasRawSearch = curPoint?.record.pExGoogleSearch !== undefined && curPoint?.record.pExGoogleSearch > 0;
-    const hasRawDiscover = curPoint?.record.pExGoogleDiscover !== undefined && curPoint?.record.pExGoogleDiscover > 0;
-    const isFromSheet = hasRawSearch || hasRawDiscover;
 
     const getSearchVal = (rec: NewsRecord) => {
       if (rec.pExGoogleSearch !== undefined && rec.pExGoogleSearch > 0) return rec.pExGoogleSearch;
@@ -127,14 +126,36 @@ export const TrafficSourcesView: React.FC<Props> = ({
       return Math.round((rec.pExGoogle || 0) * 0.38);
     };
 
-    const curSearch = getSearchVal(curPoint.record);
-    const curDiscover = getDiscoverVal(curPoint.record);
+    let curGoogleTotal = 0;
+    let curSearch = 0;
+    let curDiscover = 0;
+    let medSearch = 0;
+    let medDiscover = 0;
 
-    const searchSeries = months2026.map((d) => getSearchVal(d.record));
-    const discoverSeries = months2026.map((d) => getDiscoverVal(d.record));
+    if (isYoYMode) {
+      months2026.forEach((d) => {
+        curGoogleTotal += d.record.pExGoogle || 0;
+        curSearch += getSearchVal(d.record);
+        curDiscover += getDiscoverVal(d.record);
+      });
+      months2025.forEach((d) => {
+        medSearch += getSearchVal(d.record);
+        medDiscover += getDiscoverVal(d.record);
+      });
+    } else {
+      curGoogleTotal = curPoint?.record.pExGoogle || 0;
+      curSearch = getSearchVal(curPoint.record);
+      curDiscover = getDiscoverVal(curPoint.record);
 
-    const medSearch = calculateMedian(searchSeries);
-    const medDiscover = calculateMedian(discoverSeries);
+      const searchSeries = months2026.map((d) => getSearchVal(d.record));
+      const discoverSeries = months2026.map((d) => getDiscoverVal(d.record));
+      medSearch = calculateMedian(searchSeries);
+      medDiscover = calculateMedian(discoverSeries);
+    }
+
+    const hasRawSearch = curPoint?.record.pExGoogleSearch !== undefined && curPoint?.record.pExGoogleSearch > 0;
+    const hasRawDiscover = curPoint?.record.pExGoogleDiscover !== undefined && curPoint?.record.pExGoogleDiscover > 0;
+    const isFromSheet = hasRawSearch || hasRawDiscover;
 
     const deltaSearch = curSearch - medSearch;
     const pctSearch = medSearch > 0 ? (deltaSearch / medSearch) * 100 : 0;
@@ -142,14 +163,16 @@ export const TrafficSourcesView: React.FC<Props> = ({
     const deltaDiscover = curDiscover - medDiscover;
     const pctDiscover = medDiscover > 0 ? (deltaDiscover / medDiscover) * 100 : 0;
 
-    const curMonthLabel = curPoint?.shortLabel || '';
+    const curMonthLabel = isYoYMode ? 'Tổng 2026' : (curPoint?.shortLabel || '');
     const totalDeltaGoogle = (curSearch + curDiscover) - (medSearch + medDiscover);
     const totalPctDeltaGoogle = (medSearch + medDiscover) > 0 ? (totalDeltaGoogle / (medSearch + medDiscover)) * 100 : 0;
 
     const primaryDriver: 'search' | 'discover' = deltaSearch >= deltaDiscover ? 'search' : 'discover';
     const primaryDriverLabel = primaryDriver === 'search' ? 'Google Search' : 'Google Discover';
 
-    const trendInsightText = `Xu hướng tham khảo trong tháng ${curMonthLabel}: Tìm kiếm chủ động (Search) đạt ${formatNumber(curSearch)} PV (${formatDelta(deltaSearch)} so với chuẩn), trong khi Đề xuất di động (Discover) đạt ${formatNumber(curDiscover)} PV (${formatDelta(deltaDiscover)} so với chuẩn).`;
+    const trendInsightText = isYoYMode
+      ? `Tổng lũy kế 2026 so với Cùng kỳ 2025: Tìm kiếm chủ động (Search) đạt ${formatNumber(curSearch)} PV (${formatDelta(deltaSearch)} so với cùng kỳ), Đề xuất di động (Discover) đạt ${formatNumber(curDiscover)} PV (${formatDelta(deltaDiscover)} so với cùng kỳ).`
+      : `Xu hướng tham khảo trong tháng ${curMonthLabel}: Tìm kiếm chủ động (Search) đạt ${formatNumber(curSearch)} PV (${formatDelta(deltaSearch)} so với chuẩn), trong khi Đề xuất di động (Discover) đạt ${formatNumber(curDiscover)} PV (${formatDelta(deltaDiscover)} so với chuẩn).`;
 
     const trendSearchDiscover = months2026.map((d) => {
       const sVal = getSearchVal(d.record);
@@ -184,7 +207,7 @@ export const TrafficSourcesView: React.FC<Props> = ({
       trendInsightText,
       trendSearchDiscover,
     };
-  }, [monthlyData, selectedMonth]);
+  }, [monthlyData, selectedMonth, isYoYMode, isSearchDiscoverAllowed]);
 
   // Direct Details: Bóc tách Brandname (Dữ liệu tham khảo mức độ tìm kiếm chủ động thương hiệu VnExpress, từ T3/2026)
   const directDetails = useMemo(() => {
@@ -367,11 +390,15 @@ export const TrafficSourcesView: React.FC<Props> = ({
         <div>
           <div className="flex items-center gap-2 flex-wrap sm:flex-nowrap">
             <h2 className="text-base font-bold text-slate-900 tracking-tight">
-              Động thái & Nguồn Sụt giảm Pageview theo Tháng
+              {isYoYMode
+                ? 'Động thái & Nguồn Sụt giảm Pageview (Tổng 2026 vs Cùng kỳ 2025)'
+                : 'Động thái & Nguồn Sụt giảm Pageview theo Tháng'}
             </h2>
           </div>
           <p className="text-xs text-slate-500 mt-0.5">
-            Bóc tách từng nguồn lưu lượng so với mốc Trung vị chuẩn chu kỳ năm 2026
+            {isYoYMode
+              ? 'Bóc tách từng nguồn lưu lượng đối chiếu Tổng lũy kế 2026 với Cùng kỳ năm 2025'
+              : 'Bóc tách từng nguồn lưu lượng so với mốc Trung vị chuẩn chu kỳ năm 2026'}
           </p>
         </div>
 
@@ -510,8 +537,8 @@ export const TrafficSourcesView: React.FC<Props> = ({
                 <span className="text-xs font-semibold">({formatPercent(deepestDrop.pctChangeMedian)})</span>
               </div>
               <div className="text-xs text-slate-500 font-mono">
-                {selectedMonth ? `Tháng ${selectedMonth}` : 'Tháng này'}: <strong className="text-slate-700">{formatNumber(deepestDrop.t8)}</strong>
-                {'  '}| Trung vị: <strong className="text-slate-700">{formatNumber(deepestDrop.median)}</strong>
+                {isYoYMode ? 'Tổng 2026' : (selectedMonth ? `Tháng ${selectedMonth}` : 'Tháng này')}: <strong className="text-slate-700">{formatNumber(deepestDrop.t8)}</strong>
+                {'  '}| {isYoYMode ? 'Cùng kỳ 2025' : 'Trung vị'}: <strong className="text-slate-700">{formatNumber(deepestDrop.median)}</strong>
               </div>
             </div>
           ) : (
@@ -555,13 +582,15 @@ export const TrafficSourcesView: React.FC<Props> = ({
                 <span className="text-xs font-semibold">({formatPercent(bestGain.pctChangeMedian)})</span>
               </div>
               <div className="text-xs text-slate-500 font-mono">
-                Tháng này: <strong className="text-slate-700">{formatNumber(bestGain.t8)}</strong>
-                {'  '}| Trung vị: <strong className="text-slate-700">{formatNumber(bestGain.median)}</strong>
+                {isYoYMode ? 'Tổng 2026' : 'Tháng này'}: <strong className="text-slate-700">{formatNumber(bestGain.t8)}</strong>
+                {'  '}| {isYoYMode ? 'Cùng kỳ 2025' : 'Trung vị'}: <strong className="text-slate-700">{formatNumber(bestGain.median)}</strong>
               </div>
             </div>
           ) : (
             <div className="text-xs text-slate-400 mt-2 italic">
-              Chưa có nguồn nào vượt mốc trung vị trong tháng hiện tại.
+              {isYoYMode
+                ? 'Chưa có nguồn nào vượt cùng kỳ năm 2025.'
+                : 'Chưa có nguồn nào vượt mốc trung vị trong tháng hiện tại.'}
             </div>
           )}
         </div>
@@ -622,12 +651,20 @@ export const TrafficSourcesView: React.FC<Props> = ({
           <thead className="bg-slate-50 text-[11px] font-semibold text-slate-500 border-b border-slate-200">
             <tr>
               <th className="py-3 px-4 font-sans">Kênh Nguồn (Channel)</th>
-              <th className="py-3 px-4 text-right font-sans">Tỷ Trọng Tháng Này</th>
               <th className="py-3 px-4 text-right font-sans">
-                {selectedMonth ? `Tháng ${selectedMonth}` : 'Tháng Này (Tháng 8)'}
+                {isYoYMode ? 'Tỷ Trọng Tổng 2026' : 'Tỷ Trọng Tháng Này'}
               </th>
-              <th className="py-3 px-4 text-right font-sans">Mốc Trung Vị (2026)</th>
-              <th className="py-3 px-4 text-right font-sans min-w-[200px]">Lệch vs. Trung Vị</th>
+              <th className="py-3 px-4 text-right font-sans">
+                {isYoYMode
+                  ? 'Tổng 2026'
+                  : (selectedMonth ? `Tháng ${selectedMonth}` : 'Tháng Này (Tháng 8)')}
+              </th>
+              <th className="py-3 px-4 text-right font-sans">
+                {isYoYMode ? 'Cùng Kỳ 2025' : 'Mốc Trung Vị (2026)'}
+              </th>
+              <th className="py-3 px-4 text-right font-sans min-w-[200px]">
+                {isYoYMode ? 'Lệch vs. Cùng Kỳ' : 'Lệch vs. Trung Vị'}
+              </th>
             </tr>
           </thead>
           <tbody className="divide-y divide-slate-100">
@@ -733,7 +770,9 @@ export const TrafficSourcesView: React.FC<Props> = ({
                     {/* Median Benchmark */}
                     <td className="py-3.5 px-4 text-right font-mono">
                       <div className="font-semibold text-slate-700">{formatNumber(row.median)}</div>
-                      <div className="text-[10px] text-slate-400 font-sans">Chuẩn 2026</div>
+                      <div className="text-[10px] text-slate-400 font-sans">
+                        {isYoYMode ? 'Cùng kỳ 2025' : 'Chuẩn 2026'}
+                      </div>
                     </td>
 
                     {/* Deviation vs Median + Sleek Progress Bar */}
@@ -774,7 +813,9 @@ export const TrafficSourcesView: React.FC<Props> = ({
                         </td>
                         <td className="py-2.5 px-4 text-right font-mono">
                           <div className="font-semibold text-slate-700">{formatNumber(googleDetails.medSearch)}</div>
-                          <div className="text-[10px] text-slate-400 font-sans">Chuẩn 2026</div>
+                          <div className="text-[10px] text-slate-400 font-sans">
+                            {isYoYMode ? 'Cùng kỳ 2025' : 'Chuẩn 2026'}
+                          </div>
                         </td>
                         <td className="py-2.5 px-4 text-right font-mono">
                           <div className={`font-bold ${googleDetails.deltaSearch >= 0 ? 'text-emerald-600' : 'text-rose-600'}`}>
@@ -800,7 +841,9 @@ export const TrafficSourcesView: React.FC<Props> = ({
                         </td>
                         <td className="py-2.5 px-4 text-right font-mono">
                           <div className="font-semibold text-slate-700">{formatNumber(googleDetails.medDiscover)}</div>
-                          <div className="text-[10px] text-slate-400 font-sans">Chuẩn 2026</div>
+                          <div className="text-[10px] text-slate-400 font-sans">
+                            {isYoYMode ? 'Cùng kỳ 2025' : 'Chuẩn 2026'}
+                          </div>
                         </td>
                         <td className="py-2.5 px-4 text-right font-mono">
                           <div className={`font-bold ${googleDetails.deltaDiscover >= 0 ? 'text-emerald-600' : 'text-rose-600'}`}>
@@ -849,8 +892,8 @@ export const TrafficSourcesView: React.FC<Props> = ({
                         </td>
                         <td className="py-2.5 px-4 text-right font-mono">
                           <div className="font-semibold text-slate-700">{formatNumber(directDetails.medBrandname)}</div>
-                          <div className="text-[10px] text-slate-400 font-sans" title="Mốc chuẩn trung vị tính trên các tháng thực tế từ T3/2026">
-                            Chuẩn 2026 (từ T3)
+                          <div className="text-[10px] text-slate-400 font-sans" title="Mốc chuẩn so sánh">
+                            {isYoYMode ? 'Cùng kỳ 2025' : 'Chuẩn 2026 (từ T3)'}
                           </div>
                         </td>
                         <td className="py-2.5 px-4 text-right font-mono">
@@ -897,7 +940,9 @@ export const TrafficSourcesView: React.FC<Props> = ({
               </td>
               <td className="py-3.5 px-4 text-right font-mono">
                 <div className="font-bold text-xs text-slate-900">{formatNumber(totalMed)}</div>
-                <div className="text-[10px] text-slate-400 font-sans">Chuẩn 2026</div>
+                <div className="text-[10px] text-slate-400 font-sans">
+                  {isYoYMode ? 'Cùng kỳ 2025' : 'Chuẩn 2026'}
+                </div>
               </td>
               <td className="py-3.5 px-4 text-right font-mono">
                 <div

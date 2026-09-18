@@ -9,7 +9,7 @@ import {
   Legend,
   CartesianGrid,
 } from 'recharts';
-import { MonthlyDataPoint, analyzeDimensionSeries } from '../../utils/timeSeriesAnalytics';
+import { MonthlyDataPoint, analyzeDimensionSeries, analyzeDimensionSeriesYoY } from '../../utils/timeSeriesAnalytics';
 import { formatNumber, formatPercent, formatDelta } from '../../utils/formatters';
 import { LineChart as LineChartIcon } from 'lucide-react';
 import { NewsRecord } from '../../types';
@@ -17,9 +17,10 @@ import { NewsRecord } from '../../types';
 interface Props {
   monthlyData: MonthlyDataPoint[];
   selectedMonth?: string;
+  isYoYMode?: boolean;
 }
 
-export const PlatformsView: React.FC<Props> = ({ monthlyData, selectedMonth }) => {
+export const PlatformsView: React.FC<Props> = ({ monthlyData, selectedMonth, isYoYMode }) => {
   const platformConfig: { key: keyof NewsRecord; code: string; name: string; type: string; color: string }[] = [
     { key: 'pMobile', code: 'Mobile', name: 'Mobile Web', type: 'Web', color: '#10b981' },
     { key: 'pPC', code: 'PC', name: 'PC Desktop', type: 'Desktop', color: '#3b82f6' },
@@ -28,8 +29,11 @@ export const PlatformsView: React.FC<Props> = ({ monthlyData, selectedMonth }) =
   ];
 
   const summary = useMemo(() => {
+    if (isYoYMode) {
+      return analyzeDimensionSeriesYoY(monthlyData, platformConfig, 'pageviews');
+    }
     return analyzeDimensionSeries(monthlyData, platformConfig, 'pageviews', selectedMonth);
-  }, [monthlyData, selectedMonth]);
+  }, [monthlyData, selectedMonth, isYoYMode]);
 
   const [showChart, setShowChart] = useState(false);
   const [selectedKey, setSelectedKey] = useState<string>('pPC');
@@ -80,11 +84,15 @@ export const PlatformsView: React.FC<Props> = ({ monthlyData, selectedMonth }) =
         <div>
           <div className="flex items-center gap-2 flex-wrap sm:flex-nowrap">
             <h2 className="text-base font-bold text-slate-900 tracking-tight">
-              Động thái & Nguồn Sụt giảm Nền tảng (Platforms & Devices)
+              {isYoYMode
+                ? 'Động thái & Nguồn Sụt giảm Nền tảng (Tổng 2026 vs Cùng kỳ 2025)'
+                : 'Động thái & Nguồn Sụt giảm Nền tảng (Platforms & Devices)'}
             </h2>
           </div>
           <p className="text-xs text-slate-500 mt-0.5">
-            Bóc tách lưu lượng theo thiết bị: Xác định đà suy yếu của PC Desktop so với Mobile Web
+            {isYoYMode
+              ? 'Bóc tách lưu lượng theo thiết bị: Tổng lũy kế 2026 so với Cùng kỳ năm 2025'
+              : 'Bóc tách lưu lượng theo thiết bị: Xác định đà suy yếu của PC Desktop so với Mobile Web'}
           </p>
         </div>
 
@@ -124,12 +132,14 @@ export const PlatformsView: React.FC<Props> = ({ monthlyData, selectedMonth }) =
                 <span className="text-xs font-semibold">({formatPercent(deepestDrop.pctChangeMedian)})</span>
               </div>
               <div className="text-xs text-slate-500 font-mono">
-                {selectedMonth ? `Tháng ${selectedMonth}` : 'Tháng này'}: <strong className="text-slate-700">{formatNumber(deepestDrop.t8)}</strong>
-                {'  '}| Trung vị: <strong className="text-slate-700">{formatNumber(deepestDrop.median)}</strong>
+                {isYoYMode ? 'Tổng 2026' : (selectedMonth ? `Tháng ${selectedMonth}` : 'Tháng này')}: <strong className="text-slate-700">{formatNumber(deepestDrop.t8)}</strong>
+                {'  '}| {isYoYMode ? 'Cùng kỳ 2025' : 'Trung vị'}: <strong className="text-slate-700">{formatNumber(deepestDrop.median)}</strong>
               </div>
             </div>
           ) : (
-            <div className="text-xs text-emerald-700 font-semibold mt-2">Không có thiết bị nào giảm (≥ mốc trung vị)</div>
+            <div className="text-xs text-emerald-700 font-semibold mt-2">
+              {isYoYMode ? 'Không có thiết bị nào giảm so với cùng kỳ' : 'Không có thiết bị nào giảm (≥ mốc trung vị)'}
+            </div>
           )}
         </div>
 
@@ -229,12 +239,20 @@ export const PlatformsView: React.FC<Props> = ({ monthlyData, selectedMonth }) =
           <thead className="bg-slate-50 text-[11px] font-semibold text-slate-500 border-b border-slate-200">
             <tr>
               <th className="py-3 px-4 font-sans">Nền Tảng Thiết Bị</th>
-              <th className="py-3 px-4 text-right font-sans">Tỷ Trọng Tháng Này</th>
               <th className="py-3 px-4 text-right font-sans">
-                {selectedMonth ? `Tháng ${selectedMonth}` : 'Tháng Này (Tháng 8)'}
+                {isYoYMode ? 'Tỷ Trọng Tổng 2026' : 'Tỷ Trọng Tháng Này'}
               </th>
-              <th className="py-3 px-4 text-right font-sans">Mốc Trung Vị (2026)</th>
-              <th className="py-3 px-4 text-right font-sans min-w-[200px]">Lệch vs. Trung Vị</th>
+              <th className="py-3 px-4 text-right font-sans">
+                {isYoYMode
+                  ? 'Tổng 2026'
+                  : (selectedMonth ? `Tháng ${selectedMonth}` : 'Tháng Này (Tháng 8)')}
+              </th>
+              <th className="py-3 px-4 text-right font-sans">
+                {isYoYMode ? 'Cùng Kỳ 2025' : 'Mốc Trung Vị (2026)'}
+              </th>
+              <th className="py-3 px-4 text-right font-sans min-w-[200px]">
+                {isYoYMode ? 'Lệch vs. Cùng Kỳ' : 'Lệch vs. Trung Vị'}
+              </th>
             </tr>
           </thead>
           <tbody className="divide-y divide-slate-100">
@@ -280,7 +298,9 @@ export const PlatformsView: React.FC<Props> = ({ monthlyData, selectedMonth }) =
 
                   <td className="py-3.5 px-4 text-right font-mono">
                     <div className="font-semibold text-slate-700">{formatNumber(row.median)}</div>
-                    <div className="text-[10px] text-slate-400 font-sans">Chuẩn 2026</div>
+                    <div className="text-[10px] text-slate-400 font-sans">
+                      {isYoYMode ? 'Cùng kỳ 2025' : 'Chuẩn 2026'}
+                    </div>
                   </td>
 
                   <td className="py-3.5 px-4 text-right font-mono">
@@ -315,7 +335,9 @@ export const PlatformsView: React.FC<Props> = ({ monthlyData, selectedMonth }) =
               </td>
               <td className="py-3.5 px-4 text-right font-mono">
                 <div className="font-bold text-xs text-slate-900">{formatNumber(totalMed)}</div>
-                <div className="text-[10px] text-slate-400 font-sans">Chuẩn 2026</div>
+                <div className="text-[10px] text-slate-400 font-sans">
+                  {isYoYMode ? 'Cùng kỳ 2025' : 'Chuẩn 2026'}
+                </div>
               </td>
               <td className="py-3.5 px-4 text-right font-mono">
                 <div

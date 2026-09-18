@@ -8,6 +8,7 @@ import { PageMarketView } from './components/views/PageMarketView';
 import { ArticleProductionView } from './components/views/ArticleProductionView';
 import { FolderBreakdownView } from './components/views/FolderBreakdownView';
 import { VietnamMarketOverviewView } from './components/views/VietnamMarketOverviewView';
+import { VnExpressYoYDetailView } from './components/views/VnExpressYoYDetailView';
 import { ExecutiveReportModal } from './components/ExecutiveReportModal';
 import { ExcelImportModal } from './components/ExcelImportModal';
 import { GoogleSheetSyncModal } from './components/GoogleSheetSyncModal';
@@ -17,8 +18,8 @@ import { Globe, Layers, BarChart2 } from 'lucide-react';
 function DashboardContent() {
   const { dataset } = useDataset();
 
-  // Top-level Dashboard switcher: "Chi tiết Vnexpress" or "Tổng quan thị trường báo chí Việt Nam"
-  const [mainDashboard, setMainDashboard] = useState<'vne_detail' | 'market_overview'>('vne_detail');
+  // Top-level Dashboard switcher: "Chi tiết Vnexpress", "VnExpress: Tổng 2026 vs Cùng kỳ 2025", or "Tổng quan thị trường báo chí Việt Nam"
+  const [mainDashboard, setMainDashboard] = useState<'vne_detail' | 'vne_yoy' | 'market_overview'>('vne_detail');
 
   // Folder options from active dataset - directly reflect actual departments/folders in data
   const folderOptions = useMemo(() => {
@@ -50,7 +51,7 @@ function DashboardContent() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 py-6 w-full flex-1 space-y-5">
         {/* Top-Level Main Dashboard Switcher */}
         <div className="bg-white border border-slate-200/90 rounded-2xl p-2.5 shadow-xs flex items-center justify-between flex-wrap gap-3">
-          <div className="flex items-center gap-1.5 p-1 bg-slate-100 rounded-xl">
+          <div className="flex items-center gap-1.5 p-1 bg-slate-100 rounded-xl flex-wrap">
             <button
               onClick={() => setMainDashboard('vne_detail')}
               className={`flex items-center gap-2 px-3.5 py-2 rounded-lg text-xs font-bold transition cursor-pointer ${
@@ -61,6 +62,23 @@ function DashboardContent() {
             >
               <Layers className={`w-4 h-4 ${mainDashboard === 'vne_detail' ? 'text-red-600' : 'text-slate-400'}`} />
               <span>Chi tiết Vnexpress</span>
+            </button>
+
+            <button
+              onClick={() => setMainDashboard('vne_yoy')}
+              className={`flex items-center gap-2 px-3.5 py-2 rounded-lg text-xs font-bold transition cursor-pointer ${
+                mainDashboard === 'vne_yoy'
+                  ? 'bg-white text-emerald-800 shadow-xs border border-emerald-200/80'
+                  : 'text-slate-600 hover:text-slate-900 hover:bg-slate-200/50'
+              }`}
+            >
+              <BarChart2 className={`w-4 h-4 ${mainDashboard === 'vne_yoy' ? 'text-emerald-600' : 'text-slate-400'}`} />
+              <div className="flex items-center gap-1.5">
+                <span>VnExpress: Tổng 2026 vs Cùng kỳ 2025</span>
+                <span className="px-1.5 py-0.2 rounded text-[10px] font-semibold bg-emerald-100 text-emerald-800">
+                  YoY
+                </span>
+              </div>
             </button>
 
             <button
@@ -79,12 +97,14 @@ function DashboardContent() {
           <div className="flex items-center gap-2 text-xs text-slate-500 pr-2">
             <span className="hidden sm:inline font-medium">Chế độ xem:</span>
             <span className="px-2 py-0.5 rounded text-[11px] font-semibold bg-slate-100 text-slate-700 border border-slate-200">
-              {mainDashboard === 'vne_detail' ? 'Chi tiết Vnexpress' : 'Toàn Cảnh Báo Chí Việt Nam'}
+              {mainDashboard === 'vne_detail' && 'Chi tiết Vnexpress (Theo tháng)'}
+              {mainDashboard === 'vne_yoy' && 'VnExpress (Tổng 2026 vs Cùng kỳ 2025)'}
+              {mainDashboard === 'market_overview' && 'Toàn Cảnh Báo Chí Việt Nam'}
             </span>
           </div>
         </div>
 
-        {/* ─── 1. DASHBOARD 1: CHI TIẾT VNEXPRESS ─── */}
+        {/* ─── 1. DASHBOARD 1: CHI TIẾT VNEXPRESS (THEO THÁNG) ─── */}
         {mainDashboard === 'vne_detail' && (
           <div className="space-y-5 animate-in fade-in duration-200">
             {/* Executive Header with KPIs & Navigation */}
@@ -100,6 +120,7 @@ function DashboardContent() {
               onOpenGoogleSheetSync={() => setIsGoogleSheetModalOpen(true)}
               selectedMonth={selectedMonth}
               onMonthChange={setSelectedMonth}
+              hideImportAndExport={true}
             />
 
             {/* Executive Summary: Kết Luận Nơi Sụt Giảm Chính Theo Các Góc Nhìn */}
@@ -162,7 +183,20 @@ function DashboardContent() {
           </div>
         )}
 
-        {/* ─── 2. DASHBOARD 2: TỔNG QUAN THỊ TRƯỜNG BÁO CHÍ VIỆT NAM ─── */}
+        {/* ─── 2. DASHBOARD 2: VNEXPRESS (TỔNG 2026 VS CÙNG KỲ 2025) ─── */}
+        {mainDashboard === 'vne_yoy' && (
+          <VnExpressYoYDetailView
+            dataset={dataset}
+            folderOptions={folderOptions}
+            currentScope={currentScope}
+            onScopeChange={setCurrentScope}
+            onOpenReport={() => setIsReportOpen(true)}
+            onOpenExcelImport={() => setIsExcelImportOpen(true)}
+            onOpenGoogleSheetSync={() => setIsGoogleSheetModalOpen(true)}
+          />
+        )}
+
+        {/* ─── 3. DASHBOARD 3: TỔNG QUAN THỊ TRƯỜNG BÁO CHÍ VIỆT NAM ─── */}
         {mainDashboard === 'market_overview' && (
           <div className="animate-in fade-in duration-200">
             <VietnamMarketOverviewView selectedMonth={selectedMonth} />

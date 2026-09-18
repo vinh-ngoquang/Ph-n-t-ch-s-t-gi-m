@@ -9,7 +9,7 @@ import {
   Legend,
   CartesianGrid,
 } from 'recharts';
-import { computeFolderRanking, FolderComparisonItem, isSpecialPublication } from '../../utils/timeSeriesAnalytics';
+import { computeFolderRanking, computeFolderRankingYoY, FolderComparisonItem, isSpecialPublication } from '../../utils/timeSeriesAnalytics';
 import { formatNumber, formatPercent, formatDelta } from '../../utils/formatters';
 import { LineChart as LineChartIcon, Search, Filter, X, Eye } from 'lucide-react';
 import { RAW_DATASET } from '../../data/dataset';
@@ -20,6 +20,7 @@ interface FolderBreakdownViewProps {
   currentScope?: string;
   onScopeChange?: (scope: string) => void;
   selectedMonth?: string;
+  isYoYMode?: boolean;
 }
 
 export const FolderBreakdownView: React.FC<FolderBreakdownViewProps> = ({
@@ -27,11 +28,12 @@ export const FolderBreakdownView: React.FC<FolderBreakdownViewProps> = ({
   currentScope = 'ALL_FOLDERS_AGG',
   onScopeChange,
   selectedMonth = '8/2026',
+  isYoYMode,
 }) => {
   const currentData = dataset || RAW_DATASET;
   const allRankingList = useMemo(
-    () => computeFolderRanking(currentData, selectedMonth),
-    [currentData, selectedMonth]
+    () => isYoYMode ? computeFolderRankingYoY(currentData) : computeFolderRanking(currentData, selectedMonth),
+    [currentData, selectedMonth, isYoYMode]
   );
 
   const isSingleScope = Boolean(currentScope && currentScope !== 'ALL_FOLDERS_AGG' && currentScope !== 'ALL_VNE_AGG');
@@ -179,9 +181,13 @@ export const FolderBreakdownView: React.FC<FolderBreakdownViewProps> = ({
             )}
           </div>
           <p className="text-xs text-slate-500 mt-0.5">
-            {isSingleScope && selectedFolder
-              ? `Hiển thị chi tiết theo phạm vi ban được chọn (${selectedMonth}). Thứ hạng thâm hụt PV: #${overallRank} / ${allRankingList.length} toàn tòa soạn.`
-              : `Xếp hạng chi tiết 23 ban nội dung và Trang Home trong kỳ Tháng ${selectedMonth} so với mốc Trung Vị 2026.`}
+            {isYoYMode
+              ? (isSingleScope && selectedFolder
+                ? `Hiển thị chi tiết theo phạm vi ban được chọn (Tổng 2026 vs Cùng kỳ 2025). Thứ hạng thâm hụt PV: #${overallRank} / ${allRankingList.length} toàn tòa soạn.`
+                : 'Xếp hạng chi tiết 23 ban nội dung và Trang Home: Tổng lũy kế 2026 so với Cùng kỳ năm 2025.')
+              : (isSingleScope && selectedFolder
+                ? `Hiển thị chi tiết theo phạm vi ban được chọn (${selectedMonth}). Thứ hạng thâm hụt PV: #${overallRank} / ${allRankingList.length} toàn tòa soạn.`
+                : `Xếp hạng chi tiết 23 ban nội dung và Trang Home trong kỳ Tháng ${selectedMonth} so với mốc Trung Vị 2026.`)}
           </p>
         </div>
 
@@ -367,8 +373,8 @@ export const FolderBreakdownView: React.FC<FolderBreakdownViewProps> = ({
                   </span>
                 </div>
                 <div className="text-xs text-slate-500 font-mono">
-                  Tháng {selectedMonth}: <strong className="text-slate-700">{formatNumber(selectedFolder.curPV)}</strong>
-                  {'  '}| Trung vị: <strong className="text-slate-700">{formatNumber(selectedFolder.median2026PV)}</strong>
+                  {isYoYMode ? 'Tổng 2026' : `Tháng ${selectedMonth}`}: <strong className="text-slate-700">{formatNumber(selectedFolder.curPV)}</strong>
+                  {'  '}| {isYoYMode ? 'Cùng kỳ 2025' : 'Trung vị'}: <strong className="text-slate-700">{formatNumber(selectedFolder.median2026PV)}</strong>
                 </div>
               </div>
             </div>
@@ -397,8 +403,8 @@ export const FolderBreakdownView: React.FC<FolderBreakdownViewProps> = ({
                   <span className="text-xs font-semibold">({formatPercent(selectedFolder.pctMedianDetail)})</span>
                 </div>
                 <div className="text-xs text-slate-500 font-mono">
-                  Tháng {selectedMonth}: <strong className="text-slate-700">{formatNumber(selectedFolder.curDetail)}</strong>
-                  {'  '}| Trung vị: <strong className="text-slate-700">{formatNumber(selectedFolder.median2026Detail)}</strong>
+                  {isYoYMode ? 'Tổng 2026' : `Tháng ${selectedMonth}`}: <strong className="text-slate-700">{formatNumber(selectedFolder.curDetail)}</strong>
+                  {'  '}| {isYoYMode ? 'Cùng kỳ 2025' : 'Trung vị'}: <strong className="text-slate-700">{formatNumber(selectedFolder.median2026Detail)}</strong>
                 </div>
               </div>
             </div>
@@ -420,7 +426,7 @@ export const FolderBreakdownView: React.FC<FolderBreakdownViewProps> = ({
                   </span>
                 </div>
                 <div className="text-xs text-slate-500 font-mono">
-                  Sản lượng Tháng {selectedMonth}: <strong className="text-slate-700">{formatNumber(selectedFolder.curArticles)}</strong> bài viết
+                  Sản lượng {isYoYMode ? 'Tổng 2026' : `Tháng ${selectedMonth}`}: <strong className="text-slate-700">{formatNumber(selectedFolder.curArticles)}</strong> bài viết
                 </div>
               </div>
             </div>
@@ -443,8 +449,8 @@ export const FolderBreakdownView: React.FC<FolderBreakdownViewProps> = ({
                     <span className="text-xs font-semibold">({formatPercent(deepestDrop.pctMedianPV)})</span>
                   </div>
                   <div className="text-xs text-slate-500 font-mono">
-                    Tháng {selectedMonth}: <strong className="text-slate-700">{formatNumber(deepestDrop.curPV)}</strong>
-                    {'  '}| Trung vị: <strong className="text-slate-700">{formatNumber(deepestDrop.median2026PV)}</strong>
+                    {isYoYMode ? 'Tổng 2026' : `Tháng ${selectedMonth}`}: <strong className="text-slate-700">{formatNumber(deepestDrop.curPV)}</strong>
+                    {'  '}| {isYoYMode ? 'Cùng kỳ 2025' : 'Trung vị'}: <strong className="text-slate-700">{formatNumber(deepestDrop.median2026PV)}</strong>
                   </div>
                 </div>
               ) : null}
@@ -455,7 +461,9 @@ export const FolderBreakdownView: React.FC<FolderBreakdownViewProps> = ({
               <div className="text-xs font-medium text-slate-500">Tỷ Lệ Chuyên Mục Giảm vs. Tăng</div>
               <div className="mt-2 space-y-1 text-xs font-mono">
                 <div className="flex items-center justify-between">
-                  <span className="text-slate-500 font-sans">Mục sụt giảm so với Trung vị:</span>
+                  <span className="text-slate-500 font-sans">
+                    Mục sụt giảm so với {isYoYMode ? 'Cùng kỳ' : 'Trung vị'}:
+                  </span>
                   <span className="font-bold text-rose-600">
                     {dropsOnly.length} / {rankingList.length} chuyên mục ({rankingList.length > 0 ? Math.round((dropsOnly.length / rankingList.length) * 100) : 0}%)
                   </span>
@@ -596,10 +604,14 @@ export const FolderBreakdownView: React.FC<FolderBreakdownViewProps> = ({
             <tr>
               <th className="py-3 px-3">#</th>
               <th className="py-3 px-4 font-sans">Chuyên Mục</th>
-              <th className="py-3 px-4 text-right font-sans">Tháng {selectedMonth} (PV)</th>
-              <th className="py-3 px-3 text-right font-sans">Mốc Trung Vị</th>
+              <th className="py-3 px-4 text-right font-sans">
+                {isYoYMode ? 'Tổng 2026 (PV)' : `Tháng ${selectedMonth} (PV)`}
+              </th>
+              <th className="py-3 px-3 text-right font-sans">
+                {isYoYMode ? 'Cùng Kỳ 2025' : 'Mốc Trung Vị'}
+              </th>
               <th className="py-3 px-4 text-right font-sans min-w-[190px]">
-                <div>Lệch vs. Trung Vị</div>
+                <div>{isYoYMode ? 'Lệch vs. Cùng Kỳ' : 'Lệch vs. Trung Vị'}</div>
                 <div className="text-[9px] text-slate-400 font-normal">Hụt PV & % Sụt giảm</div>
               </th>
               <th className="py-3 px-3 text-center font-sans">

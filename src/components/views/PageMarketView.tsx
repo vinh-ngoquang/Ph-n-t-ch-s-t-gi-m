@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import {
   ResponsiveContainer,
   LineChart,
@@ -9,7 +9,7 @@ import {
   Legend,
   CartesianGrid,
 } from 'recharts';
-import { MonthlyDataPoint, analyzeDimensionSeries } from '../../utils/timeSeriesAnalytics';
+import { MonthlyDataPoint, analyzeDimensionSeries, analyzeDimensionSeriesYoY } from '../../utils/timeSeriesAnalytics';
 import { formatNumber, formatPercent, formatDelta } from '../../utils/formatters';
 import { LineChart as LineChartIcon } from 'lucide-react';
 import { NewsRecord } from '../../types';
@@ -17,25 +17,38 @@ import { NewsRecord } from '../../types';
 interface Props {
   monthlyData: MonthlyDataPoint[];
   selectedMonth?: string;
+  isYoYMode?: boolean;
 }
 
-export const PageMarketView: React.FC<Props> = ({ monthlyData, selectedMonth }) => {
+export const PageMarketView: React.FC<Props> = ({ monthlyData, selectedMonth, isYoYMode }) => {
   const [showPageChart, setShowPageChart] = useState(false);
   const [showMarketChart, setShowMarketChart] = useState(false);
 
   // Config for Page Types
-  const pageTypeConfig: { key: keyof NewsRecord; code: string; name: string; color: string }[] = [
+  const pageTypeConfig: { key: keyof NewsRecord; code: string; name: string; color: string }[] = useMemo(() => [
     { key: 'pDetail', code: 'P_Detail', name: 'Trang Bài viết (Detail)', color: '#10b981' },
     { key: 'pListing', code: 'P_Listing', name: 'Trang Danh mục (Listing)', color: '#3b82f6' },
-  ];
-  const pageTypeSummary = analyzeDimensionSeries(monthlyData, pageTypeConfig, 'pageviews', selectedMonth);
+  ], []);
+
+  const pageTypeSummary = useMemo(() => {
+    if (isYoYMode) {
+      return analyzeDimensionSeriesYoY(monthlyData, pageTypeConfig, 'pageviews');
+    }
+    return analyzeDimensionSeries(monthlyData, pageTypeConfig, 'pageviews', selectedMonth);
+  }, [monthlyData, selectedMonth, isYoYMode, pageTypeConfig]);
 
   // Config for Markets
-  const marketConfig: { key: keyof NewsRecord; code: string; name: string; color: string }[] = [
+  const marketConfig: { key: keyof NewsRecord; code: string; name: string; color: string }[] = useMemo(() => [
     { key: 'pDO', code: 'M_Domestic', name: 'Trong nước (Domestic - DO)', color: '#0ea5e9' },
     { key: 'pOV', code: 'M_Overseas', name: 'Nước ngoài (Overseas - OV)', color: '#f59e0b' },
-  ];
-  const marketSummary = analyzeDimensionSeries(monthlyData, marketConfig, 'pageviews', selectedMonth);
+  ], []);
+
+  const marketSummary = useMemo(() => {
+    if (isYoYMode) {
+      return analyzeDimensionSeriesYoY(monthlyData, marketConfig, 'pageviews');
+    }
+    return analyzeDimensionSeries(monthlyData, marketConfig, 'pageviews', selectedMonth);
+  }, [monthlyData, selectedMonth, isYoYMode, marketConfig]);
 
   // Charts data
   const pageChartData = pageTypeSummary.trendSeries.map((item) => ({
@@ -61,11 +74,15 @@ export const PageMarketView: React.FC<Props> = ({ monthlyData, selectedMonth }) 
           <div>
             <div className="flex items-center gap-2 flex-wrap sm:flex-nowrap">
               <h2 className="text-base font-bold text-slate-900 tracking-tight">
-                Động thái & Phân Bố Lớp Trang (Page Layers: Listing vs Detail)
+                {isYoYMode
+                  ? 'Động thái & Phân Bố Lớp Trang (Tổng 2026 vs Cùng kỳ 2025)'
+                  : 'Động thái & Phân Bố Lớp Trang (Page Layers: Listing vs Detail)'}
               </h2>
             </div>
             <p className="text-xs text-slate-500 mt-0.5">
-              Tỷ lệ độc giả đọc thẳng bài viết chi tiết (Detail) so với xem trang danh sách chuyên mục (Listing)
+              {isYoYMode
+                ? 'Tỷ lệ độc giả đọc bài chi tiết (Detail) vs xem trang danh mục (Listing): Lũy kế 2026 so với cùng kỳ 2025'
+                : 'Tỷ lệ độc giả đọc thẳng bài viết chi tiết (Detail) so với xem trang danh sách chuyên mục (Listing)'}
             </p>
           </div>
 
@@ -124,12 +141,20 @@ export const PageMarketView: React.FC<Props> = ({ monthlyData, selectedMonth }) 
             <thead className="bg-slate-50 text-[11px] font-semibold text-slate-500 border-b border-slate-200">
               <tr>
                 <th className="py-3 px-4 font-sans">Lớp Trang (Page Layer)</th>
-                <th className="py-3 px-4 text-right font-sans">Tỷ Trọng Tháng Này</th>
                 <th className="py-3 px-4 text-right font-sans">
-                  {selectedMonth ? `Tháng ${selectedMonth}` : 'Tháng Này (Tháng 8)'}
+                  {isYoYMode ? 'Tỷ Trọng Tổng 2026' : 'Tỷ Trọng Tháng Này'}
                 </th>
-                <th className="py-3 px-4 text-right font-sans">Mốc Trung Vị (2026)</th>
-                <th className="py-3 px-4 text-right font-sans min-w-[200px]">Lệch vs. Trung Vị</th>
+                <th className="py-3 px-4 text-right font-sans">
+                  {isYoYMode
+                    ? 'Tổng 2026'
+                    : (selectedMonth ? `Tháng ${selectedMonth}` : 'Tháng Này (Tháng 8)')}
+                </th>
+                <th className="py-3 px-4 text-right font-sans">
+                  {isYoYMode ? 'Cùng Kỳ 2025' : 'Mốc Trung Vị (2026)'}
+                </th>
+                <th className="py-3 px-4 text-right font-sans min-w-[200px]">
+                  {isYoYMode ? 'Lệch vs. Cùng Kỳ' : 'Lệch vs. Trung Vị'}
+                </th>
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-100">
@@ -156,7 +181,9 @@ export const PageMarketView: React.FC<Props> = ({ monthlyData, selectedMonth }) 
                     </td>
                     <td className="py-3.5 px-4 text-right font-mono">
                       <div className="font-semibold text-slate-700">{formatNumber(row.median)}</div>
-                      <div className="text-[10px] text-slate-400 font-sans">Chuẩn 2026</div>
+                      <div className="text-[10px] text-slate-400 font-sans">
+                        {isYoYMode ? 'Cùng kỳ 2025' : 'Chuẩn 2026'}
+                      </div>
                     </td>
                     <td className="py-3.5 px-4 text-right font-mono">
                       <div className={`font-bold ${isDrop ? 'text-rose-600' : 'text-emerald-600'}`}>
@@ -183,11 +210,15 @@ export const PageMarketView: React.FC<Props> = ({ monthlyData, selectedMonth }) 
           <div>
             <div className="flex items-center gap-2 flex-wrap sm:flex-nowrap">
               <h2 className="text-base font-bold text-slate-900 tracking-tight">
-                Động thái & Phân Bố Thị Trường (Markets: Domestic vs Overseas)
+                {isYoYMode
+                  ? 'Động thái & Phân Bố Thị Trường (Tổng 2026 vs Cùng kỳ 2025)'
+                  : 'Động thái & Phân Bố Thị Trường (Markets: Domestic vs Overseas)'}
               </h2>
             </div>
             <p className="text-xs text-slate-500 mt-0.5">
-              Cán cân người đọc trong nước (DO) và độc giả kiều bào / quốc tế (OV)
+              {isYoYMode
+                ? 'Cán cân người đọc trong nước (DO) và nước ngoài (OV): Lũy kế 2026 so với cùng kỳ 2025'
+                : 'Cán cân người đọc trong nước (DO) và độc giả kiều bào / quốc tế (OV)'}
             </p>
           </div>
 
@@ -246,12 +277,20 @@ export const PageMarketView: React.FC<Props> = ({ monthlyData, selectedMonth }) 
             <thead className="bg-slate-50 text-[11px] font-semibold text-slate-500 border-b border-slate-200">
               <tr>
                 <th className="py-3 px-4 font-sans">Thị Trường Địa Lý</th>
-                <th className="py-3 px-4 text-right font-sans">Tỷ Trọng Tháng Này</th>
                 <th className="py-3 px-4 text-right font-sans">
-                  {selectedMonth ? `Tháng ${selectedMonth}` : 'Tháng Này (Tháng 8)'}
+                  {isYoYMode ? 'Tỷ Trọng Tổng 2026' : 'Tỷ Trọng Tháng Này'}
                 </th>
-                <th className="py-3 px-4 text-right font-sans">Mốc Trung Vị (2026)</th>
-                <th className="py-3 px-4 text-right font-sans min-w-[200px]">Lệch vs. Trung Vị</th>
+                <th className="py-3 px-4 text-right font-sans">
+                  {isYoYMode
+                    ? 'Tổng 2026'
+                    : (selectedMonth ? `Tháng ${selectedMonth}` : 'Tháng Này (Tháng 8)')}
+                </th>
+                <th className="py-3 px-4 text-right font-sans">
+                  {isYoYMode ? 'Cùng Kỳ 2025' : 'Mốc Trung Vị (2026)'}
+                </th>
+                <th className="py-3 px-4 text-right font-sans min-w-[200px]">
+                  {isYoYMode ? 'Lệch vs. Cùng Kỳ' : 'Lệch vs. Trung Vị'}
+                </th>
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-100">
@@ -278,7 +317,9 @@ export const PageMarketView: React.FC<Props> = ({ monthlyData, selectedMonth }) 
                     </td>
                     <td className="py-3.5 px-4 text-right font-mono">
                       <div className="font-semibold text-slate-700">{formatNumber(row.median)}</div>
-                      <div className="text-[10px] text-slate-400 font-sans">Chuẩn 2026</div>
+                      <div className="text-[10px] text-slate-400 font-sans">
+                        {isYoYMode ? 'Cùng kỳ 2025' : 'Chuẩn 2026'}
+                      </div>
                     </td>
                     <td className="py-3.5 px-4 text-right font-mono">
                       <div className={`font-bold ${isDrop ? 'text-rose-600' : 'text-emerald-600'}`}>

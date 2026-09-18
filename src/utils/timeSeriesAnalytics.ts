@@ -427,3 +427,180 @@ export function computeFolderRanking(
   items.sort((a, b) => a.deltaMedianPV - b.deltaMedianPV);
   return items;
 }
+
+// Compute comparison metrics for YoY (Sum 2026 vs Sum 2025 across matching months)
+export function analyzeDimensionSeriesYoY(
+  monthlyData: MonthlyDataPoint[],
+  components: { key: keyof NewsRecord; name: string }[],
+  totalKey: keyof NewsRecord
+): DimensionTableSummary {
+  const months2026 = monthlyData.filter((d) => d.year === 2026);
+  const months2025 = monthlyData.filter((d) => d.year === 2025);
+
+  // Match month numbers (e.g. 1..8)
+  const availableMonthNums = new Set(months2026.map((d) => d.monthNum));
+  const matched2025 = months2025.filter((d) => availableMonthNums.has(d.monthNum));
+
+  let total2026 = 0;
+  let total2025 = 0;
+  months2026.forEach((d) => {
+    total2026 += Number(d.record[totalKey]) || 0;
+  });
+  matched2025.forEach((d) => {
+    total2025 += Number(d.record[totalKey]) || 0;
+  });
+
+  const rows: MetricComparison[] = [];
+
+  for (const comp of components) {
+    let sum26 = 0;
+    let sum25 = 0;
+    months2026.forEach((d) => {
+      sum26 += Number(d.record[comp.key]) || 0;
+    });
+    matched2025.forEach((d) => {
+      sum25 += Number(d.record[comp.key]) || 0;
+    });
+
+    const deltaMedian = sum26 - sum25;
+    const pctMedian = sum25 > 0 ? (deltaMedian / sum25) * 100 : 0;
+
+    const shareT8 = total2026 > 0 ? (sum26 / total2026) * 100 : 0;
+    const shareMedian = total2025 > 0 ? (sum25 / total2025) * 100 : 0;
+    const deltaShare = shareT8 - shareMedian;
+
+    let maxVal = -Infinity;
+    let maxMonth = '';
+    months2026.forEach((d) => {
+      const v = Number(d.record[comp.key]) || 0;
+      if (v > maxVal) {
+        maxVal = v;
+        maxMonth = d.shortLabel;
+      }
+    });
+
+    rows.push({
+      key: String(comp.key),
+      name: comp.name,
+      t8: sum26,
+      mom: sum25,
+      deltaMoM: deltaMedian,
+      pctMoM: pctMedian,
+      pctChangeMoM: pctMedian,
+      median2026: sum25,
+      median: sum25,
+      deltaMedian,
+      pctMedian,
+      pctChangeMedian: pctMedian,
+      mean2026: sum26 / (months2026.length || 1),
+      peak2026: maxVal,
+      peakMonth: maxMonth,
+      shareT8,
+      shareMedian,
+      deltaShare,
+    });
+  }
+
+  // Monthly trend series for Recharts (showing 2026 progression)
+  const trendSeries = months2026.map((d) => {
+    const point: any = {
+      month: d.month,
+      shortLabel: d.shortLabel,
+      label: d.label,
+      total: Number(d.record[totalKey]) || 0,
+    };
+    for (const comp of components) {
+      point[comp.key] = Number(d.record[comp.key]) || 0;
+    }
+    return point;
+  });
+
+  const totalDeltaMedian = total2026 - total2025;
+  const totalPctMedian = total2025 > 0 ? (totalDeltaMedian / total2025) * 100 : 0;
+
+  return {
+    dimensionName: String(totalKey),
+    rows,
+    totalT8: total2026,
+    totalMoM: total2025,
+    totalMedian: total2025,
+    totalDeltaMoM: totalDeltaMedian,
+    totalPctMoM: totalPctMedian,
+    totalDeltaMedian,
+    totalPctMedian,
+    trendSeries,
+  };
+}
+
+// Folder ranking across all 24 individual folders in YoY mode (Sum 2026 vs Sum 2025)
+export function computeFolderRankingYoY(
+  dataset: NewsRecord[] = RAW_DATASET
+): FolderComparisonItem[] {
+  const months2026 = ['1/2026', '2/2026', '3/2026', '4/2026', '5/2026', '6/2026', '7/2026', '8/2026'];
+  const months2025 = ['1/2025', '2/2025', '3/2025', '4/2025', '5/2025', '6/2025', '7/2025', '8/2025'];
+  const folderMap = new Map<string, string>();
+
+  dataset.forEach((r) => {
+    if (r.folder_id !== '-1' && r.folder && !folderMap.has(r.folder_id)) {
+      folderMap.set(r.folder_id, r.folder);
+    }
+  });
+
+  const items: FolderComparisonItem[] = [];
+
+  for (const [fId, fName] of folderMap.entries()) {
+    let sumPV26 = 0;
+    let sumPV25 = 0;
+    let sumArts26 = 0;
+    let sumArts25 = 0;
+    let sumDetail26 = 0;
+    let sumDetail25 = 0;
+
+    const monthlyPVs26: number[] = [];
+
+    months2026.forEach((m) => {
+      const match = dataset.find((r) => r.month === m && r.folder_id === fId);
+      const pv = match?.pageviews || 0;
+      sumPV26 += pv;
+      sumArts26 += match?.articles || 0;
+      sumDetail26 += match?.pDetail || 0;
+      monthlyPVs26.push(pv);
+    });
+
+    months2025.forEach((m) => {
+      const match = dataset.find((r) => r.month === m && r.folder_id === fId);
+      sumPV25 += match?.pageviews || 0;
+      sumArts25 += match?.articles || 0;
+      sumDetail25 += match?.pDetail || 0;
+    });
+
+    const deltaPV = sumPV26 - sumPV25;
+    const pctPV = sumPV25 > 0 ? (deltaPV / sumPV25) * 100 : 0;
+
+    const deltaDetail = sumDetail26 - sumDetail25;
+    const pctDetail = sumDetail25 > 0 ? (deltaDetail / sumDetail25) * 100 : 0;
+
+    items.push({
+      folderId: fId,
+      folderName: fName,
+      curPV: sumPV26,
+      t8PV: sumPV26,
+      median2026PV: sumPV25,
+      deltaMedianPV: deltaPV,
+      pctMedianPV: pctPV,
+      curArticles: sumArts26,
+      t8Articles: sumArts26,
+      median2026Articles: sumArts25,
+      curDetail: sumDetail26,
+      t8Detail: sumDetail26,
+      median2026Detail: sumDetail25,
+      deltaMedianDetail: deltaDetail,
+      pctMedianDetail: pctDetail,
+      trend: monthlyPVs26,
+    });
+  }
+
+  // Sort by biggest drop vs 2025
+  items.sort((a, b) => a.deltaMedianPV - b.deltaMedianPV);
+  return items;
+}

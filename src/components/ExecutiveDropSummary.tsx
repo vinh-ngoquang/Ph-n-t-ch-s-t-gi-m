@@ -14,37 +14,44 @@ import { NewsRecord } from '../types';
 
 interface ExecutiveDropSummaryProps {
   monthlyData: MonthlyDataPoint[];
-  selectedMonth: string;
+  selectedMonth?: string;
   dataset: NewsRecord[];
   onTabChange: (tab: string) => void;
   currentScope?: string;
   onScopeChange?: (scope: string) => void;
+  isYoYMode?: boolean;
 }
 
 export const ExecutiveDropSummary: React.FC<ExecutiveDropSummaryProps> = ({
   monthlyData,
-  selectedMonth,
+  selectedMonth = '8/2026',
   dataset,
   onTabChange,
   currentScope = 'ALL_FOLDERS_AGG',
   onScopeChange,
+  isYoYMode = false,
 }) => {
   const months2026 = monthlyData.filter((d) => d.year === 2026);
+  const months2025 = monthlyData.filter((d) => d.year === 2025);
+  const availableMonthNums = new Set(months2026.map((d) => d.monthNum));
+  const matched2025 = months2025.filter((d) => availableMonthNums.has(d.monthNum));
+
   const targetIdx = months2026.findIndex((d) => d.month === selectedMonth);
   const safeIdx = targetIdx >= 0 ? targetIdx : months2026.length - 1;
   const curPoint = months2026[safeIdx] || months2026[months2026.length - 1];
 
   // 1. Core Totals
-  const curPV = curPoint?.record.pageviews || 0;
-  const medPV = calculateMedian(months2026.map((d) => d.record.pageviews || 0));
+  let curPV = 0;
+  let medPV = 0;
+  if (isYoYMode) {
+    months2026.forEach((d) => { curPV += d.record.pageviews || 0; });
+    matched2025.forEach((d) => { medPV += d.record.pageviews || 0; });
+  } else {
+    curPV = curPoint?.record.pageviews || 0;
+    medPV = calculateMedian(months2026.map((d) => d.record.pageviews || 0));
+  }
   const deltaMedPV = curPV - medPV;
   const pctMedPV = medPV > 0 ? (deltaMedPV / medPV) * 100 : 0;
-
-  const curArt = curPoint?.record.articles || 0;
-  const medArt = calculateMedian(months2026.map((d) => d.record.articles || 0));
-
-  const curDetail = curPoint?.record.pDetail || 0;
-  const medDetail = calculateMedian(months2026.map((d) => d.record.pDetail || 0));
 
   // 2. Traffic Sources Breakdown (Find Deepest Drop)
   const sourcesDef = [
@@ -59,14 +66,21 @@ export const ExecutiveDropSummary: React.FC<ExecutiveDropSummaryProps> = ({
 
   const sourcesRanked = useMemo(() => {
     return sourcesDef.map((s) => {
-      const vals = months2026.map((d) => (d.record[s.key] as number) || 0);
-      const cur = (curPoint?.record[s.key] as number) || 0;
-      const med = calculateMedian(vals);
+      let cur = 0;
+      let med = 0;
+      if (isYoYMode) {
+        months2026.forEach((d) => { cur += (d.record[s.key] as number) || 0; });
+        matched2025.forEach((d) => { med += (d.record[s.key] as number) || 0; });
+      } else {
+        const vals = months2026.map((d) => (d.record[s.key] as number) || 0);
+        cur = (curPoint?.record[s.key] as number) || 0;
+        med = calculateMedian(vals);
+      }
       const deltaMed = cur - med;
       const pctMed = med > 0 ? (deltaMed / med) * 100 : 0;
       return { ...s, cur, med, deltaMed, pctMed };
     }).sort((a, b) => a.deltaMed - b.deltaMed);
-  }, [months2026, curPoint]);
+  }, [months2026, matched2025, curPoint, isYoYMode]);
 
   const sourcesWithDrop = useMemo(() => sourcesRanked.filter((s) => s.deltaMed < 0), [sourcesRanked]);
   const hasSourceDrop = sourcesWithDrop.length > 0;
@@ -82,14 +96,21 @@ export const ExecutiveDropSummary: React.FC<ExecutiveDropSummaryProps> = ({
 
   const platformsRanked = useMemo(() => {
     return platformsDef.map((p) => {
-      const vals = months2026.map((d) => (d.record[p.key] as number) || 0);
-      const cur = (curPoint?.record[p.key] as number) || 0;
-      const med = calculateMedian(vals);
+      let cur = 0;
+      let med = 0;
+      if (isYoYMode) {
+        months2026.forEach((d) => { cur += (d.record[p.key] as number) || 0; });
+        matched2025.forEach((d) => { med += (d.record[p.key] as number) || 0; });
+      } else {
+        const vals = months2026.map((d) => (d.record[p.key] as number) || 0);
+        cur = (curPoint?.record[p.key] as number) || 0;
+        med = calculateMedian(vals);
+      }
       const deltaMed = cur - med;
       const pctMed = med > 0 ? (deltaMed / med) * 100 : 0;
       return { ...p, cur, med, deltaMed, pctMed };
     }).sort((a, b) => a.deltaMed - b.deltaMed);
-  }, [months2026, curPoint]);
+  }, [months2026, matched2025, curPoint, isYoYMode]);
 
   const platformsWithDrop = useMemo(() => platformsRanked.filter((p) => p.deltaMed < 0), [platformsRanked]);
   const hasPlatformDrop = platformsWithDrop.length > 0;
@@ -97,7 +118,8 @@ export const ExecutiveDropSummary: React.FC<ExecutiveDropSummaryProps> = ({
 
   // 4. Folder Breakdown (Deepest Dropping Folder)
   const foldersRanked = useMemo(() => {
-    const months = ['1/2026', '2/2026', '3/2026', '4/2026', '5/2026', '6/2026', '7/2026', '8/2026'];
+    const months26 = ['1/2026', '2/2026', '3/2026', '4/2026', '5/2026', '6/2026', '7/2026', '8/2026'];
+    const months25 = ['1/2025', '2/2025', '3/2025', '4/2025', '5/2025', '6/2025', '7/2025', '8/2025'];
     const folderMap = new Map<string, string>();
     dataset.forEach((r) => {
       if (r.folder_id !== '-1' && r.folder && !folderMap.has(r.folder_id)) {
@@ -115,17 +137,30 @@ export const ExecutiveDropSummary: React.FC<ExecutiveDropSummaryProps> = ({
     }> = [];
 
     folderMap.forEach((fName, fId) => {
-      const recs = months.map((m) => dataset.find((r) => r.month === m && r.folder_id === fId));
-      const pvs = recs.map((r) => r?.pageviews || 0);
-      const cur = pvs[safeIdx] || 0;
-      const med = calculateMedian(pvs);
+      let cur = 0;
+      let med = 0;
+      if (isYoYMode) {
+        months26.forEach((m) => {
+          const match = dataset.find((r) => r.month === m && r.folder_id === fId);
+          cur += match?.pageviews || 0;
+        });
+        months25.forEach((m) => {
+          const match = dataset.find((r) => r.month === m && r.folder_id === fId);
+          med += match?.pageviews || 0;
+        });
+      } else {
+        const recs = months26.map((m) => dataset.find((r) => r.month === m && r.folder_id === fId));
+        const pvs = recs.map((r) => r?.pageviews || 0);
+        cur = pvs[safeIdx] || 0;
+        med = calculateMedian(pvs);
+      }
       const deltaMed = cur - med;
       const pctMed = med > 0 ? (deltaMed / med) * 100 : 0;
       items.push({ id: fId, name: fName, curPV: cur, medPV: med, deltaMed, pctMed });
     });
 
     return items.sort((a, b) => a.deltaMed - b.deltaMed);
-  }, [dataset, safeIdx]);
+  }, [dataset, safeIdx, isYoYMode]);
 
   const foldersWithDrop = useMemo(() => foldersRanked.filter((f) => f.deltaMed < 0), [foldersRanked]);
   const hasFolderDrop = foldersWithDrop.length > 0;
@@ -139,11 +174,29 @@ export const ExecutiveDropSummary: React.FC<ExecutiveDropSummaryProps> = ({
   }, [foldersRanked, isSingleScope, currentScope]);
 
   // 5. Page Layers (Listing vs Detail)
+  let curDetail = 0;
+  let medDetail = 0;
+  let curListing = 0;
+  let medListing = 0;
+
+  if (isYoYMode) {
+    months2026.forEach((d) => {
+      curDetail += d.record.pDetail || 0;
+      curListing += d.record.pListing || 0;
+    });
+    matched2025.forEach((d) => {
+      medDetail += d.record.pDetail || 0;
+      medListing += d.record.pListing || 0;
+    });
+  } else {
+    curDetail = curPoint?.record.pDetail || 0;
+    medDetail = calculateMedian(months2026.map((d) => d.record.pDetail || 0));
+    curListing = curPoint?.record.pListing || 0;
+    medListing = calculateMedian(months2026.map((d) => d.record.pListing || 0));
+  }
+
   const deltaDetail = curDetail - medDetail;
   const pctDetail = medDetail > 0 ? (deltaDetail / medDetail) * 100 : 0;
-
-  const curListing = curPoint?.record.pListing || 0;
-  const medListing = calculateMedian(months2026.map((d) => d.record.pListing || 0));
   const deltaListing = curListing - medListing;
   const pctListing = medListing > 0 ? (deltaListing / medListing) * 100 : 0;
 
@@ -175,13 +228,29 @@ export const ExecutiveDropSummary: React.FC<ExecutiveDropSummaryProps> = ({
   const deepestPageLayer = hasPageLayerDrop ? pageLayersWithDrop[0] : null;
 
   // 6. Markets (Domestic vs Overseas)
-  const curDO = curPoint?.record.pDO || 0;
-  const medDO = calculateMedian(months2026.map((d) => d.record.pDO || 0));
+  let curDO = 0;
+  let medDO = 0;
+  let curOV = 0;
+  let medOV = 0;
+
+  if (isYoYMode) {
+    months2026.forEach((d) => {
+      curDO += d.record.pDO || 0;
+      curOV += d.record.pOV || 0;
+    });
+    matched2025.forEach((d) => {
+      medDO += d.record.pDO || 0;
+      medOV += d.record.pOV || 0;
+    });
+  } else {
+    curDO = curPoint?.record.pDO || 0;
+    medDO = calculateMedian(months2026.map((d) => d.record.pDO || 0));
+    curOV = curPoint?.record.pOV || 0;
+    medOV = calculateMedian(months2026.map((d) => d.record.pOV || 0));
+  }
+
   const deltaDO = curDO - medDO;
   const pctDO = medDO > 0 ? (deltaDO / medDO) * 100 : 0;
-
-  const curOV = curPoint?.record.pOV || 0;
-  const medOV = calculateMedian(months2026.map((d) => d.record.pOV || 0));
   const deltaOV = curOV - medOV;
   const pctOV = medOV > 0 ? (deltaOV / medOV) * 100 : 0;
 
@@ -212,6 +281,9 @@ export const ExecutiveDropSummary: React.FC<ExecutiveDropSummaryProps> = ({
   const hasMarketDrop = marketsWithDrop.length > 0;
   const deepestMarket = hasMarketDrop ? marketsWithDrop[0] : null;
 
+  const line1Label = isYoYMode ? 'Tổng 2026:' : `Tháng ${curPoint?.monthNum || selectedMonth}:`;
+  const line2Label = isYoYMode ? 'Cùng kỳ 2025:' : 'Mức trung vị:';
+
   return (
     <div className="bg-white border border-slate-200/90 rounded-2xl p-5 shadow-xs space-y-4">
       {/* Header bar */}
@@ -224,15 +296,30 @@ export const ExecutiveDropSummary: React.FC<ExecutiveDropSummaryProps> = ({
             <h2 className="text-base font-bold text-slate-900 tracking-tight">
               Kết Luận Nơi Sụt Giảm Chính Theo Các Góc Nhìn
             </h2>
-            <span className="px-2 py-0.5 rounded text-[11px] font-semibold bg-slate-100 text-slate-700 border border-slate-200">
-              Kỳ: Tháng {curPoint?.month || selectedMonth}
-            </span>
-            <span className="px-2 py-0.5 rounded text-[11px] font-semibold bg-blue-50 text-blue-700 border border-blue-200">
-              Đối chiếu: Chuẩn Trung vị 2026
-            </span>
+            {isYoYMode ? (
+              <>
+                <span className="px-2 py-0.5 rounded text-[11px] font-semibold bg-slate-100 text-slate-700 border border-slate-200">
+                  Kỳ: Tổng 2026 vs Cùng kỳ 2025
+                </span>
+                <span className="px-2 py-0.5 rounded text-[11px] font-semibold bg-blue-50 text-blue-700 border border-blue-200">
+                  Đối chiếu: Cùng kỳ 2025
+                </span>
+              </>
+            ) : (
+              <>
+                <span className="px-2 py-0.5 rounded text-[11px] font-semibold bg-slate-100 text-slate-700 border border-slate-200">
+                  Kỳ: Tháng {curPoint?.month || selectedMonth}
+                </span>
+                <span className="px-2 py-0.5 rounded text-[11px] font-semibold bg-blue-50 text-blue-700 border border-blue-200">
+                  Đối chiếu: Chuẩn Trung vị 2026
+                </span>
+              </>
+            )}
           </div>
           <p className="text-xs text-slate-500 mt-1">
-            Tổng hợp số liệu sụt giảm lớn nhất theo từng chiều dữ liệu (đối chiếu với mốc trung vị 2026)
+            {isYoYMode
+              ? 'Tổng hợp số liệu sụt giảm lớn nhất theo từng chiều dữ liệu (đối chiếu Tổng 2026 với Cùng kỳ năm 2025)'
+              : 'Tổng hợp số liệu sụt giảm lớn nhất theo từng chiều dữ liệu (đối chiếu với mốc trung vị 2026)'}
           </p>
         </div>
 
@@ -273,11 +360,11 @@ export const ExecutiveDropSummary: React.FC<ExecutiveDropSummaryProps> = ({
                 </div>
                 <div className="space-y-1 text-[11px] pt-1.5 border-t border-slate-200/60 font-mono">
                   <div className="flex items-center justify-between">
-                    <span className="text-slate-500 font-sans">Tháng {curPoint?.monthNum || selectedMonth}:</span>
+                    <span className="text-slate-500 font-sans">{line1Label}</span>
                     <span className="font-bold text-slate-800">{formatNumber(deepestSource.cur)} PV</span>
                   </div>
                   <div className="flex items-center justify-between">
-                    <span className="text-slate-500 font-sans">Mức trung vị:</span>
+                    <span className="text-slate-500 font-sans">{line2Label}</span>
                     <span className="font-medium text-slate-700">{formatNumber(deepestSource.med)} PV</span>
                   </div>
                 </div>
@@ -333,11 +420,11 @@ export const ExecutiveDropSummary: React.FC<ExecutiveDropSummaryProps> = ({
                 </div>
                 <div className="space-y-1 text-[11px] pt-1.5 border-t border-slate-200/60 font-mono">
                   <div className="flex items-center justify-between">
-                    <span className="text-slate-500 font-sans">Tháng {curPoint?.monthNum || selectedMonth}:</span>
+                    <span className="text-slate-500 font-sans">{line1Label}</span>
                     <span className="font-bold text-slate-800">{formatNumber(deepestPlatform.cur)} PV</span>
                   </div>
                   <div className="flex items-center justify-between">
-                    <span className="text-slate-500 font-sans">Mức trung vị:</span>
+                    <span className="text-slate-500 font-sans">{line2Label}</span>
                     <span className="font-medium text-slate-700">{formatNumber(deepestPlatform.med)} PV</span>
                   </div>
                 </div>
@@ -350,7 +437,7 @@ export const ExecutiveDropSummary: React.FC<ExecutiveDropSummaryProps> = ({
                 <div className="text-[11px] text-slate-600 font-mono space-y-1 pt-1.5 border-t border-slate-200/60">
                   <div className="flex items-center justify-between">
                     <span className="text-slate-500 font-sans">Tất cả thiết bị:</span>
-                    <span className="font-bold text-emerald-600">≥ mốc trung vị</span>
+                    <span className="font-bold text-emerald-600">≥ {isYoYMode ? 'cùng kỳ' : 'mốc trung vị'}</span>
                   </div>
                 </div>
               </div>
@@ -391,11 +478,11 @@ export const ExecutiveDropSummary: React.FC<ExecutiveDropSummaryProps> = ({
                     </div>
                     <div className="space-y-1 text-[11px] pt-1.5 border-t border-slate-200/60 font-mono">
                       <div className="flex items-center justify-between">
-                        <span className="text-slate-500 font-sans">Tháng {curPoint?.monthNum || selectedMonth}:</span>
+                        <span className="text-slate-500 font-sans">{line1Label}</span>
                         <span className="font-bold text-slate-800">{formatNumber(selectedFolderInfo.curPV)} PV</span>
                       </div>
                       <div className="flex items-center justify-between">
-                        <span className="text-slate-500 font-sans">Mức trung vị:</span>
+                        <span className="text-slate-500 font-sans">{line2Label}</span>
                         <span className="font-medium text-slate-700">{formatNumber(selectedFolderInfo.medPV)} PV</span>
                       </div>
                     </div>
@@ -415,11 +502,11 @@ export const ExecutiveDropSummary: React.FC<ExecutiveDropSummaryProps> = ({
                     </div>
                     <div className="space-y-1 text-[11px] pt-1.5 border-t border-slate-200/60 font-mono">
                       <div className="flex items-center justify-between">
-                        <span className="text-slate-500 font-sans">Tháng {curPoint?.monthNum || selectedMonth}:</span>
+                        <span className="text-slate-500 font-sans">{line1Label}</span>
                         <span className="font-bold text-slate-800">{formatNumber(selectedFolderInfo.curPV)} PV</span>
                       </div>
                       <div className="flex items-center justify-between">
-                        <span className="text-slate-500 font-sans">Mức trung vị:</span>
+                        <span className="text-slate-500 font-sans">{line2Label}</span>
                         <span className="font-medium text-slate-700">{formatNumber(selectedFolderInfo.medPV)} PV</span>
                       </div>
                     </div>
@@ -441,11 +528,11 @@ export const ExecutiveDropSummary: React.FC<ExecutiveDropSummaryProps> = ({
                 </div>
                 <div className="space-y-1 text-[11px] pt-1.5 border-t border-slate-200/60 font-mono">
                   <div className="flex items-center justify-between">
-                    <span className="text-slate-500 font-sans">Tháng {curPoint?.monthNum || selectedMonth}:</span>
+                    <span className="text-slate-500 font-sans">{line1Label}</span>
                     <span className="font-bold text-slate-800">{formatNumber(deepestFolder.curPV)} PV</span>
                   </div>
                   <div className="flex items-center justify-between">
-                    <span className="text-slate-500 font-sans">Mức trung vị:</span>
+                    <span className="text-slate-500 font-sans">{line2Label}</span>
                     <span className="font-medium text-slate-700">{formatNumber(deepestFolder.medPV)} PV</span>
                   </div>
                 </div>
@@ -456,7 +543,7 @@ export const ExecutiveDropSummary: React.FC<ExecutiveDropSummaryProps> = ({
                   Không có chuyên mục nào giảm
                 </div>
                 <div className="text-[11px] text-slate-500 pt-1.5 border-t border-slate-200/60 font-mono">
-                  Tất cả các ban đều đạt hoặc vượt mức trung vị.
+                  Tất cả các ban đều đạt hoặc vượt mức {isYoYMode ? 'cùng kỳ 2025' : 'trung vị'}.
                 </div>
               </div>
             )}
@@ -494,11 +581,11 @@ export const ExecutiveDropSummary: React.FC<ExecutiveDropSummaryProps> = ({
                 </div>
                 <div className="space-y-1 text-[11px] pt-1.5 border-t border-slate-200/60 font-mono">
                   <div className="flex items-center justify-between">
-                    <span className="text-slate-500 font-sans">{deepestPageLayer.shortName} T{curPoint?.monthNum || selectedMonth}:</span>
+                    <span className="text-slate-500 font-sans">{deepestPageLayer.shortName} {line1Label}</span>
                     <span className="font-bold text-slate-800">{formatNumber(deepestPageLayer.cur)} PV</span>
                   </div>
                   <div className="flex items-center justify-between">
-                    <span className="text-slate-500 font-sans">Mức trung vị:</span>
+                    <span className="text-slate-500 font-sans">{line2Label}</span>
                     <span className="font-medium text-slate-700">{formatNumber(deepestPageLayer.med)} PV</span>
                   </div>
                 </div>
@@ -554,11 +641,11 @@ export const ExecutiveDropSummary: React.FC<ExecutiveDropSummaryProps> = ({
                 </div>
                 <div className="space-y-1 text-[11px] pt-1.5 border-t border-slate-200/60 font-mono">
                   <div className="flex items-center justify-between">
-                    <span className="text-slate-500 font-sans">{deepestMarket.shortName} T{curPoint?.monthNum || selectedMonth}:</span>
+                    <span className="text-slate-500 font-sans">{deepestMarket.shortName} {line1Label}</span>
                     <span className="font-bold text-slate-800">{formatNumber(deepestMarket.cur)} PV</span>
                   </div>
                   <div className="flex items-center justify-between">
-                    <span className="text-slate-500 font-sans">Mức trung vị:</span>
+                    <span className="text-slate-500 font-sans">{line2Label}</span>
                     <span className="font-medium text-slate-700">{formatNumber(deepestMarket.med)} PV</span>
                   </div>
                 </div>

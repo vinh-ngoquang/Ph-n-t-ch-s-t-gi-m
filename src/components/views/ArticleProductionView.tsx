@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import {
   ResponsiveContainer,
   LineChart,
@@ -16,19 +16,33 @@ import { LineChart as LineChartIcon } from 'lucide-react';
 interface Props {
   monthlyData: MonthlyDataPoint[];
   selectedMonth?: string;
+  isYoYMode?: boolean;
 }
 
-export const ArticleProductionView: React.FC<Props> = ({ monthlyData, selectedMonth }) => {
+export const ArticleProductionView: React.FC<Props> = ({ monthlyData, selectedMonth, isYoYMode }) => {
   const [showChart, setShowChart] = useState(false);
 
-  const months2026 = monthlyData.filter((d) => d.year === 2026);
+  const months2026 = useMemo(() => monthlyData.filter((d) => d.year === 2026), [monthlyData]);
+  const months2025 = useMemo(() => monthlyData.filter((d) => d.year === 2025), [monthlyData]);
+
   const targetIdx = selectedMonth
     ? months2026.findIndex((d) => d.month === selectedMonth)
     : months2026.length - 1;
   const safeIdx = targetIdx >= 0 ? targetIdx : months2026.length - 1;
   const t8 = months2026[safeIdx] || months2026[months2026.length - 1];
 
-  // Raw arrays for production
+  // YoY sums
+  const totalArt2026 = useMemo(() => months2026.reduce((sum, d) => sum + (d.record.articles || 0), 0), [months2026]);
+  const artThuong2026 = useMemo(() => months2026.reduce((sum, d) => sum + (d.record.articleThuong || 0), 0), [months2026]);
+  const artTmai2026 = useMemo(() => months2026.reduce((sum, d) => sum + (d.record.articleThuongMai || 0), 0), [months2026]);
+  const buildTop2026 = useMemo(() => months2026.reduce((sum, d) => sum + (d.record.aBuildTop || 0), 0), [months2026]);
+
+  const totalArt2025 = useMemo(() => months2025.reduce((sum, d) => sum + (d.record.articles || 0), 0), [months2025]);
+  const artThuong2025 = useMemo(() => months2025.reduce((sum, d) => sum + (d.record.articleThuong || 0), 0), [months2025]);
+  const artTmai2025 = useMemo(() => months2025.reduce((sum, d) => sum + (d.record.articleThuongMai || 0), 0), [months2025]);
+  const buildTop2025 = useMemo(() => months2025.reduce((sum, d) => sum + (d.record.aBuildTop || 0), 0), [months2025]);
+
+  // Raw arrays for production in monthly mode
   const artThuongList = months2026.map((d) => d.record.articleThuong || 0);
   const artTmaiList = months2026.map((d) => d.record.articleThuongMai || 0);
   const buildTopList = months2026.map((d) => d.record.aBuildTop || 0);
@@ -61,49 +75,93 @@ export const ArticleProductionView: React.FC<Props> = ({ monthlyData, selectedMo
     isPercent?: boolean;
   }
 
-  const items: ItemRow[] = [
-    {
-      code: 'A_Total',
-      name: 'Tổng Bài viết Xuất bản',
-      type: 'All',
-      color: '#3b82f6',
-      t8: t8?.record.articles || 0,
-      median: calculateMedian(totalArtList),
-    },
-    {
-      code: 'A_Editorial',
-      name: 'Bài Thường (Nội dung Biên tập)',
-      type: 'Editorial',
-      color: '#10b981',
-      t8: t8?.record.articleThuong || 0,
-      median: calculateMedian(artThuongList),
-    },
-    {
-      code: 'A_Commercial',
-      name: 'Bài Thương Mại (Sponsored / PR)',
-      type: 'Commercial',
-      color: '#f59e0b',
-      t8: t8?.record.articleThuongMai || 0,
-      median: calculateMedian(artTmaiList),
-    },
-    {
-      code: 'A_BuildTop',
-      name: 'Bài được Build Top (Lên Trang Bìa)',
-      type: 'Featured',
-      color: '#8b5cf6',
-      t8: t8?.record.aBuildTop || 0,
-      median: calculateMedian(buildTopList),
-    },
-    {
-      code: 'R_BuildTop',
-      name: 'Tỷ lệ Bài Viết Được Build Top (%)',
-      type: 'Ratio',
-      color: '#ec4899',
-      t8: (t8?.record.articles || 0) > 0 ? ((t8?.record.aBuildTop || 0) / t8.record.articles) * 100 : 0,
-      median: calculateMedian(buildRateList),
-      isPercent: true,
-    },
-  ];
+  const items: ItemRow[] = isYoYMode
+    ? [
+        {
+          code: 'A_Total',
+          name: 'Tổng Bài viết Xuất bản',
+          type: 'All',
+          color: '#3b82f6',
+          t8: totalArt2026,
+          median: totalArt2025,
+        },
+        {
+          code: 'A_Editorial',
+          name: 'Bài Thường (Nội dung Biên tập)',
+          type: 'Editorial',
+          color: '#10b981',
+          t8: artThuong2026,
+          median: artThuong2025,
+        },
+        {
+          code: 'A_Commercial',
+          name: 'Bài Thương Mại (Sponsored / PR)',
+          type: 'Commercial',
+          color: '#f59e0b',
+          t8: artTmai2026,
+          median: artTmai2025,
+        },
+        {
+          code: 'A_BuildTop',
+          name: 'Bài được Build Top (Lên Trang Bìa)',
+          type: 'Featured',
+          color: '#8b5cf6',
+          t8: buildTop2026,
+          median: buildTop2025,
+        },
+        {
+          code: 'R_BuildTop',
+          name: 'Tỷ lệ Bài Viết Được Build Top (%)',
+          type: 'Ratio',
+          color: '#ec4899',
+          t8: totalArt2026 > 0 ? (buildTop2026 / totalArt2026) * 100 : 0,
+          median: totalArt2025 > 0 ? (buildTop2025 / totalArt2025) * 100 : 0,
+          isPercent: true,
+        },
+      ]
+    : [
+        {
+          code: 'A_Total',
+          name: 'Tổng Bài viết Xuất bản',
+          type: 'All',
+          color: '#3b82f6',
+          t8: t8?.record.articles || 0,
+          median: calculateMedian(totalArtList),
+        },
+        {
+          code: 'A_Editorial',
+          name: 'Bài Thường (Nội dung Biên tập)',
+          type: 'Editorial',
+          color: '#10b981',
+          t8: t8?.record.articleThuong || 0,
+          median: calculateMedian(artThuongList),
+        },
+        {
+          code: 'A_Commercial',
+          name: 'Bài Thương Mại (Sponsored / PR)',
+          type: 'Commercial',
+          color: '#f59e0b',
+          t8: t8?.record.articleThuongMai || 0,
+          median: calculateMedian(artTmaiList),
+        },
+        {
+          code: 'A_BuildTop',
+          name: 'Bài được Build Top (Lên Trang Bìa)',
+          type: 'Featured',
+          color: '#8b5cf6',
+          t8: t8?.record.aBuildTop || 0,
+          median: calculateMedian(buildTopList),
+        },
+        {
+          code: 'R_BuildTop',
+          name: 'Tỷ lệ Bài Viết Được Build Top (%)',
+          type: 'Ratio',
+          color: '#ec4899',
+          t8: (t8?.record.articles || 0) > 0 ? ((t8?.record.aBuildTop || 0) / t8.record.articles) * 100 : 0,
+          median: calculateMedian(buildRateList),
+          isPercent: true,
+        },
+      ];
 
   const totalArtRow = items[0];
   const buildTopRow = items[3];
@@ -117,11 +175,15 @@ export const ArticleProductionView: React.FC<Props> = ({ monthlyData, selectedMo
         <div>
           <div className="flex items-center gap-2 flex-wrap sm:flex-nowrap">
             <h2 className="text-base font-bold text-slate-900 tracking-tight">
-              Động thái & Sản Lượng Bài Viết (Articles: Editorial vs Commercial & Build Top)
+              {isYoYMode
+                ? 'Động thái & Sản Lượng Bài Viết (Tổng 2026 vs Cùng kỳ 2025)'
+                : 'Động thái & Sản Lượng Bài Viết (Articles: Editorial vs Commercial & Build Top)'}
             </h2>
           </div>
           <p className="text-xs text-slate-500 mt-0.5">
-            Đánh giá năng suất toà soạn và tỷ lệ tuyển chọn bài viết lên trang bìa (Build Top)
+            {isYoYMode
+              ? 'Đánh giá năng suất toà soạn và tỷ lệ tuyển chọn bài viết lên trang bìa: Lũy kế 2026 so với cùng kỳ 2025'
+              : 'Đánh giá năng suất toà soạn và tỷ lệ tuyển chọn bài viết lên trang bìa (Build Top)'}
           </p>
         </div>
 
@@ -146,7 +208,9 @@ export const ArticleProductionView: React.FC<Props> = ({ monthlyData, selectedMo
         {/* Card 1: Total Output */}
         <div className="bg-white border border-slate-200/90 rounded-xl p-4 shadow-xs">
           <div className="flex items-center justify-between">
-            <span className="text-xs font-medium text-slate-500">Tổng Sản Lượng Bài Viết</span>
+            <span className="text-xs font-medium text-slate-500">
+              {isYoYMode ? 'Tổng Sản Lượng (Tổng 2026)' : 'Tổng Sản Lượng Bài Viết'}
+            </span>
             <span className="px-2 py-0.5 rounded text-[10px] font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200/70">
               Duy trì tốt
             </span>
@@ -154,13 +218,15 @@ export const ArticleProductionView: React.FC<Props> = ({ monthlyData, selectedMo
           <div className="mt-2 space-y-1">
             <div className="text-base font-bold text-slate-900 font-mono flex items-center gap-2">
               <span>{formatNumber(totalArtRow.t8)} bài</span>
-              <span className="text-xs font-semibold text-emerald-600">
+              <span className={`text-xs font-semibold ${totalArtRow.t8 >= totalArtRow.median ? 'text-emerald-600' : 'text-rose-600'}`}>
                 ({formatDelta(totalArtRow.t8 - totalArtRow.median, false)})
               </span>
             </div>
             <div className="text-xs text-slate-500 font-mono">
-              Tháng này: <strong className="text-slate-700">{formatNumber(totalArtRow.t8)}</strong>
-              {'  '}| Trung vị: <strong className="text-slate-700">{formatNumber(totalArtRow.median)}</strong>
+              {isYoYMode ? 'Tổng 2026: ' : 'Tháng này: '}
+              <strong className="text-slate-700">{formatNumber(totalArtRow.t8)}</strong>
+              {'  '}| {isYoYMode ? 'Cùng kỳ 2025: ' : 'Trung vị: '}
+              <strong className="text-slate-700">{formatNumber(totalArtRow.median)}</strong>
             </div>
           </div>
         </div>
@@ -181,8 +247,10 @@ export const ArticleProductionView: React.FC<Props> = ({ monthlyData, selectedMo
               </span>
             </div>
             <div className="text-xs text-slate-500 font-mono">
-              Tháng này: <strong className="text-slate-700">{formatNumber(buildTopRow.t8)}</strong>
-              {'  '}| Trung vị: <strong className="text-slate-700">{formatNumber(buildTopRow.median)}</strong>
+              {isYoYMode ? 'Tổng 2026: ' : 'Tháng này: '}
+              <strong className="text-slate-700">{formatNumber(buildTopRow.t8)}</strong>
+              {'  '}| {isYoYMode ? 'Cùng kỳ 2025: ' : 'Trung vị: '}
+              <strong className="text-slate-700">{formatNumber(buildTopRow.median)}</strong>
             </div>
           </div>
         </div>
@@ -268,10 +336,16 @@ export const ArticleProductionView: React.FC<Props> = ({ monthlyData, selectedMo
             <tr>
               <th className="py-3 px-4 font-sans">Loại Nội Dung</th>
               <th className="py-3 px-4 text-right font-sans">
-                {selectedMonth ? `Tháng ${selectedMonth}` : 'Tháng 8/2026'}
+                {isYoYMode
+                  ? 'Tổng 2026'
+                  : (selectedMonth ? `Tháng ${selectedMonth}` : 'Tháng 8/2026')}
               </th>
-              <th className="py-3 px-4 text-right font-sans">Mốc Trung Vị (2026)</th>
-              <th className="py-3 px-4 text-right font-sans min-w-[200px]">Lệch vs. Trung Vị</th>
+              <th className="py-3 px-4 text-right font-sans">
+                {isYoYMode ? 'Cùng Kỳ 2025' : 'Mốc Trung Vị (2026)'}
+              </th>
+              <th className="py-3 px-4 text-right font-sans min-w-[200px]">
+                {isYoYMode ? 'Lệch vs. Cùng Kỳ' : 'Lệch vs. Trung Vị'}
+              </th>
             </tr>
           </thead>
           <tbody className="divide-y divide-slate-100">

@@ -1,4 +1,4 @@
-import React, { useMemo } from 'react';
+import React, { useState, useMemo } from 'react';
 import { MonthlyDataPoint, calculateMedian, isSpecialPublication } from '../utils/timeSeriesAnalytics';
 import { formatNumber, formatPercent, formatDelta } from '../utils/formatters';
 import {
@@ -13,6 +13,7 @@ import {
   RefreshCw,
   ExternalLink,
   Pencil,
+  Table2,
 } from 'lucide-react';
 import { useDataset } from '../context/DatasetContext';
 
@@ -26,8 +27,10 @@ interface Props {
   onOpenReport: () => void;
   onOpenExcelImport: () => void;
   onOpenGoogleSheetSync: () => void;
-  selectedMonth: string;
-  onMonthChange: (month: string) => void;
+  selectedMonth?: string;
+  onMonthChange?: (month: string) => void;
+  isYoYMode?: boolean;
+  hideImportAndExport?: boolean;
 }
 
 export const ExecutiveHeader: React.FC<Props> = ({
@@ -40,16 +43,22 @@ export const ExecutiveHeader: React.FC<Props> = ({
   onOpenReport,
   onOpenExcelImport,
   onOpenGoogleSheetSync,
-  selectedMonth,
+  selectedMonth = '8/2026',
   onMonthChange,
+  isYoYMode = false,
+  hideImportAndExport = false,
 }) => {
+  const [showMonthlyTable, setShowMonthlyTable] = useState(false);
   const {
-    isCustomData,
-    customMeta,
     googleSheetConfig,
     isSyncingSheet,
   } = useDataset();
   const months2026 = monthlyData.filter((d) => d.year === 2026);
+  const months2025 = monthlyData.filter((d) => d.year === 2025);
+
+  // Match months available in 2026 to 2025
+  const availableMonthNums = new Set(months2026.map((d) => d.monthNum));
+  const matched2025 = months2025.filter((d) => availableMonthNums.has(d.monthNum));
 
   // Available months list for selection (in reverse chronological order)
   const availableMonths = useMemo(() => {
@@ -116,6 +125,37 @@ export const ExecutiveHeader: React.FC<Props> = ({
   const pctMedBuildTop = medBuildTop > 0 ? ((curBuildTop - medBuildTop) / medBuildTop) * 100 : 0;
   const curBuildRate = curArt > 0 ? (curBuildTop / curArt) * 100 : 0;
 
+  // --- YoY Accumulative Calculations ---
+  let pv2026Sum = 0;
+  let pv2025Sum = 0;
+  months2026.forEach((d) => { pv2026Sum += d.record.pageviews || 0; });
+  matched2025.forEach((d) => { pv2025Sum += d.record.pageviews || 0; });
+  const deltaYoYPV = pv2026Sum - pv2025Sum;
+  const pctYoYPV = pv2025Sum > 0 ? (deltaYoYPV / pv2025Sum) * 100 : 0;
+
+  let session2026Sum = 0;
+  let session2025Sum = 0;
+  months2026.forEach((d) => { session2026Sum += d.record.sessions || 0; });
+  matched2025.forEach((d) => { session2025Sum += d.record.sessions || 0; });
+  const deltaYoYSession = session2026Sum - session2025Sum;
+  const pctYoYSession = session2025Sum > 0 ? (deltaYoYSession / session2025Sum) * 100 : 0;
+  const yoyPvPerSession = session2026Sum > 0 ? pv2026Sum / session2026Sum : 0;
+
+  let art2026Sum = 0;
+  let art2025Sum = 0;
+  months2026.forEach((d) => { art2026Sum += d.record.articles || 0; });
+  matched2025.forEach((d) => { art2025Sum += d.record.articles || 0; });
+  const deltaYoYArt = art2026Sum - art2025Sum;
+  const pctYoYArt = art2025Sum > 0 ? (deltaYoYArt / art2025Sum) * 100 : 0;
+
+  let buildTop2026Sum = 0;
+  let buildTop2025Sum = 0;
+  months2026.forEach((d) => { buildTop2026Sum += d.record.aBuildTop || 0; });
+  matched2025.forEach((d) => { buildTop2025Sum += d.record.aBuildTop || 0; });
+  const deltaYoYBuildTop = buildTop2026Sum - buildTop2025Sum;
+  const pctYoYBuildTop = buildTop2025Sum > 0 ? (deltaYoYBuildTop / buildTop2025Sum) * 100 : 0;
+  const yoyBuildRate = art2026Sum > 0 ? (buildTop2026Sum / art2026Sum) * 100 : 0;
+
   const tabs = [
     { id: 'all', name: 'Toàn Bộ Góc Nhìn', icon: Layers },
     { id: 'sources', name: 'Nguồn Truy Cập (7 Nguồn)', icon: Compass },
@@ -135,16 +175,37 @@ export const ExecutiveHeader: React.FC<Props> = ({
               <h1 className="text-lg sm:text-xl font-bold text-slate-900 tracking-tight whitespace-nowrap">
                 Phân Tích Hiệu Quả Nội Dung VnExpress
               </h1>
-              <span className="px-2 py-0.5 rounded text-[11px] font-semibold bg-slate-100 text-slate-700 border border-slate-200 whitespace-nowrap">
-                Tháng {currentMonthLabel}
-              </span>
-              <span className="px-2 py-0.5 rounded text-[11px] font-semibold bg-blue-50 text-blue-700 border border-blue-200 whitespace-nowrap">
-                Chuẩn Trung vị 2026
-              </span>
+              {isYoYMode ? (
+                <>
+                  <span className="px-2 py-0.5 rounded text-[11px] font-semibold bg-slate-100 text-slate-700 border border-slate-200 whitespace-nowrap">
+                    Tổng 2026 vs Cùng kỳ 2025
+                  </span>
+                  <span className="px-2 py-0.5 rounded text-[11px] font-semibold bg-blue-50 text-blue-700 border border-blue-200 whitespace-nowrap">
+                    Chuẩn Cùng Kỳ 2025
+                  </span>
+                </>
+              ) : (
+                <>
+                  <span className="px-2 py-0.5 rounded text-[11px] font-semibold bg-slate-100 text-slate-700 border border-slate-200 whitespace-nowrap">
+                    Tháng {currentMonthLabel}
+                  </span>
+                  <span className="px-2 py-0.5 rounded text-[11px] font-semibold bg-blue-50 text-blue-700 border border-blue-200 whitespace-nowrap">
+                    Chuẩn Trung vị 2026
+                  </span>
+                </>
+              )}
             </div>
             <p className="text-xs text-slate-500 mt-1 flex items-center gap-1.5 flex-wrap">
               <span>
-                Đối chiếu số liệu Tháng {currentMonthLabel} với <strong>Mốc Trung vị chu kỳ năm 2026</strong>.
+                {isYoYMode ? (
+                  <>
+                    Đối chiếu số liệu <strong>Tổng lũy kế 2026</strong> với <strong>Cùng kỳ năm 2025</strong>.
+                  </>
+                ) : (
+                  <>
+                    Đối chiếu số liệu Tháng {currentMonthLabel} với <strong>Mốc Trung vị chu kỳ năm 2026</strong>.
+                  </>
+                )}
               </span>
               <span className="text-slate-300">•</span>
               <span className="text-slate-500 inline-flex items-center gap-1.5 flex-wrap">
@@ -184,24 +245,26 @@ export const ExecutiveHeader: React.FC<Props> = ({
 
           {/* Month filter, Scope selection & Action buttons */}
           <div className="flex items-center gap-2 flex-wrap sm:flex-nowrap">
-            {/* 1. Month Filter Box */}
-            <div className="flex items-center gap-2 bg-slate-50 border border-slate-200 rounded-lg px-2.5 py-1.5 shadow-2xs">
-              <label htmlFor="select-month-filter" className="text-[11px] text-slate-500 font-semibold whitespace-nowrap">
-                Kỳ phân tích:
-              </label>
-              <select
-                id="select-month-filter"
-                value={selectedMonth}
-                onChange={(e) => onMonthChange(e.target.value)}
-                className="bg-transparent text-slate-900 text-xs font-bold focus:outline-none cursor-pointer"
-              >
-                {availableMonths.map((m) => (
-                  <option key={m.value} value={m.value}>
-                    {m.label} {m.value === '8/2026' ? '(Mới nhất)' : ''}
-                  </option>
-                ))}
-              </select>
-            </div>
+            {/* 1. Month Filter Box - Hidden in YoY mode */}
+            {!isYoYMode && onMonthChange && (
+              <div className="flex items-center gap-2 bg-slate-50 border border-slate-200 rounded-lg px-2.5 py-1.5 shadow-2xs">
+                <label htmlFor="select-month-filter" className="text-[11px] text-slate-500 font-semibold whitespace-nowrap">
+                  Kỳ phân tích:
+                </label>
+                <select
+                  id="select-month-filter"
+                  value={selectedMonth}
+                  onChange={(e) => onMonthChange(e.target.value)}
+                  className="bg-transparent text-slate-900 text-xs font-bold focus:outline-none cursor-pointer"
+                >
+                  {availableMonths.map((m) => (
+                    <option key={m.value} value={m.value}>
+                      {m.label} {m.value === '8/2026' ? '(Mới nhất)' : ''}
+                    </option>
+                  ))}
+                </select>
+              </div>
+            )}
 
             {/* 2. Scope selection */}
             <div className="flex items-center gap-2 bg-slate-50 border border-slate-200 rounded-lg px-2.5 py-1.5 shadow-2xs">
@@ -250,6 +313,22 @@ export const ExecutiveHeader: React.FC<Props> = ({
               </select>
             </div>
 
+            {/* Nút bật tắt bảng chi tiết các tháng 2026 vs Trung vị */}
+            {!isYoYMode && (
+              <button
+                onClick={() => setShowMonthlyTable(!showMonthlyTable)}
+                className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg border font-medium text-xs transition shadow-xs cursor-pointer whitespace-nowrap ${
+                  showMonthlyTable
+                    ? 'bg-blue-50 text-blue-700 border-blue-300 font-semibold'
+                    : 'bg-white hover:bg-slate-50 text-slate-700 border-slate-200'
+                }`}
+                title="Bật/tắt bảng so sánh chi tiết các tháng trong năm 2026 với mốc trung vị"
+              >
+                <Table2 className="w-3.5 h-3.5 text-blue-600" />
+                <span>{showMonthlyTable ? 'Ẩn Bảng Các Tháng 2026' : 'Bảng Các Tháng 2026'}</span>
+              </button>
+            )}
+
             {/* Google Sheets Sync Button */}
             <button
               onClick={onOpenGoogleSheetSync}
@@ -268,23 +347,27 @@ export const ExecutiveHeader: React.FC<Props> = ({
             </button>
 
             {/* Import Excel / CSV Button */}
-            <button
-              onClick={onOpenExcelImport}
-              className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-700 border border-slate-200 font-medium text-xs transition shadow-xs cursor-pointer whitespace-nowrap"
-              title="Tải lên tệp Excel (.xlsx, .xls) hoặc CSV thủ công"
-            >
-              <FileSpreadsheet className="w-3.5 h-3.5" />
-              <span>Import Excel</span>
-            </button>
+            {!hideImportAndExport && (
+              <button
+                onClick={onOpenExcelImport}
+                className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-700 border border-slate-200 font-medium text-xs transition shadow-xs cursor-pointer whitespace-nowrap"
+                title="Tải lên tệp Excel (.xlsx, .xls) hoặc CSV thủ công"
+              >
+                <FileSpreadsheet className="w-3.5 h-3.5" />
+                <span>Import Excel</span>
+              </button>
+            )}
 
             {/* Export report button */}
-            <button
-              onClick={onOpenReport}
-              className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-slate-900 hover:bg-slate-800 text-white font-medium text-xs transition shadow-xs cursor-pointer whitespace-nowrap"
-            >
-              <FileDown className="w-3.5 h-3.5" />
-              <span>Xuất Báo Cáo</span>
-            </button>
+            {!hideImportAndExport && (
+              <button
+                onClick={onOpenReport}
+                className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-slate-900 hover:bg-slate-800 text-white font-medium text-xs transition shadow-xs cursor-pointer whitespace-nowrap"
+              >
+                <FileDown className="w-3.5 h-3.5" />
+                <span>Xuất Báo Cáo</span>
+              </button>
+            )}
           </div>
         </div>
 
@@ -297,28 +380,32 @@ export const ExecutiveHeader: React.FC<Props> = ({
                 Tổng Pageview
               </span>
               <span className="px-2 py-0.5 rounded text-[10px] sm:text-[11px] font-medium text-slate-500 bg-slate-50 border border-slate-200/70 whitespace-nowrap">
-                Tổng tháng
+                {isYoYMode ? 'Tổng lũy kế' : 'Tổng tháng'}
               </span>
             </div>
 
             <div className="my-2.5 flex items-baseline gap-1.5">
               <span className="text-xl sm:text-2xl font-extrabold text-slate-900 font-mono tracking-tight">
-                {formatNumber(curPV)}
+                {formatNumber(isYoYMode ? pv2026Sum : curPV)}
               </span>
               <span className="text-xs font-semibold text-slate-400 font-sans">PV</span>
             </div>
 
             <div className="border-t border-slate-100 pt-2.5">
               <div className="flex items-center justify-between text-xs">
-                <span className="text-[11px] text-slate-400 font-medium">Mốc Trung vị 2026:</span>
+                <span className="text-[11px] text-slate-400 font-medium">
+                  {isYoYMode ? 'Cùng kỳ 2025:' : 'Mốc Trung vị 2026:'}
+                </span>
                 <span className="font-bold text-slate-800 font-mono">
-                  {formatNumber(medPV)}
+                  {formatNumber(isYoYMode ? pv2025Sum : medPV)}
                 </span>
               </div>
               <div className="flex items-center justify-between text-xs mt-1">
-                <span className="text-[11px] text-slate-400 font-medium">Lệch vs Trung vị:</span>
-                <span className={`font-bold font-mono ${deltaMedPV >= 0 ? 'text-emerald-600' : 'text-rose-600'}`}>
-                  {formatDelta(deltaMedPV)} ({formatPercent(pctMedPV)})
+                <span className="text-[11px] text-slate-400 font-medium">
+                  {isYoYMode ? 'Lệch vs Cùng kỳ:' : 'Lệch vs Trung vị:'}
+                </span>
+                <span className={`font-bold font-mono ${(isYoYMode ? deltaYoYPV : deltaMedPV) >= 0 ? 'text-emerald-600' : 'text-rose-600'}`}>
+                  {formatDelta(isYoYMode ? deltaYoYPV : deltaMedPV)} ({formatPercent(isYoYMode ? pctYoYPV : pctMedPV)})
                 </span>
               </div>
             </div>
@@ -334,28 +421,34 @@ export const ExecutiveHeader: React.FC<Props> = ({
                 className="px-2 py-0.5 rounded text-[10px] sm:text-[11px] font-medium text-blue-700 bg-blue-50 border border-blue-200/70 whitespace-nowrap"
                 title="Lượt xem trung bình trên mỗi phiên (PV / Session)"
               >
-                {curPvPerSession > 0 ? `${curPvPerSession.toFixed(2)} PV/phiên` : 'Cột Z'}
+                {(isYoYMode ? yoyPvPerSession : curPvPerSession) > 0
+                  ? `${(isYoYMode ? yoyPvPerSession : curPvPerSession).toFixed(2)} PV/phiên`
+                  : 'Cột Z'}
               </span>
             </div>
 
             <div className="my-2.5 flex items-baseline gap-1.5">
               <span className="text-xl sm:text-2xl font-extrabold text-slate-900 font-mono tracking-tight">
-                {formatNumber(curSession)}
+                {formatNumber(isYoYMode ? session2026Sum : curSession)}
               </span>
               <span className="text-xs font-semibold text-slate-400 font-sans">Phiên</span>
             </div>
 
             <div className="border-t border-slate-100 pt-2.5">
               <div className="flex items-center justify-between text-xs">
-                <span className="text-[11px] text-slate-400 font-medium">Mốc Trung vị 2026:</span>
+                <span className="text-[11px] text-slate-400 font-medium">
+                  {isYoYMode ? 'Cùng kỳ 2025:' : 'Mốc Trung vị 2026:'}
+                </span>
                 <span className="font-bold text-slate-800 font-mono">
-                  {formatNumber(medSession)}
+                  {formatNumber(isYoYMode ? session2025Sum : medSession)}
                 </span>
               </div>
               <div className="flex items-center justify-between text-xs mt-1">
-                <span className="text-[11px] text-slate-400 font-medium">Lệch vs Trung vị:</span>
-                <span className={`font-bold font-mono ${deltaMedSession >= 0 ? 'text-emerald-600' : 'text-rose-600'}`}>
-                  {formatDelta(deltaMedSession)} ({formatPercent(pctMedSession)})
+                <span className="text-[11px] text-slate-400 font-medium">
+                  {isYoYMode ? 'Lệch vs Cùng kỳ:' : 'Lệch vs Trung vị:'}
+                </span>
+                <span className={`font-bold font-mono ${(isYoYMode ? deltaYoYSession : deltaMedSession) >= 0 ? 'text-emerald-600' : 'text-rose-600'}`}>
+                  {formatDelta(isYoYMode ? deltaYoYSession : deltaMedSession)} ({formatPercent(isYoYMode ? pctYoYSession : pctMedSession)})
                 </span>
               </div>
             </div>
@@ -368,28 +461,32 @@ export const ExecutiveHeader: React.FC<Props> = ({
                 Sản lượng Bài
               </span>
               <span className="px-2 py-0.5 rounded text-[10px] sm:text-[11px] font-medium text-slate-500 bg-slate-50 border border-slate-200/70 whitespace-nowrap">
-                Tổng tháng
+                {isYoYMode ? 'Tổng lũy kế' : 'Tổng tháng'}
               </span>
             </div>
 
             <div className="my-2.5 flex items-baseline gap-1.5">
               <span className="text-xl sm:text-2xl font-extrabold text-slate-900 font-mono tracking-tight">
-                {formatNumber(curArt)}
+                {formatNumber(isYoYMode ? art2026Sum : curArt)}
               </span>
               <span className="text-xs font-semibold text-slate-400 font-sans">Bài</span>
             </div>
 
             <div className="border-t border-slate-100 pt-2.5">
               <div className="flex items-center justify-between text-xs">
-                <span className="text-[11px] text-slate-400 font-medium">Mốc Trung vị 2026:</span>
+                <span className="text-[11px] text-slate-400 font-medium">
+                  {isYoYMode ? 'Cùng kỳ 2025:' : 'Mốc Trung vị 2026:'}
+                </span>
                 <span className="font-bold text-slate-800 font-mono">
-                  {formatNumber(medArt)}
+                  {formatNumber(isYoYMode ? art2025Sum : medArt)}
                 </span>
               </div>
               <div className="flex items-center justify-between text-xs mt-1">
-                <span className="text-[11px] text-slate-400 font-medium">Lệch vs Trung vị:</span>
-                <span className={`font-bold font-mono ${deltaMedArt >= 0 ? 'text-emerald-600' : 'text-rose-600'}`}>
-                  {formatDelta(deltaMedArt)} ({formatPercent(pctMedArt)})
+                <span className="text-[11px] text-slate-400 font-medium">
+                  {isYoYMode ? 'Lệch vs Cùng kỳ:' : 'Lệch vs Trung vị:'}
+                </span>
+                <span className={`font-bold font-mono ${(isYoYMode ? deltaYoYArt : deltaMedArt) >= 0 ? 'text-emerald-600' : 'text-rose-600'}`}>
+                  {formatDelta(isYoYMode ? deltaYoYArt : deltaMedArt)} ({formatPercent(isYoYMode ? pctYoYArt : pctMedArt)})
                 </span>
               </div>
             </div>
@@ -405,33 +502,197 @@ export const ExecutiveHeader: React.FC<Props> = ({
                 className="px-2 py-0.5 rounded text-[10px] sm:text-[11px] font-medium text-purple-700 bg-purple-50 border border-purple-200/70 whitespace-nowrap"
                 title="Tỷ lệ bài viết được build top lên trang bìa trên tổng sản lượng bài"
               >
-                {curBuildRate > 0 ? `${curBuildRate.toFixed(1)}% sản lượng` : 'Tổng tháng'}
+                {(isYoYMode ? yoyBuildRate : curBuildRate) > 0
+                  ? `${(isYoYMode ? yoyBuildRate : curBuildRate).toFixed(1)}% sản lượng`
+                  : isYoYMode ? 'Tổng lũy kế' : 'Tổng tháng'}
               </span>
             </div>
 
             <div className="my-2.5 flex items-baseline gap-1.5">
               <span className="text-xl sm:text-2xl font-extrabold text-slate-900 font-mono tracking-tight">
-                {formatNumber(curBuildTop)}
+                {formatNumber(isYoYMode ? buildTop2026Sum : curBuildTop)}
               </span>
               <span className="text-xs font-semibold text-slate-400 font-sans">Bài</span>
             </div>
 
             <div className="border-t border-slate-100 pt-2.5">
               <div className="flex items-center justify-between text-xs">
-                <span className="text-[11px] text-slate-400 font-medium">Mốc Trung vị 2026:</span>
+                <span className="text-[11px] text-slate-400 font-medium">
+                  {isYoYMode ? 'Cùng kỳ 2025:' : 'Mốc Trung vị 2026:'}
+                </span>
                 <span className="font-bold text-slate-800 font-mono">
-                  {formatNumber(medBuildTop)}
+                  {formatNumber(isYoYMode ? buildTop2025Sum : medBuildTop)}
                 </span>
               </div>
               <div className="flex items-center justify-between text-xs mt-1">
-                <span className="text-[11px] text-slate-400 font-medium">Lệch vs Trung vị:</span>
-                <span className={`font-bold font-mono ${deltaMedBuildTop >= 0 ? 'text-emerald-600' : 'text-rose-600'}`}>
-                  {formatDelta(deltaMedBuildTop)} ({formatPercent(pctMedBuildTop)})
+                <span className="text-[11px] text-slate-400 font-medium">
+                  {isYoYMode ? 'Lệch vs Cùng kỳ:' : 'Lệch vs Trung vị:'}
+                </span>
+                <span className={`font-bold font-mono ${(isYoYMode ? deltaYoYBuildTop : deltaMedBuildTop) >= 0 ? 'text-emerald-600' : 'text-rose-600'}`}>
+                  {formatDelta(isYoYMode ? deltaYoYBuildTop : deltaMedBuildTop)} ({formatPercent(isYoYMode ? pctYoYBuildTop : pctMedBuildTop)})
                 </span>
               </div>
             </div>
           </div>
         </div>
+
+        {/* Bảng so sánh số liệu các tháng năm 2026 vs. Mốc Trung Vị Chu Kỳ */}
+        {!isYoYMode && showMonthlyTable && (
+          <div className="mt-4 pt-4 border-t border-slate-100 animate-in fade-in duration-200 space-y-3">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+              <div>
+                <div className="flex items-center gap-2">
+                  <h3 className="text-xs sm:text-sm font-bold text-slate-900">
+                    Bảng So Sánh Các Tháng Năm 2026 vs. Mốc Trung Vị Chu Kỳ
+                  </h3>
+                  <span className="px-2 py-0.5 rounded text-[10px] font-semibold bg-blue-50 text-blue-700 border border-blue-200">
+                    Chuẩn Trung Vị 2026
+                  </span>
+                </div>
+                <p className="text-[11px] text-slate-500 mt-0.5">
+                  Bấm vào từng tháng để chuyển nhanh kỳ phân tích. Dữ liệu từng tháng được đối chiếu trực tiếp với mốc Trung vị chu kỳ năm 2026.
+                </p>
+              </div>
+              <div className="text-[11px] text-slate-500 font-medium whitespace-nowrap">
+                Kỳ đang xem: <strong className="text-blue-700 font-bold">Tháng {currentMonthLabel}</strong>
+              </div>
+            </div>
+
+            <div className="overflow-x-auto rounded-xl border border-slate-200/90 shadow-2xs">
+              <table className="w-full text-left text-xs text-slate-700">
+                <thead className="bg-slate-50 text-[11px] font-semibold text-slate-600 border-b border-slate-200">
+                  <tr>
+                    <th className="py-2.5 px-3.5 font-sans">Tháng trong năm 2026</th>
+                    <th className="py-2.5 px-3.5 text-right font-sans">Tổng Pageview</th>
+                    <th className="py-2.5 px-3.5 text-right font-sans">Tổng Session</th>
+                    <th className="py-2.5 px-3.5 text-right font-sans">Sản Lượng Bài</th>
+                    <th className="py-2.5 px-3.5 text-right font-sans">Số Bài Build Top</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-slate-100 bg-white">
+                  {months2026.map((m) => {
+                    const isSelected = m.month === selectedMonth;
+                    const pv = m.record.pageviews || 0;
+                    const dPv = pv - medPV;
+                    const pPv = medPV > 0 ? (dPv / medPV) * 100 : 0;
+
+                    const ss = m.record.sessions || 0;
+                    const dSs = ss - medSession;
+                    const pSs = medSession > 0 ? (dSs / medSession) * 100 : 0;
+
+                    const art = m.record.articles || 0;
+                    const dArt = art - medArt;
+                    const pArt = medArt > 0 ? (dArt / medArt) * 100 : 0;
+
+                    const bt = m.record.aBuildTop || 0;
+                    const dBt = bt - medBuildTop;
+                    const pBt = medBuildTop > 0 ? (dBt / medBuildTop) * 100 : 0;
+                    const btRate = art > 0 ? (bt / art) * 100 : 0;
+
+                    return (
+                      <tr
+                        key={m.month}
+                        onClick={() => onMonthChange && onMonthChange(m.month)}
+                        className={`transition cursor-pointer ${
+                          isSelected
+                            ? 'bg-blue-50/70 font-medium hover:bg-blue-50'
+                            : 'hover:bg-slate-50/80'
+                        }`}
+                        title="Bấm để chọn tháng này làm kỳ phân tích"
+                      >
+                        <td className="py-2.5 px-3.5 font-medium text-slate-900">
+                          <div className="flex items-center gap-2">
+                            <span className="font-semibold text-slate-800">Tháng {m.month}</span>
+                            {isSelected && (
+                              <span className="px-1.5 py-0.5 rounded text-[10px] font-bold bg-blue-600 text-white shadow-2xs">
+                                Đang chọn
+                              </span>
+                            )}
+                            {m.month === '8/2026' && !isSelected && (
+                              <span className="px-1.5 py-0.5 rounded text-[10px] font-medium bg-slate-100 text-slate-600 border border-slate-200">
+                                Mới nhất
+                              </span>
+                            )}
+                          </div>
+                        </td>
+
+                        {/* Tổng Pageview */}
+                        <td className="py-2.5 px-3.5 text-right font-mono">
+                          <div className="font-bold text-slate-900">{formatNumber(pv)}</div>
+                          <div className={`text-[11px] font-semibold ${dPv >= 0 ? 'text-emerald-600' : 'text-rose-600'}`}>
+                            {formatDelta(dPv)} ({formatPercent(pPv)})
+                          </div>
+                        </td>
+
+                        {/* Tổng Session */}
+                        <td className="py-2.5 px-3.5 text-right font-mono">
+                          <div className="font-bold text-slate-900">{formatNumber(ss)}</div>
+                          <div className={`text-[11px] font-semibold ${dSs >= 0 ? 'text-emerald-600' : 'text-rose-600'}`}>
+                            {formatDelta(dSs)} ({formatPercent(pSs)})
+                          </div>
+                        </td>
+
+                        {/* Sản Lượng Bài */}
+                        <td className="py-2.5 px-3.5 text-right font-mono">
+                          <div className="font-bold text-slate-900">{formatNumber(art)}</div>
+                          <div className={`text-[11px] font-semibold ${dArt >= 0 ? 'text-emerald-600' : 'text-rose-600'}`}>
+                            {formatDelta(dArt)} ({formatPercent(pArt)})
+                          </div>
+                        </td>
+
+                        {/* Số Bài Build Top */}
+                        <td className="py-2.5 px-3.5 text-right font-mono">
+                          <div className="font-bold text-slate-900 flex items-center justify-end gap-1">
+                            <span>{formatNumber(bt)}</span>
+                            {art > 0 && (
+                              <span className="text-[10px] text-slate-400 font-sans font-normal">
+                                ({btRate.toFixed(1)}%)
+                              </span>
+                            )}
+                          </div>
+                          <div className={`text-[11px] font-semibold ${dBt >= 0 ? 'text-emerald-600' : 'text-rose-600'}`}>
+                            {formatDelta(dBt)} ({formatPercent(pBt)})
+                          </div>
+                        </td>
+                      </tr>
+                    );
+                  })}
+                </tbody>
+
+                {/* Benchmark Reference Row */}
+                <tfoot className="bg-slate-100/90 font-semibold border-t-2 border-slate-300 text-slate-800">
+                  <tr>
+                    <td className="py-2.5 px-3.5 font-sans">
+                      <div className="flex items-center gap-1.5">
+                        <span className="w-2 h-2 rounded-full bg-blue-600" />
+                        <span className="font-bold text-slate-900">Mốc Trung Vị Chu Kỳ 2026</span>
+                        <span className="text-[10px] text-slate-500 font-normal">(Median Benchmark)</span>
+                      </div>
+                    </td>
+                    <td className="py-2.5 px-3.5 text-right font-mono font-bold text-slate-900">
+                      <div>{formatNumber(medPV)}</div>
+                      <div className="text-[10px] text-slate-500 font-normal">Chuẩn so sánh</div>
+                    </td>
+                    <td className="py-2.5 px-3.5 text-right font-mono font-bold text-slate-900">
+                      <div>{formatNumber(medSession)}</div>
+                      <div className="text-[10px] text-slate-500 font-normal">Chuẩn so sánh</div>
+                    </td>
+                    <td className="py-2.5 px-3.5 text-right font-mono font-bold text-slate-900">
+                      <div>{formatNumber(medArt)}</div>
+                      <div className="text-[10px] text-slate-500 font-normal">Chuẩn so sánh</div>
+                    </td>
+                    <td className="py-2.5 px-3.5 text-right font-mono font-bold text-slate-900">
+                      <div>{formatNumber(medBuildTop)}</div>
+                      <div className="text-[10px] text-slate-500 font-normal">
+                        {medArt > 0 ? `${((medBuildTop / medArt) * 100).toFixed(1)}%` : 'Chuẩn so sánh'}
+                      </div>
+                    </td>
+                  </tr>
+                </tfoot>
+              </table>
+            </div>
+          </div>
+        )}
       </div>
 
       {/* Clean Navigation Pills */}
