@@ -18,6 +18,8 @@ import { formatNumber, formatPercent, formatDelta } from '../../utils/formatters
 import {
   LineChart as LineChartIcon,
 } from 'lucide-react';
+import { NewsRecord } from '../../types';
+import { YoYMonthlySparkline, YoYMonthlyPoint } from '../common/YoYMonthlySparkline';
 
 interface Props {
   monthlyData: MonthlyDataPoint[];
@@ -84,6 +86,41 @@ export const ReaderSegmentsView: React.FC<Props> = ({
   const totalT8 = summary.totalT8;
   const totalMed = summary.totalMedian;
   const totalDeltaMed = totalT8 - totalMed;
+
+  // Helper YoY monthly series for Sparklines
+  const months2026 = useMemo(() => monthlyData.filter((d) => d.year === 2026), [monthlyData]);
+  const months2025 = useMemo(() => monthlyData.filter((d) => d.year === 2025), [monthlyData]);
+  const availableMonthNums = useMemo(() => {
+    return Array.from(new Set(months2026.map((d) => d.monthNum))).sort((a, b) => a - b);
+  }, [months2026]);
+
+  const getYoYSeries = (key: string): YoYMonthlyPoint[] => {
+    return availableMonthNums.map((mNum) => {
+      const d26 = months2026.find((d) => d.monthNum === mNum);
+      const d25 = months2025.find((d) => d.monthNum === mNum);
+      return {
+        monthNum: mNum,
+        monthLabel: `T${mNum}`,
+        val2026: Number(d26?.record[key as keyof NewsRecord]) || 0,
+        val2025: Number(d25?.record[key as keyof NewsRecord]) || 0,
+      };
+    });
+  };
+
+  const getTotalSeries = (): YoYMonthlyPoint[] => {
+    return availableMonthNums.map((mNum) => {
+      const d26 = months2026.find((d) => d.monthNum === mNum);
+      const d25 = months2025.find((d) => d.monthNum === mNum);
+      const v26 = readerConfig.reduce((sum, p) => sum + (Number(d26?.record[p.key]) || 0), 0);
+      const v25 = readerConfig.reduce((sum, p) => sum + (Number(d25?.record[p.key]) || 0), 0);
+      return {
+        monthNum: mNum,
+        monthLabel: `T${mNum}`,
+        val2026: v26,
+        val2025: v25,
+      };
+    });
+  };
 
   // Process rows with metadata
   const processedRows = useMemo(() => {
@@ -258,7 +295,7 @@ export const ReaderSegmentsView: React.FC<Props> = ({
         </div>
       )}
 
-      {/* 4. Main Clean Table (Tối giản 5 cột giống hệt PlatformsView và TrafficSourcesView) */}
+      {/* 4. Main Clean Table */}
       <div className="overflow-x-auto rounded-xl border border-slate-200/90 shadow-2xs">
         <table className="w-full text-left text-xs text-slate-700">
           <thead className="bg-slate-50 text-[11px] font-semibold text-slate-500 border-b border-slate-200">
@@ -278,6 +315,18 @@ export const ReaderSegmentsView: React.FC<Props> = ({
               <th className="py-3 px-4 text-right font-sans min-w-[200px]">
                 {isYoYMode ? 'Lệch vs. Cùng Kỳ' : 'Lệch vs. Trung Vị'}
               </th>
+              {isYoYMode && (
+                <th className="py-3 px-3 text-center font-sans min-w-[155px]">
+                  <div>Xu Hướng Tháng (YoY)</div>
+                  <div className="text-[9px] font-normal text-slate-400 flex items-center justify-center gap-1 mt-0.5 whitespace-nowrap">
+                    <span className="text-emerald-600 font-bold">● '26 &ge; '25</span>
+                    <span>|</span>
+                    <span className="text-rose-600 font-bold">● '26 &lt; '25</span>
+                    <span>|</span>
+                    <span className="text-slate-400">--- '25</span>
+                  </div>
+                </th>
+              )}
             </tr>
           </thead>
           <tbody className="divide-y divide-slate-100">
@@ -290,7 +339,7 @@ export const ReaderSegmentsView: React.FC<Props> = ({
                   key={row.key}
                   className="transition hover:bg-slate-50/70"
                 >
-                  {/* Cột 1: Phân Khúc Độc Giả (Tối giản, không bullet tròn) */}
+                  {/* Cột 1: Phân Khúc Độc Giả */}
                   <td className="py-3.5 px-4 font-sans font-medium text-slate-900">
                     <div className="flex items-center gap-2">
                       <span className="font-semibold text-slate-900">{row.code}</span>
@@ -336,6 +385,12 @@ export const ReaderSegmentsView: React.FC<Props> = ({
                       />
                     </div>
                   </td>
+
+                  {isYoYMode && (
+                    <td className="py-3.5 px-3 text-center align-middle">
+                      <YoYMonthlySparkline data={getYoYSeries(row.key as string)} />
+                    </td>
+                  )}
                 </tr>
               );
             })}
@@ -369,6 +424,11 @@ export const ReaderSegmentsView: React.FC<Props> = ({
                   {formatPercent(totalMed > 0 ? (totalDeltaMed / totalMed) * 100 : 0)})
                 </div>
               </td>
+              {isYoYMode && (
+                <td className="py-3.5 px-3 text-center align-middle">
+                  <YoYMonthlySparkline data={getTotalSeries()} />
+                </td>
+              )}
             </tr>
           </tfoot>
         </table>
@@ -376,3 +436,4 @@ export const ReaderSegmentsView: React.FC<Props> = ({
     </div>
   );
 };
+

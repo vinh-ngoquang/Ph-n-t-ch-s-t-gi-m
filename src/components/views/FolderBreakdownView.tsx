@@ -19,6 +19,7 @@ import { formatNumber, formatPercent, formatDelta } from '../../utils/formatters
 import { LineChart as LineChartIcon, Search, Filter, X, Eye, RotateCcw, Users, Heart } from 'lucide-react';
 import { RAW_DATASET } from '../../data/dataset';
 import { NewsRecord } from '../../types';
+import { YoYMonthlySparkline, YoYMonthlyPoint } from '../common/YoYMonthlySparkline';
 
 interface FolderBreakdownViewProps {
   dataset?: NewsRecord[];
@@ -207,6 +208,40 @@ export const FolderBreakdownView: React.FC<FolderBreakdownViewProps> = ({
   }, [currentData, selectedFolder, targetMonths, isYoYMode]);
 
   const top6Colors = ['#3b82f6', '#ec4899', '#10b981', '#f59e0b', '#8b5cf6', '#06b6d4'];
+
+  const availableMonthNums = useMemo(() => {
+    const set26 = new Set<number>();
+    currentData.forEach((r) => {
+      if (r.month && r.month.endsWith('/2026')) {
+        const m = parseInt(r.month.split('/')[0], 10);
+        if (!isNaN(m)) set26.add(m);
+      }
+    });
+    return Array.from(set26).sort((a, b) => a - b);
+  }, [currentData]);
+
+  const getFolderYoYSeries = (folderId: string, folderName: string): YoYMonthlyPoint[] => {
+    return availableMonthNums.map((mNum) => {
+      const rec26 = currentData.find(
+        (r) =>
+          r.month === `${mNum}/2026` &&
+          (r.folder_id === folderId ||
+            (r.folder && r.folder.toLowerCase() === folderName.toLowerCase()))
+      );
+      const rec25 = currentData.find(
+        (r) =>
+          r.month === `${mNum}/2025` &&
+          (r.folder_id === folderId ||
+            (r.folder && r.folder.toLowerCase() === folderName.toLowerCase()))
+      );
+      return {
+        monthNum: mNum,
+        monthLabel: `T${mNum}`,
+        val2026: Number(rec26?.pageviews) || 0,
+        val2025: Number(rec25?.pageviews) || 0,
+      };
+    });
+  };
 
   // Final filtered and sorted rows for the table
   const displayedRows = useMemo(() => {
@@ -662,6 +697,18 @@ export const FolderBreakdownView: React.FC<FolderBreakdownViewProps> = ({
                   <div>% Lover</div>
                   <div className="text-[9px] text-slate-400 font-normal">Tỷ trọng</div>
                 </th>
+                {isYoYMode && (
+                  <th className="py-3 px-3 text-center font-sans min-w-[155px]">
+                    <div>Xu Hướng Tháng (YoY)</div>
+                    <div className="text-[9px] font-normal text-slate-400 flex items-center justify-center gap-1 mt-0.5 whitespace-nowrap">
+                      <span className="text-emerald-600 font-bold">● '26 &ge; '25</span>
+                      <span>|</span>
+                      <span className="text-rose-600 font-bold">● '26 &lt; '25</span>
+                      <span>|</span>
+                      <span className="text-slate-400">--- '25</span>
+                    </div>
+                  </th>
+                )}
                 <th className="py-3 px-3 text-center font-sans">Thao Tác</th>
               </tr>
             ) : (
@@ -678,6 +725,18 @@ export const FolderBreakdownView: React.FC<FolderBreakdownViewProps> = ({
                   <div>{isYoYMode ? 'Lệch vs. Cùng Kỳ' : 'Lệch vs. Trung Vị'}</div>
                   <div className="text-[9px] text-slate-400 font-normal">Hụt PV & % Sụt giảm</div>
                 </th>
+                {isYoYMode && (
+                  <th className="py-3 px-3 text-center font-sans min-w-[155px]">
+                    <div>Xu Hướng Tháng (YoY)</div>
+                    <div className="text-[9px] font-normal text-slate-400 flex items-center justify-center gap-1 mt-0.5 whitespace-nowrap">
+                      <span className="text-emerald-600 font-bold">● '26 &ge; '25</span>
+                      <span>|</span>
+                      <span className="text-rose-600 font-bold">● '26 &lt; '25</span>
+                      <span>|</span>
+                      <span className="text-slate-400">--- '25</span>
+                    </div>
+                  </th>
+                )}
                 <th className="py-3 px-3 text-center font-sans">
                   <div>Đánh Giá</div>
                   <div className="text-[9px] text-slate-400 font-normal">Mốc 10%</div>
@@ -689,7 +748,7 @@ export const FolderBreakdownView: React.FC<FolderBreakdownViewProps> = ({
           <tbody className="divide-y divide-slate-100 font-mono text-xs">
             {displayedRows.length === 0 ? (
               <tr>
-                <td colSpan={viewPerspective === 'readers' ? 8 : 7} className="text-center py-8 text-slate-400 font-sans">
+                <td colSpan={isYoYMode ? (viewPerspective === 'readers' ? 9 : 8) : (viewPerspective === 'readers' ? 8 : 7)} className="text-center py-8 text-slate-400 font-sans">
                   Không tìm thấy folder phù hợp với điều kiện tìm kiếm/lọc.
                 </td>
               </tr>
@@ -786,6 +845,11 @@ export const FolderBreakdownView: React.FC<FolderBreakdownViewProps> = ({
                         <td className="py-3 px-3 text-right font-mono text-slate-800">
                           {formatPercent(item.pctLover || 0)}
                         </td>
+                        {isYoYMode && (
+                          <td className="py-3.5 px-3 text-center align-middle font-sans">
+                            <YoYMonthlySparkline data={getFolderYoYSeries(item.folderId, item.folderName)} />
+                          </td>
+                        )}
                       </>
                     ) : (
                       <>
@@ -808,6 +872,11 @@ export const FolderBreakdownView: React.FC<FolderBreakdownViewProps> = ({
                             />
                           </div>
                         </td>
+                        {isYoYMode && (
+                          <td className="py-3.5 px-3 text-center align-middle font-sans">
+                            <YoYMonthlySparkline data={getFolderYoYSeries(item.folderId, item.folderName)} />
+                          </td>
+                        )}
                         <td className="py-3 px-3 text-center font-sans">
                           {item.pctMedianPV < -10 ? (
                             <span className="px-2 py-0.5 rounded text-[10px] font-semibold bg-rose-50 text-rose-700 border border-rose-200/70">

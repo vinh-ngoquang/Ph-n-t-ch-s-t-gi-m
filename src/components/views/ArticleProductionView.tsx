@@ -12,6 +12,7 @@ import {
 import { MonthlyDataPoint, calculateMedian } from '../../utils/timeSeriesAnalytics';
 import { formatNumber, formatPercent, formatDelta } from '../../utils/formatters';
 import { LineChart as LineChartIcon } from 'lucide-react';
+import { YoYMonthlySparkline, YoYMonthlyPoint } from '../common/YoYMonthlySparkline';
 
 interface Props {
   monthlyData: MonthlyDataPoint[];
@@ -26,6 +27,48 @@ export const ArticleProductionView: React.FC<Props> = ({ monthlyData, selectedMo
   const months2025 = useMemo(() => monthlyData.filter((d) => d.year === 2025), [monthlyData]);
 
   const availableMonthNums = useMemo(() => new Set(months2026.map((d) => d.monthNum)), [months2026]);
+  const sortedAvailableMonthNums = useMemo(() => {
+    return Array.from(availableMonthNums).sort((a, b) => a - b);
+  }, [availableMonthNums]);
+
+  const getArticleYoYSeries = (code: string): YoYMonthlyPoint[] => {
+    return sortedAvailableMonthNums.map((mNum) => {
+      const d26 = months2026.find((d) => d.monthNum === mNum);
+      const d25 = months2025.find((d) => d.monthNum === mNum);
+      let val26 = 0;
+      let val25 = 0;
+
+      if (code === 'A_Total') {
+        val26 = d26?.record.articles || 0;
+        val25 = d25?.record.articles || 0;
+      } else if (code === 'A_Editorial') {
+        val26 = d26?.record.articleThuong || 0;
+        val25 = d25?.record.articleThuong || 0;
+      } else if (code === 'A_Commercial') {
+        val26 = d26?.record.articleThuongMai || 0;
+        val25 = d25?.record.articleThuongMai || 0;
+      } else if (code === 'A_BuildTop') {
+        val26 = d26?.record.aBuildTop || 0;
+        val25 = d25?.record.aBuildTop || 0;
+      } else if (code === 'R_BuildTop') {
+        const art26 = d26?.record.articles || 0;
+        const bt26 = d26?.record.aBuildTop || 0;
+        val26 = art26 > 0 ? (bt26 / art26) * 100 : 0;
+
+        const art25 = d25?.record.articles || 0;
+        const bt25 = d25?.record.aBuildTop || 0;
+        val25 = art25 > 0 ? (bt25 / art25) * 100 : 0;
+      }
+
+      return {
+        monthNum: mNum,
+        monthLabel: `T${mNum}`,
+        val2026: Number(val26.toFixed(1)),
+        val2025: Number(val25.toFixed(1)),
+      };
+    });
+  };
+
   const matched2025 = useMemo(
     () => months2025.filter((d) => availableMonthNums.has(d.monthNum)),
     [months2025, availableMonthNums]
@@ -349,6 +392,18 @@ export const ArticleProductionView: React.FC<Props> = ({ monthlyData, selectedMo
               <th className="py-3 px-4 text-right font-sans min-w-[200px]">
                 {isYoYMode ? 'Lệch vs. Cùng Kỳ' : 'Lệch vs. Trung Vị'}
               </th>
+              {isYoYMode && (
+                <th className="py-3 px-3 text-center font-sans min-w-[155px]">
+                  <div>Xu Hướng Tháng (YoY)</div>
+                  <div className="text-[9px] font-normal text-slate-400 flex items-center justify-center gap-1 mt-0.5 whitespace-nowrap">
+                    <span className="text-emerald-600 font-bold">● '26 &ge; '25</span>
+                    <span>|</span>
+                    <span className="text-rose-600 font-bold">● '26 &lt; '25</span>
+                    <span>|</span>
+                    <span className="text-slate-400">--- '25</span>
+                  </div>
+                </th>
+              )}
             </tr>
           </thead>
           <tbody className="divide-y divide-slate-100">
@@ -390,6 +445,12 @@ export const ArticleProductionView: React.FC<Props> = ({ monthlyData, selectedMo
                       </div>
                     )}
                   </td>
+
+                  {isYoYMode && (
+                    <td className="py-3.5 px-3 text-center align-middle">
+                      <YoYMonthlySparkline data={getArticleYoYSeries(row.code)} isPercent={row.isPercent} />
+                    </td>
+                  )}
                 </tr>
               );
             })}

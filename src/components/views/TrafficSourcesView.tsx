@@ -27,6 +27,7 @@ import {
   Percent,
 } from 'lucide-react';
 import { NewsRecord } from '../../types';
+import { YoYMonthlySparkline, YoYMonthlyPoint } from '../common/YoYMonthlySparkline';
 
 interface Props {
   monthlyData: MonthlyDataPoint[];
@@ -398,6 +399,92 @@ export const TrafficSourcesView: React.FC<Props> = ({
     });
   }, [summary.trendSeries, isYoYMode]);
 
+  // Helper YoY monthly series for Sparklines
+  const months2026 = useMemo(() => monthlyData.filter((d) => d.year === 2026), [monthlyData]);
+  const months2025 = useMemo(() => monthlyData.filter((d) => d.year === 2025), [monthlyData]);
+  const availableMonthNums = useMemo(() => {
+    return Array.from(new Set(months2026.map((d) => d.monthNum))).sort((a, b) => a - b);
+  }, [months2026]);
+
+  const getYoYSeries = (key: string): YoYMonthlyPoint[] => {
+    return availableMonthNums.map((mNum) => {
+      const d26 = months2026.find((d) => d.monthNum === mNum);
+      const d25 = months2025.find((d) => d.monthNum === mNum);
+      return {
+        monthNum: mNum,
+        monthLabel: `T${mNum}`,
+        val2026: Number(d26?.record[key as keyof NewsRecord]) || 0,
+        val2025: Number(d25?.record[key as keyof NewsRecord]) || 0,
+      };
+    });
+  };
+
+  const getGoogleSearchSeries = (): YoYMonthlyPoint[] => {
+    return availableMonthNums.map((mNum) => {
+      const d26 = months2026.find((d) => d.monthNum === mNum);
+      const d25 = months2025.find((d) => d.monthNum === mNum);
+      const v26 = d26 ? (d26.record.pExGoogleSearch && d26.record.pExGoogleSearch > 0 ? d26.record.pExGoogleSearch : Math.round((d26.record.pExGoogle || 0) * 0.62)) : 0;
+      const v25 = d25 ? (d25.record.pExGoogleSearch && d25.record.pExGoogleSearch > 0 ? d25.record.pExGoogleSearch : Math.round((d25.record.pExGoogle || 0) * 0.62)) : 0;
+      return { monthNum: mNum, monthLabel: `T${mNum}`, val2026: v26, val2025: v25 };
+    });
+  };
+
+  const getGoogleDiscoverSeries = (): YoYMonthlyPoint[] => {
+    return availableMonthNums.map((mNum) => {
+      const d26 = months2026.find((d) => d.monthNum === mNum);
+      const d25 = months2025.find((d) => d.monthNum === mNum);
+      const v26 = d26 ? (d26.record.pExGoogleDiscover && d26.record.pExGoogleDiscover > 0 ? d26.record.pExGoogleDiscover : Math.round((d26.record.pExGoogle || 0) * 0.38)) : 0;
+      const v25 = d25 ? (d25.record.pExGoogleDiscover && d25.record.pExGoogleDiscover > 0 ? d25.record.pExGoogleDiscover : Math.round((d25.record.pExGoogle || 0) * 0.38)) : 0;
+      return { monthNum: mNum, monthLabel: `T${mNum}`, val2026: v26, val2025: v25 };
+    });
+  };
+
+  const getDirectBrandnameSeries = (): YoYMonthlyPoint[] => {
+    return availableMonthNums.map((mNum) => {
+      const d26 = months2026.find((d) => d.monthNum === mNum);
+      const d25 = months2025.find((d) => d.monthNum === mNum);
+      return {
+        monthNum: mNum,
+        monthLabel: `T${mNum}`,
+        val2026: Number(d26?.record.pExDirectBrandname) || 0,
+        val2025: Number(d25?.record.pExDirectBrandname) || 0,
+      };
+    });
+  };
+
+  const getInternalSeries = (): YoYMonthlyPoint[] => {
+    return availableMonthNums.map((mNum) => {
+      const d26 = months2026.find((d) => d.monthNum === mNum);
+      const d25 = months2025.find((d) => d.monthNum === mNum);
+      const v26 = (d26?.record.pInHome || 0) + (d26?.record.pInFolder || 0) + (d26?.record.pInDetail || 0) + (d26?.record.pInOther || 0) + (d26?.record.pInTagTopic24h || 0);
+      const v25 = (d25?.record.pInHome || 0) + (d25?.record.pInFolder || 0) + (d25?.record.pInDetail || 0) + (d25?.record.pInOther || 0) + (d25?.record.pInTagTopic24h || 0);
+      return { monthNum: mNum, monthLabel: `T${mNum}`, val2026: v26, val2025: v25 };
+    });
+  };
+
+  const getExternalSeries = (): YoYMonthlyPoint[] => {
+    return availableMonthNums.map((mNum) => {
+      const d26 = months2026.find((d) => d.monthNum === mNum);
+      const d25 = months2025.find((d) => d.monthNum === mNum);
+      const v26 = (d26?.record.pExGoogle || 0) + (d26?.record.pExDirect || 0) + (d26?.record.pExSocial || 0);
+      const v25 = (d25?.record.pExGoogle || 0) + (d25?.record.pExDirect || 0) + (d25?.record.pExSocial || 0);
+      return { monthNum: mNum, monthLabel: `T${mNum}`, val2026: v26, val2025: v25 };
+    });
+  };
+
+  const getTotalSeries = (): YoYMonthlyPoint[] => {
+    return availableMonthNums.map((mNum) => {
+      const d26 = months2026.find((d) => d.monthNum === mNum);
+      const d25 = months2025.find((d) => d.monthNum === mNum);
+      return {
+        monthNum: mNum,
+        monthLabel: `T${mNum}`,
+        val2026: Number(d26?.record.pageviews) || 0,
+        val2025: Number(d25?.record.pageviews) || 0,
+      };
+    });
+  };
+
   const dropSharePct = (deepestDrop && totalDeltaMed < 0)
     ? Math.round((deepestDrop.deltaMedian / totalDeltaMed) * 100)
     : 0;
@@ -599,9 +686,21 @@ export const TrafficSourcesView: React.FC<Props> = ({
               <th className="py-3 px-4 text-right font-sans">
                 {isYoYMode ? 'Cùng Kỳ 2025' : 'Mốc Trung Vị (2026)'}
               </th>
-              <th className="py-3 px-4 text-right font-sans min-w-[200px]">
+              <th className="py-3 px-4 text-right font-sans min-w-[190px]">
                 {isYoYMode ? 'Lệch vs. Cùng Kỳ' : 'Lệch vs. Trung Vị'}
               </th>
+              {isYoYMode && (
+                <th className="py-3 px-3 text-center font-sans min-w-[155px]">
+                  <div>Xu Hướng Tháng (YoY)</div>
+                  <div className="text-[9px] font-normal text-slate-400 flex items-center justify-center gap-1 mt-0.5 whitespace-nowrap">
+                    <span className="text-emerald-600 font-bold">● '26 &ge; '25</span>
+                    <span>|</span>
+                    <span className="text-rose-600 font-bold">● '26 &lt; '25</span>
+                    <span>|</span>
+                    <span className="text-slate-400">--- '25</span>
+                  </div>
+                </th>
+              )}
             </tr>
           </thead>
           <tbody className="divide-y divide-slate-100">
@@ -724,6 +823,13 @@ export const TrafficSourcesView: React.FC<Props> = ({
                         />
                       </div>
                     </td>
+
+                    {/* YoY Sparkline Column */}
+                    {isYoYMode && (
+                      <td className="py-3.5 px-3 text-center align-middle">
+                        <YoYMonthlySparkline data={getYoYSeries(row.key as string)} />
+                      </td>
+                    )}
                   </tr>
 
                   {/* SUB-ROWS FOR P- Ex-Google: CHỈ XUẤT HIỆN KHI CHỌN NGUỒN P- Ex-Google VÀ Ở 4 PHẠM VI HỖ TRỢ */}
@@ -755,6 +861,11 @@ export const TrafficSourcesView: React.FC<Props> = ({
                             {formatDelta(googleDetails.deltaSearch)} ({formatPercent(googleDetails.pctSearch)})
                           </div>
                         </td>
+                        {isYoYMode && (
+                          <td className="py-2.5 px-3 text-center align-middle">
+                            <YoYMonthlySparkline data={getGoogleSearchSeries()} />
+                          </td>
+                        )}
                       </tr>
 
                       {/* Sub-row 2: Google Discover */}
@@ -783,11 +894,16 @@ export const TrafficSourcesView: React.FC<Props> = ({
                             {formatDelta(googleDetails.deltaDiscover)} ({formatPercent(googleDetails.pctDiscover)})
                           </div>
                         </td>
+                        {isYoYMode && (
+                          <td className="py-2.5 px-3 text-center align-middle">
+                            <YoYMonthlySparkline data={getGoogleDiscoverSeries()} />
+                          </td>
+                        )}
                       </tr>
 
                       {/* Info helper row */}
                       <tr className="bg-amber-50/40 text-[11px] text-amber-900 border-b border-amber-200/60 font-sans">
-                        <td colSpan={5} className="py-2 px-4 pl-10">
+                        <td colSpan={isYoYMode ? 6 : 5} className="py-2 px-4 pl-10">
                           <span>
                             Search và Discover là các nguồn đo lường độc lập, không phải tập con của P- Ex-Google và không cộng dồn vào tổng nguồn.
                           </span>
@@ -842,11 +958,16 @@ export const TrafficSourcesView: React.FC<Props> = ({
                             <div className="text-slate-400 font-sans text-xs">—</div>
                           )}
                         </td>
+                        {isYoYMode && (
+                          <td className="py-2.5 px-3 text-center align-middle">
+                            <YoYMonthlySparkline data={getDirectBrandnameSeries()} />
+                          </td>
+                        )}
                       </tr>
 
                       {/* Info helper row */}
                       <tr className="bg-blue-50/40 text-[11px] text-blue-900 border-b border-blue-200/60 font-sans">
-                        <td colSpan={5} className="py-2 px-4 pl-10">
+                        <td colSpan={isYoYMode ? 6 : 5} className="py-2 px-4 pl-10">
                           <span>
                             Chỉ số Brandname thể hiện mức độ tìm kiếm thương hiệu VnExpress (ghi nhận từ Tháng 3/2026), không phải tập con của P- Ex-Direct và không cộng dồn vào tổng nguồn.
                           </span>
@@ -889,6 +1010,11 @@ export const TrafficSourcesView: React.FC<Props> = ({
                   {formatDelta(internalDelta)} ({formatPercent(internalPct)})
                 </div>
               </td>
+              {isYoYMode && (
+                <td className="py-2.5 px-3 text-center align-middle">
+                  <YoYMonthlySparkline data={getInternalSeries()} />
+                </td>
+              )}
             </tr>
 
             {/* 2. TỔNG NGUỒN NGOÀI (EXTERNAL) */}
@@ -919,6 +1045,11 @@ export const TrafficSourcesView: React.FC<Props> = ({
                   {formatDelta(externalDelta)} ({formatPercent(externalPct)})
                 </div>
               </td>
+              {isYoYMode && (
+                <td className="py-2.5 px-3 text-center align-middle">
+                  <YoYMonthlySparkline data={getExternalSeries()} />
+                </td>
+              )}
             </tr>
 
             {/* 3. TỔNG TOÀN BỘ NGUỒN (INTERNAL + EXTERNAL) */}
@@ -953,6 +1084,11 @@ export const TrafficSourcesView: React.FC<Props> = ({
                   {formatPercent(totalMed > 0 ? (totalDeltaMed / totalMed) * 100 : 0)})
                 </div>
               </td>
+              {isYoYMode && (
+                <td className="py-3 px-3 text-center align-middle">
+                  <YoYMonthlySparkline data={getTotalSeries()} />
+                </td>
+              )}
             </tr>
           </tfoot>
         </table>
