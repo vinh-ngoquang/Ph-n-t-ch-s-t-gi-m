@@ -60,9 +60,39 @@ export const YoYMonthlySparkline: React.FC<YoYMonthlySparklineProps> = ({
       return padY + (1 - normalized) * innerH;
     };
 
-    // Index where 2026 starts
-    const splitIdx = longTermData.findIndex((d) => d.year === 2026);
-    const splitX = splitIdx > 0 ? (getX(splitIdx - 1) + getX(splitIdx)) / 2 : null;
+    // Calculate Linear Trend Line (Least Squares Linear Regression)
+    let trendLine: { x1: number; y1: number; x2: number; y2: number; slope: number } | null = null;
+    const n = longTermData.length;
+    if (n >= 2) {
+      let sumX = 0;
+      let sumY = 0;
+      let sumXY = 0;
+      let sumX2 = 0;
+      for (let i = 0; i < n; i++) {
+        const x = i;
+        const y = longTermData[i].val;
+        sumX += x;
+        sumY += y;
+        sumXY += x * y;
+        sumX2 += x * x;
+      }
+      const meanX = sumX / n;
+      const meanY = sumY / n;
+      const denominator = sumX2 - sumX * meanX;
+      const slope = denominator !== 0 ? (sumXY - sumX * meanY) / denominator : 0;
+      const intercept = meanY - slope * meanX;
+
+      const yTrendStart = intercept;
+      const yTrendEnd = slope * (n - 1) + intercept;
+
+      trendLine = {
+        x1: getX(0),
+        y1: getY(yTrendStart),
+        x2: getX(n - 1),
+        y2: getY(yTrendEnd),
+        slope,
+      };
+    }
 
     const hoveredItem = hoveredIdx !== null ? longTermData[hoveredIdx] : null;
 
@@ -84,16 +114,17 @@ export const YoYMonthlySparkline: React.FC<YoYMonthlySparklineProps> = ({
             strokeWidth="1"
           />
 
-          {/* Year Boundary Line 2025 | 2026 */}
-          {splitX !== null && (
+          {/* Linear Trend Line (Đường xu hướng dài hạn) */}
+          {trendLine && (
             <line
-              x1={splitX}
-              y1={2}
-              x2={splitX}
-              y2={height - 2}
-              stroke="#cbd5e1"
-              strokeWidth="1"
-              strokeDasharray="2 2"
+              x1={trendLine.x1}
+              y1={trendLine.y1}
+              x2={trendLine.x2}
+              y2={trendLine.y2}
+              stroke="#f59e0b"
+              strokeWidth="1.3"
+              strokeDasharray="3 2"
+              opacity={0.9}
             />
           )}
 

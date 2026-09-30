@@ -464,6 +464,8 @@ export const ArticleProductionView: React.FC<Props> = ({ monthlyData, selectedMo
                         <span className="text-slate-500 font-medium">Xám: '25</span>
                         <span>→</span>
                         <span className="text-blue-600 font-bold">Xanh: '26</span>
+                        <span>|</span>
+                        <span className="text-amber-500 font-semibold">--- Trend</span>
                       </>
                     )}
                   </div>
