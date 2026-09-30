@@ -27,7 +27,7 @@ import {
   Percent,
 } from 'lucide-react';
 import { NewsRecord } from '../../types';
-import { YoYMonthlySparkline, YoYMonthlyPoint } from '../common/YoYMonthlySparkline';
+import { YoYMonthlySparkline, YoYMonthlyPoint, LongTermPoint } from '../common/YoYMonthlySparkline';
 
 interface Props {
   monthlyData: MonthlyDataPoint[];
@@ -485,6 +485,64 @@ export const TrafficSourcesView: React.FC<Props> = ({
     });
   };
 
+  const [sparkMode, setSparkMode] = useState<'yoy' | 'longterm'>('yoy');
+
+  // Long-term continuous 2025 -> 2026 series
+  const getLongTermSeries = (key: string): LongTermPoint[] => {
+    return monthlyData.map((d) => ({
+      month: d.month,
+      monthLabel: d.label,
+      year: d.year,
+      val: Number(d.record[key as keyof NewsRecord]) || 0,
+    }));
+  };
+
+  const getGoogleSearchLongTermSeries = (): LongTermPoint[] => {
+    return monthlyData.map((d) => {
+      const v = d.record.pExGoogleSearch && d.record.pExGoogleSearch > 0 ? d.record.pExGoogleSearch : Math.round((d.record.pExGoogle || 0) * 0.62);
+      return { month: d.month, monthLabel: d.label, year: d.year, val: v };
+    });
+  };
+
+  const getGoogleDiscoverLongTermSeries = (): LongTermPoint[] => {
+    return monthlyData.map((d) => {
+      const v = d.record.pExGoogleDiscover && d.record.pExGoogleDiscover > 0 ? d.record.pExGoogleDiscover : Math.round((d.record.pExGoogle || 0) * 0.38);
+      return { month: d.month, monthLabel: d.label, year: d.year, val: v };
+    });
+  };
+
+  const getDirectBrandnameLongTermSeries = (): LongTermPoint[] => {
+    return monthlyData.map((d) => ({
+      month: d.month,
+      monthLabel: d.label,
+      year: d.year,
+      val: Number(d.record.pExDirectBrandname) || 0,
+    }));
+  };
+
+  const getInternalLongTermSeries = (): LongTermPoint[] => {
+    return monthlyData.map((d) => {
+      const v = (d.record.pInHome || 0) + (d.record.pInFolder || 0) + (d.record.pInDetail || 0) + (d.record.pInOther || 0) + (d.record.pInTagTopic24h || 0);
+      return { month: d.month, monthLabel: d.label, year: d.year, val: v };
+    });
+  };
+
+  const getExternalLongTermSeries = (): LongTermPoint[] => {
+    return monthlyData.map((d) => {
+      const v = (d.record.pExGoogle || 0) + (d.record.pExDirect || 0) + (d.record.pExSocial || 0);
+      return { month: d.month, monthLabel: d.label, year: d.year, val: v };
+    });
+  };
+
+  const getTotalLongTermSeries = (): LongTermPoint[] => {
+    return monthlyData.map((d) => ({
+      month: d.month,
+      monthLabel: d.label,
+      year: d.year,
+      val: Number(d.record.pageviews) || 0,
+    }));
+  };
+
   const dropSharePct = (deepestDrop && totalDeltaMed < 0)
     ? Math.round((deepestDrop.deltaMedian / totalDeltaMed) * 100)
     : 0;
@@ -690,14 +748,52 @@ export const TrafficSourcesView: React.FC<Props> = ({
                 {isYoYMode ? 'Lệch vs. Cùng Kỳ' : 'Lệch vs. Trung Vị'}
               </th>
               {isYoYMode && (
-                <th className="py-3 px-3 text-center font-sans min-w-[155px]">
-                  <div>Xu Hướng Tháng (YoY)</div>
+                <th className="py-2.5 px-3 text-center font-sans min-w-[175px]">
+                  <div className="flex items-center justify-center gap-1.5">
+                    <span className="font-semibold text-slate-700">Xu Hướng</span>
+                    <div className="inline-flex bg-slate-200/90 p-0.5 rounded text-[10px] font-medium">
+                      <button
+                        type="button"
+                        onClick={(e) => { e.stopPropagation(); setSparkMode('yoy'); }}
+                        className={`px-1.5 py-0.5 rounded transition cursor-pointer ${
+                          sparkMode === 'yoy'
+                            ? 'bg-white text-blue-700 shadow-2xs font-bold'
+                            : 'text-slate-600 hover:text-slate-900'
+                        }`}
+                        title="So sánh cùng kỳ 2026 vs 2025 theo từng tháng"
+                      >
+                        YoY
+                      </button>
+                      <button
+                        type="button"
+                        onClick={(e) => { e.stopPropagation(); setSparkMode('longterm'); }}
+                        className={`px-1.5 py-0.5 rounded transition cursor-pointer ${
+                          sparkMode === 'longterm'
+                            ? 'bg-white text-blue-700 shadow-2xs font-bold'
+                            : 'text-slate-600 hover:text-slate-900'
+                        }`}
+                        title="Đường xu hướng dài hạn liên tục từ 2025 đến 2026"
+                      >
+                        2025→2026
+                      </button>
+                    </div>
+                  </div>
                   <div className="text-[9px] font-normal text-slate-400 flex items-center justify-center gap-1 mt-0.5 whitespace-nowrap">
-                    <span className="text-emerald-600 font-bold">● '26 &ge; '25</span>
-                    <span>|</span>
-                    <span className="text-rose-600 font-bold">● '26 &lt; '25</span>
-                    <span>|</span>
-                    <span className="text-slate-400">--- '25</span>
+                    {sparkMode === 'yoy' ? (
+                      <>
+                        <span className="text-emerald-600 font-bold">● '26 &ge; '25</span>
+                        <span>|</span>
+                        <span className="text-rose-600 font-bold">● '26 &lt; '25</span>
+                        <span>|</span>
+                        <span className="text-slate-400">--- '25</span>
+                      </>
+                    ) : (
+                      <>
+                        <span className="text-slate-500 font-medium">Xám: '25</span>
+                        <span>→</span>
+                        <span className="text-blue-600 font-bold">Xanh: '26</span>
+                      </>
+                    )}
                   </div>
                 </th>
               )}
@@ -827,7 +923,11 @@ export const TrafficSourcesView: React.FC<Props> = ({
                     {/* YoY Sparkline Column */}
                     {isYoYMode && (
                       <td className="py-3.5 px-3 text-center align-middle">
-                        <YoYMonthlySparkline data={getYoYSeries(row.key as string)} />
+                        <YoYMonthlySparkline
+                          data={getYoYSeries(row.key as string)}
+                          longTermData={getLongTermSeries(row.key as string)}
+                          mode={sparkMode}
+                        />
                       </td>
                     )}
                   </tr>
@@ -863,7 +963,11 @@ export const TrafficSourcesView: React.FC<Props> = ({
                         </td>
                         {isYoYMode && (
                           <td className="py-2.5 px-3 text-center align-middle">
-                            <YoYMonthlySparkline data={getGoogleSearchSeries()} />
+                            <YoYMonthlySparkline
+                              data={getGoogleSearchSeries()}
+                              longTermData={getGoogleSearchLongTermSeries()}
+                              mode={sparkMode}
+                            />
                           </td>
                         )}
                       </tr>
@@ -896,7 +1000,11 @@ export const TrafficSourcesView: React.FC<Props> = ({
                         </td>
                         {isYoYMode && (
                           <td className="py-2.5 px-3 text-center align-middle">
-                            <YoYMonthlySparkline data={getGoogleDiscoverSeries()} />
+                            <YoYMonthlySparkline
+                              data={getGoogleDiscoverSeries()}
+                              longTermData={getGoogleDiscoverLongTermSeries()}
+                              mode={sparkMode}
+                            />
                           </td>
                         )}
                       </tr>
@@ -960,7 +1068,11 @@ export const TrafficSourcesView: React.FC<Props> = ({
                         </td>
                         {isYoYMode && (
                           <td className="py-2.5 px-3 text-center align-middle">
-                            <YoYMonthlySparkline data={getDirectBrandnameSeries()} />
+                            <YoYMonthlySparkline
+                              data={getDirectBrandnameSeries()}
+                              longTermData={getDirectBrandnameLongTermSeries()}
+                              mode={sparkMode}
+                            />
                           </td>
                         )}
                       </tr>
@@ -1012,7 +1124,11 @@ export const TrafficSourcesView: React.FC<Props> = ({
               </td>
               {isYoYMode && (
                 <td className="py-2.5 px-3 text-center align-middle">
-                  <YoYMonthlySparkline data={getInternalSeries()} />
+                  <YoYMonthlySparkline
+                    data={getInternalSeries()}
+                    longTermData={getInternalLongTermSeries()}
+                    mode={sparkMode}
+                  />
                 </td>
               )}
             </tr>
@@ -1047,7 +1163,11 @@ export const TrafficSourcesView: React.FC<Props> = ({
               </td>
               {isYoYMode && (
                 <td className="py-2.5 px-3 text-center align-middle">
-                  <YoYMonthlySparkline data={getExternalSeries()} />
+                  <YoYMonthlySparkline
+                    data={getExternalSeries()}
+                    longTermData={getExternalLongTermSeries()}
+                    mode={sparkMode}
+                  />
                 </td>
               )}
             </tr>
@@ -1086,7 +1206,11 @@ export const TrafficSourcesView: React.FC<Props> = ({
               </td>
               {isYoYMode && (
                 <td className="py-3 px-3 text-center align-middle">
-                  <YoYMonthlySparkline data={getTotalSeries()} />
+                  <YoYMonthlySparkline
+                    data={getTotalSeries()}
+                    longTermData={getTotalLongTermSeries()}
+                    mode={sparkMode}
+                  />
                 </td>
               )}
             </tr>

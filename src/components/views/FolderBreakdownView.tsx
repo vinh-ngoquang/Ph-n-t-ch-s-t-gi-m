@@ -19,7 +19,7 @@ import { formatNumber, formatPercent, formatDelta } from '../../utils/formatters
 import { LineChart as LineChartIcon, Search, Filter, X, Eye, RotateCcw, Users, Heart } from 'lucide-react';
 import { RAW_DATASET } from '../../data/dataset';
 import { NewsRecord } from '../../types';
-import { YoYMonthlySparkline, YoYMonthlyPoint } from '../common/YoYMonthlySparkline';
+import { YoYMonthlySparkline, YoYMonthlyPoint, LongTermPoint } from '../common/YoYMonthlySparkline';
 
 interface FolderBreakdownViewProps {
   dataset?: NewsRecord[];
@@ -239,6 +239,26 @@ export const FolderBreakdownView: React.FC<FolderBreakdownViewProps> = ({
         monthLabel: `T${mNum}`,
         val2026: Number(rec26?.pageviews) || 0,
         val2025: Number(rec25?.pageviews) || 0,
+      };
+    });
+  };
+
+  const [sparkMode, setSparkMode] = useState<'yoy' | 'longterm'>('yoy');
+
+  const getFolderLongTermSeries = (folderId: string, folderName: string): LongTermPoint[] => {
+    return allMonthsList.map((m) => {
+      const [mo, yr] = m.split('/').map(Number);
+      const rec = currentData.find(
+        (r) =>
+          r.month === m &&
+          (r.folder_id === folderId ||
+            (r.folder && r.folder.toLowerCase() === folderName.toLowerCase()))
+      );
+      return {
+        month: m,
+        monthLabel: `T${mo}/${String(yr).slice(-2)}`,
+        year: yr,
+        val: Number(rec?.pageviews) || 0,
       };
     });
   };
@@ -698,14 +718,52 @@ export const FolderBreakdownView: React.FC<FolderBreakdownViewProps> = ({
                   <div className="text-[9px] text-slate-400 font-normal">Tỷ trọng</div>
                 </th>
                 {isYoYMode && (
-                  <th className="py-3 px-3 text-center font-sans min-w-[155px]">
-                    <div>Xu Hướng Tháng (YoY)</div>
+                  <th className="py-2.5 px-3 text-center font-sans min-w-[175px]">
+                    <div className="flex items-center justify-center gap-1.5">
+                      <span className="font-semibold text-slate-700">Xu Hướng</span>
+                      <div className="inline-flex bg-slate-200/90 p-0.5 rounded text-[10px] font-medium">
+                        <button
+                          type="button"
+                          onClick={(e) => { e.stopPropagation(); setSparkMode('yoy'); }}
+                          className={`px-1.5 py-0.5 rounded transition cursor-pointer ${
+                            sparkMode === 'yoy'
+                              ? 'bg-white text-blue-700 shadow-2xs font-bold'
+                              : 'text-slate-600 hover:text-slate-900'
+                          }`}
+                          title="So sánh cùng kỳ 2026 vs 2025 theo từng tháng"
+                        >
+                          YoY
+                        </button>
+                        <button
+                          type="button"
+                          onClick={(e) => { e.stopPropagation(); setSparkMode('longterm'); }}
+                          className={`px-1.5 py-0.5 rounded transition cursor-pointer ${
+                            sparkMode === 'longterm'
+                              ? 'bg-white text-blue-700 shadow-2xs font-bold'
+                              : 'text-slate-600 hover:text-slate-900'
+                          }`}
+                          title="Đường xu hướng dài hạn liên tục từ 2025 đến 2026"
+                        >
+                          2025→2026
+                        </button>
+                      </div>
+                    </div>
                     <div className="text-[9px] font-normal text-slate-400 flex items-center justify-center gap-1 mt-0.5 whitespace-nowrap">
-                      <span className="text-emerald-600 font-bold">● '26 &ge; '25</span>
-                      <span>|</span>
-                      <span className="text-rose-600 font-bold">● '26 &lt; '25</span>
-                      <span>|</span>
-                      <span className="text-slate-400">--- '25</span>
+                      {sparkMode === 'yoy' ? (
+                        <>
+                          <span className="text-emerald-600 font-bold">● '26 &ge; '25</span>
+                          <span>|</span>
+                          <span className="text-rose-600 font-bold">● '26 &lt; '25</span>
+                          <span>|</span>
+                          <span className="text-slate-400">--- '25</span>
+                        </>
+                      ) : (
+                        <>
+                          <span className="text-slate-500 font-medium">Xám: '25</span>
+                          <span>→</span>
+                          <span className="text-blue-600 font-bold">Xanh: '26</span>
+                        </>
+                      )}
                     </div>
                   </th>
                 )}
@@ -726,14 +784,52 @@ export const FolderBreakdownView: React.FC<FolderBreakdownViewProps> = ({
                   <div className="text-[9px] text-slate-400 font-normal">Hụt PV & % Sụt giảm</div>
                 </th>
                 {isYoYMode && (
-                  <th className="py-3 px-3 text-center font-sans min-w-[155px]">
-                    <div>Xu Hướng Tháng (YoY)</div>
+                  <th className="py-2.5 px-3 text-center font-sans min-w-[175px]">
+                    <div className="flex items-center justify-center gap-1.5">
+                      <span className="font-semibold text-slate-700">Xu Hướng</span>
+                      <div className="inline-flex bg-slate-200/90 p-0.5 rounded text-[10px] font-medium">
+                        <button
+                          type="button"
+                          onClick={(e) => { e.stopPropagation(); setSparkMode('yoy'); }}
+                          className={`px-1.5 py-0.5 rounded transition cursor-pointer ${
+                            sparkMode === 'yoy'
+                              ? 'bg-white text-blue-700 shadow-2xs font-bold'
+                              : 'text-slate-600 hover:text-slate-900'
+                          }`}
+                          title="So sánh cùng kỳ 2026 vs 2025 theo từng tháng"
+                        >
+                          YoY
+                        </button>
+                        <button
+                          type="button"
+                          onClick={(e) => { e.stopPropagation(); setSparkMode('longterm'); }}
+                          className={`px-1.5 py-0.5 rounded transition cursor-pointer ${
+                            sparkMode === 'longterm'
+                              ? 'bg-white text-blue-700 shadow-2xs font-bold'
+                              : 'text-slate-600 hover:text-slate-900'
+                          }`}
+                          title="Đường xu hướng dài hạn liên tục từ 2025 đến 2026"
+                        >
+                          2025→2026
+                        </button>
+                      </div>
+                    </div>
                     <div className="text-[9px] font-normal text-slate-400 flex items-center justify-center gap-1 mt-0.5 whitespace-nowrap">
-                      <span className="text-emerald-600 font-bold">● '26 &ge; '25</span>
-                      <span>|</span>
-                      <span className="text-rose-600 font-bold">● '26 &lt; '25</span>
-                      <span>|</span>
-                      <span className="text-slate-400">--- '25</span>
+                      {sparkMode === 'yoy' ? (
+                        <>
+                          <span className="text-emerald-600 font-bold">● '26 &ge; '25</span>
+                          <span>|</span>
+                          <span className="text-rose-600 font-bold">● '26 &lt; '25</span>
+                          <span>|</span>
+                          <span className="text-slate-400">--- '25</span>
+                        </>
+                      ) : (
+                        <>
+                          <span className="text-slate-500 font-medium">Xám: '25</span>
+                          <span>→</span>
+                          <span className="text-blue-600 font-bold">Xanh: '26</span>
+                        </>
+                      )}
                     </div>
                   </th>
                 )}
@@ -847,7 +943,11 @@ export const FolderBreakdownView: React.FC<FolderBreakdownViewProps> = ({
                         </td>
                         {isYoYMode && (
                           <td className="py-3.5 px-3 text-center align-middle font-sans">
-                            <YoYMonthlySparkline data={getFolderYoYSeries(item.folderId, item.folderName)} />
+                            <YoYMonthlySparkline
+                              data={getFolderYoYSeries(item.folderId, item.folderName)}
+                              longTermData={getFolderLongTermSeries(item.folderId, item.folderName)}
+                              mode={sparkMode}
+                            />
                           </td>
                         )}
                       </>
@@ -874,7 +974,11 @@ export const FolderBreakdownView: React.FC<FolderBreakdownViewProps> = ({
                         </td>
                         {isYoYMode && (
                           <td className="py-3.5 px-3 text-center align-middle font-sans">
-                            <YoYMonthlySparkline data={getFolderYoYSeries(item.folderId, item.folderName)} />
+                            <YoYMonthlySparkline
+                              data={getFolderYoYSeries(item.folderId, item.folderName)}
+                              longTermData={getFolderLongTermSeries(item.folderId, item.folderName)}
+                              mode={sparkMode}
+                            />
                           </td>
                         )}
                         <td className="py-3 px-3 text-center font-sans">

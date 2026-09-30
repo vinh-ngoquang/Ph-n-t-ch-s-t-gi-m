@@ -8,8 +8,17 @@ export interface YoYMonthlyPoint {
   val2025: number;
 }
 
+export interface LongTermPoint {
+  month: string;      // e.g. "1/2025", "1/2026"
+  monthLabel: string; // e.g. "T1/25", "T8/26"
+  year: number;       // 2025 or 2026
+  val: number;
+}
+
 interface YoYMonthlySparklineProps {
   data: YoYMonthlyPoint[];
+  longTermData?: LongTermPoint[];
+  mode?: 'yoy' | 'longterm';
   width?: number;
   height?: number;
   isPercent?: boolean;
@@ -18,13 +27,177 @@ interface YoYMonthlySparklineProps {
 
 export const YoYMonthlySparkline: React.FC<YoYMonthlySparklineProps> = ({
   data,
-  width = 150,
+  longTermData,
+  mode = 'yoy',
+  width = 160,
   height = 36,
   isPercent = false,
   unit = 'PV',
 }) => {
   const [hoveredIdx, setHoveredIdx] = useState<number | null>(null);
 
+  // LONG-TERM CONTINUOUS 2025 -> 2026 MODE
+  if (mode === 'longterm' && longTermData && longTermData.length > 0) {
+    const padX = 6;
+    const padY = 5;
+    const innerW = width - padX * 2;
+    const innerH = height - padY * 2;
+
+    const allVals = longTermData.map((d) => d.val || 0);
+    const rawMin = Math.min(...allVals);
+    const rawMax = Math.max(...allVals);
+    const minVal = Math.max(0, rawMin - (rawMax - rawMin) * 0.05);
+    const maxVal = rawMax === minVal ? (rawMax === 0 ? 1 : rawMax * 1.1) : rawMax + (rawMax - rawMin) * 0.08;
+
+    const getX = (idx: number) => {
+      if (longTermData.length <= 1) return padX + innerW / 2;
+      return padX + (idx / (longTermData.length - 1)) * innerW;
+    };
+
+    const getY = (val: number) => {
+      const range = maxVal - minVal || 1;
+      const normalized = (val - minVal) / range;
+      return padY + (1 - normalized) * innerH;
+    };
+
+    // Index where 2026 starts
+    const splitIdx = longTermData.findIndex((d) => d.year === 2026);
+    const splitX = splitIdx > 0 ? (getX(splitIdx - 1) + getX(splitIdx)) / 2 : null;
+
+    const hoveredItem = hoveredIdx !== null ? longTermData[hoveredIdx] : null;
+
+    return (
+      <div className="relative inline-flex items-center group/spark">
+        <svg
+          width={width}
+          height={height}
+          className="overflow-visible select-none cursor-pointer"
+          onMouseLeave={() => setHoveredIdx(null)}
+        >
+          {/* Background baseline */}
+          <line
+            x1={padX}
+            y1={height - 2}
+            x2={width - padX}
+            y2={height - 2}
+            stroke="#e2e8f0"
+            strokeWidth="1"
+          />
+
+          {/* Year Boundary Line 2025 | 2026 */}
+          {splitX !== null && (
+            <line
+              x1={splitX}
+              y1={2}
+              x2={splitX}
+              y2={height - 2}
+              stroke="#cbd5e1"
+              strokeWidth="1"
+              strokeDasharray="2 2"
+            />
+          )}
+
+          {/* Continuous Line Segments */}
+          {longTermData.map((d, i) => {
+            if (i === 0) return null;
+            const prev = longTermData[i - 1];
+            const x1 = getX(i - 1);
+            const y1 = getY(prev.val);
+            const x2 = getX(i);
+            const y2 = getY(d.val);
+            const is2026 = d.year === 2026;
+            const strokeColor = is2026 ? '#2563eb' : '#94a3b8';
+
+            return (
+              <line
+                key={`lt-seg-${i}`}
+                x1={x1}
+                y1={y1}
+                x2={x2}
+                y2={y2}
+                stroke={strokeColor}
+                strokeWidth={is2026 ? 2.2 : 1.6}
+                strokeLinecap="round"
+              />
+            );
+          })}
+
+          {/* Vertical indicator line when hovered */}
+          {hoveredIdx !== null && (
+            <line
+              x1={getX(hoveredIdx)}
+              y1={2}
+              x2={getX(hoveredIdx)}
+              y2={height - 2}
+              stroke="#3b82f6"
+              strokeWidth="1"
+              strokeDasharray="2 1"
+            />
+          )}
+
+          {/* Month dots */}
+          {longTermData.map((d, i) => {
+            const is2026 = d.year === 2026;
+            const isHovered = hoveredIdx === i;
+            const dotColor = is2026 ? '#2563eb' : '#94a3b8';
+
+            return (
+              <g
+                key={`lt-dot-${i}`}
+                onMouseEnter={() => setHoveredIdx(i)}
+                className="cursor-pointer"
+              >
+                <circle cx={getX(i)} cy={getY(d.val)} r={6} fill="transparent" />
+                {isHovered && (
+                  <circle
+                    cx={getX(i)}
+                    cy={getY(d.val)}
+                    r={5}
+                    fill="none"
+                    stroke={dotColor}
+                    strokeWidth="1.5"
+                    opacity={0.5}
+                  />
+                )}
+                <circle
+                  cx={getX(i)}
+                  cy={getY(d.val)}
+                  r={isHovered ? 3.5 : (is2026 ? 2.5 : 1.5)}
+                  fill={dotColor}
+                  stroke="#ffffff"
+                  strokeWidth={is2026 ? 1 : 0.5}
+                />
+              </g>
+            );
+          })}
+        </svg>
+
+        {/* Floating Tooltip for Long Term */}
+        {hoveredItem && (
+          <div className="absolute z-30 pointer-events-none bg-slate-900/95 text-white text-[10px] rounded-lg px-2.5 py-1.5 shadow-xl border border-slate-700/80 -top-12 left-1/2 -translate-x-1/2 whitespace-nowrap min-w-[110px] transition-all">
+            <div className="font-bold border-b border-slate-700/70 pb-0.5 mb-1 flex items-center justify-between gap-2">
+              <span>{hoveredItem.monthLabel || hoveredItem.month}</span>
+              <span
+                className={`px-1 py-0.2 rounded text-[9px] font-bold ${
+                  hoveredItem.year === 2026 ? 'bg-blue-500/20 text-blue-300' : 'bg-slate-500/20 text-slate-300'
+                }`}
+              >
+                Năm {hoveredItem.year}
+              </span>
+            </div>
+            <div className="flex items-center justify-between gap-3 font-mono text-[9.5px]">
+              <span className="text-slate-400">Giá trị:</span>
+              <span className="text-right font-bold text-white">
+                {isPercent ? `${hoveredItem.val.toFixed(1)}%` : formatNumber(hoveredItem.val)} {unit && !isPercent ? unit : ''}
+              </span>
+            </div>
+          </div>
+        )}
+      </div>
+    );
+  }
+
+  // YOY DUAL-LINE COMPARISON MODE (DEFAULT)
   if (!data || data.length === 0) {
     return <span className="text-slate-300 text-xs">-</span>;
   }
@@ -45,11 +218,7 @@ export const YoYMonthlySparkline: React.FC<YoYMonthlySparklineProps> = ({
   const rawMin = Math.min(...allVals);
   const rawMax = Math.max(...allVals);
   const minVal = Math.max(0, rawMin - (rawMax - rawMin) * 0.05);
-  const maxVal = rawMax === minVal ? maxValOrOne(rawMax) : rawMax + (rawMax - rawMin) * 0.08;
-
-  function maxValOrOne(v: number) {
-    return v === 0 ? 1 : v * 1.1;
-  }
+  const maxVal = rawMax === minVal ? (rawMax === 0 ? 1 : rawMax * 1.1) : rawMax + (rawMax - rawMin) * 0.08;
 
   const getX = (idx: number) => {
     if (data.length <= 1) return padX + innerW / 2;
@@ -66,10 +235,6 @@ export const YoYMonthlySparkline: React.FC<YoYMonthlySparklineProps> = ({
   const path2025 = data
     .map((d, i) => `${i === 0 ? 'M' : 'L'} ${getX(i).toFixed(1)} ${getY(d.val2025).toFixed(1)}`)
     .join(' ');
-
-  // Compute summary count of winning months
-  const gainMonths = data.filter((d) => d.val2026 >= d.val2025).length;
-  const dropMonths = data.length - gainMonths;
 
   const hoveredItem = hoveredIdx !== null ? data[hoveredIdx] : null;
 
