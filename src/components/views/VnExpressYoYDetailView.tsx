@@ -78,6 +78,8 @@ export const VnExpressYoYDetailView: React.FC<Props> = ({
         onTabChange={setActiveTab}
         currentScope={currentScope}
         onScopeChange={onScopeChange}
+        selectedSite={selectedSite}
+        selectedCate={selectedCate}
         isYoYMode={true}
       />
 

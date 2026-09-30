@@ -184,6 +184,8 @@ function DashboardContent() {
                 onTabChange={(tab) => setActiveTab(tab as ReportTabType)}
                 currentScope={currentScope}
                 onScopeChange={handleScopeChange}
+                selectedSite={selectedSite}
+                selectedCate={selectedCate}
               />
 
               {/* Detailed Views by Category */}

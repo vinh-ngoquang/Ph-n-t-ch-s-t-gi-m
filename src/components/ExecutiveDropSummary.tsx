@@ -8,7 +8,7 @@ import {
   TrendingDown,
   Layers,
 } from 'lucide-react';
-import { MonthlyDataPoint, calculateMedian } from '../utils/timeSeriesAnalytics';
+import { MonthlyDataPoint, calculateMedian, computeFolderRanking, computeFolderRankingYoY } from '../utils/timeSeriesAnalytics';
 import { formatNumber, formatPercent, formatDelta } from '../utils/formatters';
 import { NewsRecord } from '../types';
 
@@ -19,6 +19,8 @@ interface ExecutiveDropSummaryProps {
   onTabChange: (tab: string) => void;
   currentScope?: string;
   onScopeChange?: (scope: string) => void;
+  selectedSite?: string;
+  selectedCate?: string;
   isYoYMode?: boolean;
 }
 
@@ -29,6 +31,8 @@ export const ExecutiveDropSummary: React.FC<ExecutiveDropSummaryProps> = ({
   onTabChange,
   currentScope = 'ALL_FOLDERS_AGG',
   onScopeChange,
+  selectedSite,
+  selectedCate,
   isYoYMode = false,
 }) => {
   const months2026 = monthlyData.filter((d) => d.year === 2026);
@@ -119,75 +123,76 @@ export const ExecutiveDropSummary: React.FC<ExecutiveDropSummaryProps> = ({
   const deepestPlatform = hasPlatformDrop ? platformsWithDrop[0] : null;
 
   // 4. Folder Breakdown (Deepest Dropping Folder)
-  const isSiteScope = ['VnExpress', 'Ngoi sao', 'English', 'Tia sáng'].includes(currentScope || '');
-  const isSingleScope = Boolean(
-    currentScope &&
-      currentScope !== 'ALL_FOLDERS_AGG' &&
-      currentScope !== 'ALL_VNE_AGG' &&
-      currentScope !== 'ALL' &&
-      !isSiteScope
-  );
+  const activeSite = useMemo(() => {
+    if (selectedSite && selectedSite !== 'ALL') return selectedSite;
+    if (['VnExpress', 'Ngoi sao', 'English', 'Tia sáng'].includes(currentScope || '')) {
+      return currentScope!;
+    }
+    return 'ALL';
+  }, [selectedSite, currentScope]);
 
-  const foldersRanked = useMemo(() => {
-    const months26 = ['1/2026', '2/2026', '3/2026', '4/2026', '5/2026', '6/2026', '7/2026', '8/2026'];
-    const months25 = ['1/2025', '2/2025', '3/2025', '4/2025', '5/2025', '6/2025', '7/2025', '8/2025'];
-    const folderMap = new Map<string, string>();
-    dataset.forEach((r) => {
-      if (r.folder_id !== '-1' && r.folder && !folderMap.has(r.folder_id)) {
-        if (isSiteScope) {
-          if ((r.site_name || '').trim().toLowerCase() === (currentScope || '').trim().toLowerCase()) {
-            folderMap.set(r.folder_id, r.folder);
-          }
-        } else {
-          folderMap.set(r.folder_id, r.folder);
-        }
-      }
-    });
+  const activeFolderId = useMemo(() => {
+    if (selectedCate && selectedCate !== 'ALL') return selectedCate;
+    if (
+      currentScope &&
+      !['ALL', 'ALL_FOLDERS_AGG', 'ALL_VNE_AGG', 'VnExpress', 'Ngoi sao', 'English', 'Tia sáng'].includes(currentScope)
+    ) {
+      return currentScope;
+    }
+    return null;
+  }, [selectedCate, currentScope]);
 
-    const items: Array<{
-      id: string;
-      name: string;
-      curPV: number;
-      medPV: number;
-      deltaMed: number;
-      pctMed: number;
-    }> = [];
+  const isSingleFolderActive = Boolean(activeFolderId);
 
-    folderMap.forEach((fName, fId) => {
-      let cur = 0;
-      let med = 0;
-      if (isYoYMode) {
-        months26.forEach((m) => {
-          const match = dataset.find((r) => r.month === m && r.folder_id === fId);
-          cur += match?.pageviews || 0;
-        });
-        months25.forEach((m) => {
-          const match = dataset.find((r) => r.month === m && r.folder_id === fId);
-          med += match?.pageviews || 0;
-        });
-      } else {
-        const recs = months26.map((m) => dataset.find((r) => r.month === m && r.folder_id === fId));
-        const pvs = recs.map((r) => r?.pageviews || 0);
-        cur = pvs[safeIdx] || 0;
-        med = calculateMedian(pvs);
-      }
-      const deltaMed = cur - med;
-      const pctMed = med > 0 ? (deltaMed / med) * 100 : 0;
-      items.push({ id: fId, name: fName, curPV: cur, medPV: med, deltaMed, pctMed });
-    });
+  const allRankingList = useMemo(() => {
+    return isYoYMode
+      ? computeFolderRankingYoY(dataset)
+      : computeFolderRanking(dataset, selectedMonth);
+  }, [dataset, selectedMonth, isYoYMode]);
 
-    return items.sort((a, b) => a.deltaMed - b.deltaMed);
-  }, [dataset, safeIdx, isYoYMode]);
+  const siteRankingList = useMemo(() => {
+    if (activeSite !== 'ALL') {
+      return allRankingList.filter(
+        (r) => (r.siteName || '').trim().toLowerCase() === activeSite.trim().toLowerCase()
+      );
+    }
+    return allRankingList;
+  }, [allRankingList, activeSite]);
 
-  const foldersWithDrop = useMemo(() => foldersRanked.filter((f) => f.deltaMed < 0), [foldersRanked]);
-  const hasFolderDrop = foldersWithDrop.length > 0;
-  const deepestFolder = hasFolderDrop ? foldersWithDrop[0] : null;
   const selectedFolderInfo = useMemo(() => {
-    if (!isSingleScope) return null;
-    const item = foldersRanked.find((f) => f.id === currentScope);
-    const rank = foldersRanked.findIndex((f) => f.id === currentScope) + 1;
-    return item ? { ...item, rank } : null;
-  }, [foldersRanked, isSingleScope, currentScope]);
+    if (!activeFolderId) return null;
+    const found = allRankingList.find(
+      (r) => r.folderId === activeFolderId || r.folderName.toLowerCase() === activeFolderId.toLowerCase()
+    );
+    if (!found) return null;
+    const rank = allRankingList.findIndex((r) => r.folderId === found.folderId) + 1;
+    return {
+      id: found.folderId,
+      name: found.folderName,
+      curPV: found.curPV,
+      medPV: found.median2026PV,
+      deltaMed: found.deltaMedianPV,
+      pctMed: found.pctMedianPV,
+      rank,
+      siteName: found.siteName,
+    };
+  }, [allRankingList, activeFolderId]);
+
+  const dropsOnly = useMemo(() => siteRankingList.filter((r) => r.deltaMedianPV < 0), [siteRankingList]);
+  const hasFolderDrop = dropsOnly.length > 0;
+  const deepestFolder = useMemo(() => {
+    if (!hasFolderDrop) return null;
+    const d = dropsOnly[0];
+    return {
+      id: d.folderId,
+      name: d.folderName,
+      curPV: d.curPV,
+      medPV: d.median2026PV,
+      deltaMed: d.deltaMedianPV,
+      pctMed: d.pctMedianPV,
+      siteName: d.siteName,
+    };
+  }, [hasFolderDrop, dropsOnly]);
 
   // 5. Page Layers (Listing vs Detail)
   let curDetail = 0;
@@ -472,7 +477,7 @@ export const ExecutiveDropSummary: React.FC<ExecutiveDropSummaryProps> = ({
               <span>Folder</span>
             </div>
 
-            {isSingleScope && selectedFolderInfo ? (
+            {isSingleFolderActive && selectedFolderInfo ? (
               <div className="space-y-1.5">
                 <div className="text-xs font-semibold text-slate-900 truncate" title={selectedFolderInfo.name}>
                   {selectedFolderInfo.name}
@@ -564,7 +569,7 @@ export const ExecutiveDropSummary: React.FC<ExecutiveDropSummaryProps> = ({
             onClick={() => onTabChange('folders')}
             className="mt-3 pt-2.5 border-t border-slate-200/60 flex items-center justify-between text-[11px] font-semibold text-blue-600 hover:text-blue-800 transition cursor-pointer"
           >
-            <span>{isSingleScope ? 'Xem chi tiết Folder này' : 'Xem ma trận Folder'}</span>
+            <span>{isSingleFolderActive ? 'Xem chi tiết Folder này' : 'Xem ma trận Folder'}</span>
             <ArrowRight className="w-3 h-3" />
           </button>
         </div>
