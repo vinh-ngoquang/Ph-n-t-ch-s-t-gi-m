@@ -258,7 +258,9 @@ export const ReaderSegmentsView: React.FC<Props> = ({
             onChange={(e) => setSortBy(e.target.value as any)}
             className="bg-transparent text-slate-800 text-xs font-semibold focus:outline-none cursor-pointer"
           >
-            <option value="deficit">Giảm sâu nhất vs Trung vị (Mặc định)</option>
+            <option value="deficit">
+              {isYoYMode ? 'Giảm sâu nhất (Tuyệt đối)' : 'Giảm sâu nhất vs Trung vị (Mặc định)'}
+            </option>
             <option value="share">Tỷ trọng cao nhất</option>
             <option value="volume">Lượng Pageview cao nhất</option>
             <option value="growth">Tăng trưởng cao nhất</option>
