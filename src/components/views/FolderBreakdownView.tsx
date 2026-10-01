@@ -190,12 +190,19 @@ export const FolderBreakdownView: React.FC<FolderBreakdownViewProps> = ({
     return targetMonths.map((m) => {
       const [mo, yr] = m.split('/').map(Number);
       const label = isYoYMode ? `T${mo}/${String(yr).slice(-2)}` : `T${mo}`;
-      const rec = currentData.find(
-        (r) =>
-          r.month === m &&
-          (r.folder_id === selectedFolder.folderId ||
-            (r.folder && r.folder.toLowerCase() === selectedFolder.folderName.toLowerCase()))
-      );
+      const rec = currentData.find((r) => {
+        if (r.month !== m) return false;
+        if (
+          selectedFolder.siteName &&
+          selectedFolder.siteName !== 'ALL' &&
+          r.site_name &&
+          r.site_name.trim().toLowerCase() !== selectedFolder.siteName.trim().toLowerCase()
+        ) {
+          return false;
+        }
+        if (selectedFolder.folderId && r.folder_id === selectedFolder.folderId) return true;
+        return Boolean(r.folder && r.folder.trim().toLowerCase() === selectedFolder.folderName.trim().toLowerCase());
+      });
       const pv = Number(((rec?.pageviews || 0) / 1_000_000).toFixed(2));
       const med = Number((selectedFolder.median2026PV / 1_000_000).toFixed(2));
       return {
@@ -220,20 +227,29 @@ export const FolderBreakdownView: React.FC<FolderBreakdownViewProps> = ({
     return Array.from(set26).sort((a, b) => a - b);
   }, [currentData]);
 
-  const getFolderYoYSeries = (folderId: string, folderName: string): YoYMonthlyPoint[] => {
+  const getFolderYoYSeries = (folderId: string, folderName: string, siteName?: string): YoYMonthlyPoint[] => {
     return availableMonthNums.map((mNum) => {
-      const rec26 = currentData.find(
-        (r) =>
-          r.month === `${mNum}/2026` &&
-          (r.folder_id === folderId ||
-            (r.folder && r.folder.toLowerCase() === folderName.toLowerCase()))
-      );
-      const rec25 = currentData.find(
-        (r) =>
-          r.month === `${mNum}/2025` &&
-          (r.folder_id === folderId ||
-            (r.folder && r.folder.toLowerCase() === folderName.toLowerCase()))
-      );
+      const match26 = `${mNum}/2026`;
+      const match25 = `${mNum}/2025`;
+
+      const rec26 = currentData.find((r) => {
+        if (r.month !== match26) return false;
+        if (siteName && siteName !== 'ALL' && r.site_name && r.site_name.trim().toLowerCase() !== siteName.trim().toLowerCase()) {
+          return false;
+        }
+        if (folderId && r.folder_id === folderId) return true;
+        return Boolean(r.folder && r.folder.trim().toLowerCase() === folderName.trim().toLowerCase());
+      });
+
+      const rec25 = currentData.find((r) => {
+        if (r.month !== match25) return false;
+        if (siteName && siteName !== 'ALL' && r.site_name && r.site_name.trim().toLowerCase() !== siteName.trim().toLowerCase()) {
+          return false;
+        }
+        if (folderId && r.folder_id === folderId) return true;
+        return Boolean(r.folder && r.folder.trim().toLowerCase() === folderName.trim().toLowerCase());
+      });
+
       return {
         monthNum: mNum,
         monthLabel: `T${mNum}`,
@@ -245,15 +261,17 @@ export const FolderBreakdownView: React.FC<FolderBreakdownViewProps> = ({
 
   const [sparkMode, setSparkMode] = useState<'yoy' | 'longterm'>('yoy');
 
-  const getFolderLongTermSeries = (folderId: string, folderName: string): LongTermPoint[] => {
+  const getFolderLongTermSeries = (folderId: string, folderName: string, siteName?: string): LongTermPoint[] => {
     return allMonthsList.map((m) => {
       const [mo, yr] = m.split('/').map(Number);
-      const rec = currentData.find(
-        (r) =>
-          r.month === m &&
-          (r.folder_id === folderId ||
-            (r.folder && r.folder.toLowerCase() === folderName.toLowerCase()))
-      );
+      const rec = currentData.find((r) => {
+        if (r.month !== m) return false;
+        if (siteName && siteName !== 'ALL' && r.site_name && r.site_name.trim().toLowerCase() !== siteName.trim().toLowerCase()) {
+          return false;
+        }
+        if (folderId && r.folder_id === folderId) return true;
+        return Boolean(r.folder && r.folder.trim().toLowerCase() === folderName.trim().toLowerCase());
+      });
       return {
         month: m,
         monthLabel: `T${mo}/${String(yr).slice(-2)}`,
@@ -948,8 +966,8 @@ export const FolderBreakdownView: React.FC<FolderBreakdownViewProps> = ({
                         {isYoYMode && (
                           <td className="py-3.5 px-3 text-center align-middle font-sans">
                             <YoYMonthlySparkline
-                              data={getFolderYoYSeries(item.folderId, item.folderName)}
-                              longTermData={getFolderLongTermSeries(item.folderId, item.folderName)}
+                              data={getFolderYoYSeries(item.folderId, item.folderName, item.siteName)}
+                              longTermData={getFolderLongTermSeries(item.folderId, item.folderName, item.siteName)}
                               mode={sparkMode}
                             />
                           </td>
@@ -979,8 +997,8 @@ export const FolderBreakdownView: React.FC<FolderBreakdownViewProps> = ({
                         {isYoYMode && (
                           <td className="py-3.5 px-3 text-center align-middle font-sans">
                             <YoYMonthlySparkline
-                              data={getFolderYoYSeries(item.folderId, item.folderName)}
-                              longTermData={getFolderLongTermSeries(item.folderId, item.folderName)}
+                              data={getFolderYoYSeries(item.folderId, item.folderName, item.siteName)}
+                              longTermData={getFolderLongTermSeries(item.folderId, item.folderName, item.siteName)}
                               mode={sparkMode}
                             />
                           </td>
