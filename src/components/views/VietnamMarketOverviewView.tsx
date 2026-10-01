@@ -193,38 +193,10 @@ export const VietnamMarketOverviewView: React.FC<Props> = ({
     return processedData.items.slice(0, 8);
   }, [processedData.items]);
 
-  const top8Ids = useMemo(() => ['market', ...top8Publishers.map((p) => p.id)], [top8Publishers]);
-
-  const isAllSelected = useMemo(
-    () => top8Ids.length > 0 && top8Ids.every((id) => selectedPublishers.includes(id)),
-    [top8Ids, selectedPublishers]
-  );
-
   const togglePublisher = (id: string) => {
     setSelectedPublishers((prev) =>
       prev.includes(id) ? prev.filter((p) => p !== id) : [...prev, id]
     );
-  };
-
-  const handleToggleSelectAll = () => {
-    if (isAllSelected) {
-      setSelectedPublishers(['market', 'vnexpress']);
-    } else {
-      setSelectedPublishers(top8Ids);
-    }
-  };
-
-  const selectTop5 = () => {
-    const top5Ids = top8Publishers.slice(0, 5).map((p) => p.id);
-    setSelectedPublishers(['market', ...top5Ids]);
-  };
-
-  const selectAllTop8 = () => {
-    setSelectedPublishers(top8Ids);
-  };
-
-  const clearAllPublishers = () => {
-    setSelectedPublishers(['market']);
   };
 
   // Filter and sort items for the table
@@ -541,52 +513,9 @@ export const VietnamMarketOverviewView: React.FC<Props> = ({
           </div>
         </div>
 
-        {/* Checkbox Controls Box */}
-        <div className="bg-slate-50/70 rounded-xl p-3.5 border border-slate-200/80 space-y-3">
-          <div className="flex flex-wrap items-center justify-between gap-2 border-b border-slate-200/60 pb-2.5">
-            <div className="flex items-center gap-3">
-              <label className="flex items-center gap-2 cursor-pointer select-none font-bold text-xs text-slate-800 hover:text-blue-600 transition">
-                <input
-                  type="checkbox"
-                  checked={isAllSelected}
-                  onChange={handleToggleSelectAll}
-                  className="rounded text-blue-600 focus:ring-blue-500 w-3.5 h-3.5 cursor-pointer"
-                />
-                <span>Chọn tất cả (8 báo + Thị trường)</span>
-              </label>
-              <span className="text-[11px] text-slate-500 font-sans">
-                (Đang hiển thị {selectedPublishers.filter((id) => top8Ids.includes(id)).length}/{top8Ids.length} đối tượng)
-              </span>
-            </div>
-
-            {/* Quick Filter Buttons */}
-            <div className="flex items-center gap-1.5 flex-wrap">
-              <button
-                type="button"
-                onClick={selectTop5}
-                className="px-2.5 py-1 text-[11px] font-semibold bg-white text-slate-700 hover:bg-slate-100 hover:text-slate-900 border border-slate-200 rounded-lg shadow-2xs transition cursor-pointer"
-              >
-                Top 5 báo
-              </button>
-              <button
-                type="button"
-                onClick={selectAllTop8}
-                className="px-2.5 py-1 text-[11px] font-semibold bg-white text-slate-700 hover:bg-slate-100 hover:text-slate-900 border border-slate-200 rounded-lg shadow-2xs transition cursor-pointer"
-              >
-                Tất cả 8 báo
-              </button>
-              <button
-                type="button"
-                onClick={clearAllPublishers}
-                className="px-2.5 py-1 text-[11px] font-semibold bg-white text-rose-600 hover:bg-rose-50 border border-rose-200 rounded-lg shadow-2xs transition cursor-pointer"
-              >
-                Chỉ xem Toàn thị trường
-              </button>
-            </div>
-          </div>
-
-          {/* Publisher and Market Checkboxes Grid: 8 BÁO LỚN NHẤT */}
-          <div className="flex flex-wrap gap-2 max-h-40 overflow-y-auto pr-1">
+        {/* Checkbox Controls Box: 8 BÁO LỚN NHẤT + TOÀN THỊ TRƯỜNG */}
+        <div className="bg-slate-50/70 rounded-xl p-3 border border-slate-200/80">
+          <div className="flex flex-wrap items-center gap-2">
             {/* 1. Market Total Checkbox */}
             <label
               className={`inline-flex items-center gap-2 px-2.5 py-1.5 rounded-lg border text-xs font-semibold cursor-pointer select-none transition ${
