@@ -399,11 +399,20 @@ export interface FolderComparisonItem {
   curArticles: number;
   t8Articles: number; // alias for curArticles
   median2026Articles: number;
+
+  // Lớp trang (Layers)
   curDetail: number;
   t8Detail: number; // alias for curDetail
   median2026Detail: number;
   deltaMedianDetail: number;
   pctMedianDetail: number;
+  curListing?: number;
+  pctListingShare?: number;
+  pctDetailShare?: number;
+  pctListingYoY?: number;
+  pctDetailYoY?: number;
+
+  // Loại độc giả (Readers)
   curNew?: number;
   curReturn?: number;
   curLover?: number;
@@ -413,6 +422,55 @@ export interface FolderComparisonItem {
   pctNewYoY?: number;
   pctReturnYoY?: number;
   pctLoverYoY?: number;
+
+  // Nguồn truy cập (Traffic Sources)
+  curExDirect?: number;
+  curExGoogle?: number;
+  curExSocial?: number;
+  curInHome?: number;
+  curInFolder?: number;
+  curInDetail?: number;
+  curInOther?: number;
+  pctExDirect?: number;
+  pctExGoogle?: number;
+  pctExSocial?: number;
+  pctInHome?: number;
+  pctInFolder?: number;
+  pctInDetail?: number;
+  pctInOther?: number;
+  pctExDirectYoY?: number;
+  pctExGoogleYoY?: number;
+  pctExSocialYoY?: number;
+  pctInHomeYoY?: number;
+  pctInFolderYoY?: number;
+  pctInDetailYoY?: number;
+  pctInOtherYoY?: number;
+
+  // Nền tảng & Thiết bị (Platforms / Devices)
+  curMobile?: number;
+  curPC?: number;
+  curApp?: number;
+  curTablet?: number;
+  curOtherPlatform?: number;
+  pctMobile?: number;
+  pctPC?: number;
+  pctApp?: number;
+  pctTablet?: number;
+  pctOtherPlatform?: number;
+  pctMobileYoY?: number;
+  pctPCYoY?: number;
+  pctAppYoY?: number;
+  pctTabletYoY?: number;
+  pctOtherPlatformYoY?: number;
+
+  // Thị trường (Markets)
+  curDO?: number;
+  curOV?: number;
+  pctDO?: number;
+  pctOV?: number;
+  pctDOYoY?: number;
+  pctOVYoY?: number;
+
   trend: number[];
 }
 
@@ -478,16 +536,59 @@ export function computeFolderRanking(
     const deltaMedianDetail = curDetail - median2026Detail;
     const pctMedianDetail = median2026Detail > 0 ? (deltaMedianDetail / median2026Detail) * 100 : 0;
 
-    const news = recs2026.map((r) => r.pNew || 0);
-    const rets = recs2026.map((r) => r.pReturn || 0);
-    const lovs = recs2026.map((r) => r.pLover || 0);
-    const curNew = news[safeIdx] || 0;
-    const curReturn = rets[safeIdx] || 0;
-    const curLover = lovs[safeIdx] || 0;
+    const curRec = recs2026[safeIdx];
+
+    // Layers
+    const curListing = curRec.pListing || 0;
+    const totLayer = curListing + curDetail || curPV || 1;
+    const pctListingShare = (curListing / totLayer) * 100;
+    const pctDetailShare = (curDetail / totLayer) * 100;
+
+    // Readers
+    const curNew = curRec.pNew || 0;
+    const curReturn = curRec.pReturn || 0;
+    const curLover = curRec.pLover || 0;
     const totReader = curNew + curReturn + curLover || curPV || 1;
     const pctNew = (curNew / totReader) * 100;
     const pctReturn = (curReturn / totReader) * 100;
     const pctLover = (curLover / totReader) * 100;
+
+    // Traffic Sources
+    const curExDirect = curRec.pExDirect || 0;
+    const curExGoogle = curRec.pExGoogle || 0;
+    const curExSocial = curRec.pExSocial || 0;
+    const curInHome = curRec.pInHome || 0;
+    const curInFolder = curRec.pInFolder || 0;
+    const curInDetail = curRec.pInDetail || 0;
+    const curInOther = (curRec.pInOther || 0) + (curRec.pInTagTopic24h || 0);
+    const totSrc = curPV || 1;
+    const pctExDirect = (curExDirect / totSrc) * 100;
+    const pctExGoogle = (curExGoogle / totSrc) * 100;
+    const pctExSocial = (curExSocial / totSrc) * 100;
+    const pctInHome = (curInHome / totSrc) * 100;
+    const pctInFolder = (curInFolder / totSrc) * 100;
+    const pctInDetail = (curInDetail / totSrc) * 100;
+    const pctInOther = (curInOther / totSrc) * 100;
+
+    // Platforms / Devices
+    const curMobile = curRec.pMobile || 0;
+    const curPC = curRec.pPC || 0;
+    const curApp = curRec.pApp || 0;
+    const curTablet = curRec.pTablet || 0;
+    const curOtherPlatform = curRec.pOtherPlatform || 0;
+    const totPlat = curMobile + curPC + curApp + curTablet + curOtherPlatform || curPV || 1;
+    const pctMobile = (curMobile / totPlat) * 100;
+    const pctPC = (curPC / totPlat) * 100;
+    const pctApp = (curApp / totPlat) * 100;
+    const pctTablet = (curTablet / totPlat) * 100;
+    const pctOtherPlatform = (curOtherPlatform / totPlat) * 100;
+
+    // Markets
+    const curDO = curRec.pDO || 0;
+    const curOV = curRec.pOV || 0;
+    const totMarket = curDO + curOV || curPV || 1;
+    const pctDO = (curDO / totMarket) * 100;
+    const pctOV = (curOV / totMarket) * 100;
 
     items.push({
       folderId: fId,
@@ -506,12 +607,43 @@ export function computeFolderRanking(
       median2026Detail,
       deltaMedianDetail,
       pctMedianDetail,
+      curListing,
+      pctListingShare,
+      pctDetailShare,
       curNew,
       curReturn,
       curLover,
       pctNew,
       pctReturn,
       pctLover,
+      curExDirect,
+      curExGoogle,
+      curExSocial,
+      curInHome,
+      curInFolder,
+      curInDetail,
+      curInOther,
+      pctExDirect,
+      pctExGoogle,
+      pctExSocial,
+      pctInHome,
+      pctInFolder,
+      pctInDetail,
+      pctInOther,
+      curMobile,
+      curPC,
+      curApp,
+      curTablet,
+      curOtherPlatform,
+      pctMobile,
+      pctPC,
+      pctApp,
+      pctTablet,
+      pctOtherPlatform,
+      curDO,
+      curOV,
+      pctDO,
+      pctOV,
       trend: pvs,
     });
   }
@@ -662,14 +794,54 @@ export function computeFolderRankingYoY(
     let sumPV25 = 0;
     let sumArts26 = 0;
     let sumArts25 = 0;
+
+    // Layers
+    let sumListing26 = 0;
+    let sumListing25 = 0;
     let sumDetail26 = 0;
     let sumDetail25 = 0;
+
+    // Readers
     let sumNew26 = 0;
     let sumReturn26 = 0;
     let sumLover26 = 0;
     let sumNew25 = 0;
     let sumReturn25 = 0;
     let sumLover25 = 0;
+
+    // Sources
+    let sumExDirect26 = 0;
+    let sumExGoogle26 = 0;
+    let sumExSocial26 = 0;
+    let sumInHome26 = 0;
+    let sumInFolder26 = 0;
+    let sumInDetail26 = 0;
+    let sumInOther26 = 0;
+    let sumExDirect25 = 0;
+    let sumExGoogle25 = 0;
+    let sumExSocial25 = 0;
+    let sumInHome25 = 0;
+    let sumInFolder25 = 0;
+    let sumInDetail25 = 0;
+    let sumInOther25 = 0;
+
+    // Platforms / Devices
+    let sumMobile26 = 0;
+    let sumPC26 = 0;
+    let sumApp26 = 0;
+    let sumTablet26 = 0;
+    let sumOtherPlatform26 = 0;
+    let sumMobile25 = 0;
+    let sumPC25 = 0;
+    let sumApp25 = 0;
+    let sumTablet25 = 0;
+    let sumOtherPlatform25 = 0;
+
+    // Markets
+    let sumDO26 = 0;
+    let sumOV26 = 0;
+    let sumDO25 = 0;
+    let sumOV25 = 0;
 
     const monthlyPVs26: number[] = [];
 
@@ -678,10 +850,31 @@ export function computeFolderRankingYoY(
       const pv = match?.pageviews || 0;
       sumPV26 += pv;
       sumArts26 += match?.articles || 0;
+
+      sumListing26 += match?.pListing || 0;
       sumDetail26 += match?.pDetail || 0;
+
       sumNew26 += match?.pNew || 0;
       sumReturn26 += match?.pReturn || 0;
       sumLover26 += match?.pLover || 0;
+
+      sumExDirect26 += match?.pExDirect || 0;
+      sumExGoogle26 += match?.pExGoogle || 0;
+      sumExSocial26 += match?.pExSocial || 0;
+      sumInHome26 += match?.pInHome || 0;
+      sumInFolder26 += match?.pInFolder || 0;
+      sumInDetail26 += match?.pInDetail || 0;
+      sumInOther26 += (match?.pInOther || 0) + (match?.pInTagTopic24h || 0);
+
+      sumMobile26 += match?.pMobile || 0;
+      sumPC26 += match?.pPC || 0;
+      sumApp26 += match?.pApp || 0;
+      sumTablet26 += match?.pTablet || 0;
+      sumOtherPlatform26 += match?.pOtherPlatform || 0;
+
+      sumDO26 += match?.pDO || 0;
+      sumOV26 += match?.pOV || 0;
+
       monthlyPVs26.push(pv);
     });
 
@@ -689,31 +882,94 @@ export function computeFolderRankingYoY(
       const match = dataset.find((r) => r.month === m && r.folder_id === fId);
       sumPV25 += match?.pageviews || 0;
       sumArts25 += match?.articles || 0;
+
+      sumListing25 += match?.pListing || 0;
       sumDetail25 += match?.pDetail || 0;
+
       sumNew25 += match?.pNew || 0;
       sumReturn25 += match?.pReturn || 0;
       sumLover25 += match?.pLover || 0;
+
+      sumExDirect25 += match?.pExDirect || 0;
+      sumExGoogle25 += match?.pExGoogle || 0;
+      sumExSocial25 += match?.pExSocial || 0;
+      sumInHome25 += match?.pInHome || 0;
+      sumInFolder25 += match?.pInFolder || 0;
+      sumInDetail25 += match?.pInDetail || 0;
+      sumInOther25 += (match?.pInOther || 0) + (match?.pInTagTopic24h || 0);
+
+      sumMobile25 += match?.pMobile || 0;
+      sumPC25 += match?.pPC || 0;
+      sumApp25 += match?.pApp || 0;
+      sumTablet25 += match?.pTablet || 0;
+      sumOtherPlatform25 += match?.pOtherPlatform || 0;
+
+      sumDO25 += match?.pDO || 0;
+      sumOV25 += match?.pOV || 0;
     });
 
     const deltaPV = sumPV26 - sumPV25;
     const pctPV = sumPV25 > 0 ? (deltaPV / sumPV25) * 100 : 0;
 
+    // Layers
     const deltaDetail = sumDetail26 - sumDetail25;
-    const pctDetail = sumDetail25 > 0 ? (deltaDetail / sumDetail25) * 100 : 0;
+    const pctDetailYoY = sumDetail25 > 0 ? (deltaDetail / sumDetail25) * 100 : 0;
+    const deltaListing = sumListing26 - sumListing25;
+    const pctListingYoY = sumListing25 > 0 ? (deltaListing / sumListing25) * 100 : 0;
+    const totLayer = sumListing26 + sumDetail26 || sumPV26 || 1;
+    const pctListingShare = (sumListing26 / totLayer) * 100;
+    const pctDetailShare = (sumDetail26 / totLayer) * 100;
 
+    // Readers
     const totReader = sumNew26 + sumReturn26 + sumLover26 || sumPV26 || 1;
     const pctNew = (sumNew26 / totReader) * 100;
     const pctReturn = (sumReturn26 / totReader) * 100;
     const pctLover = (sumLover26 / totReader) * 100;
-
     const deltaNew = sumNew26 - sumNew25;
     const pctNewYoY = sumNew25 > 0 ? (deltaNew / sumNew25) * 100 : 0;
-
     const deltaReturn = sumReturn26 - sumReturn25;
     const pctReturnYoY = sumReturn25 > 0 ? (deltaReturn / sumReturn25) * 100 : 0;
-
     const deltaLover = sumLover26 - sumLover25;
     const pctLoverYoY = sumLover25 > 0 ? (deltaLover / sumLover25) * 100 : 0;
+
+    // Sources
+    const totSrc = sumPV26 || 1;
+    const pctExDirect = (sumExDirect26 / totSrc) * 100;
+    const pctExGoogle = (sumExGoogle26 / totSrc) * 100;
+    const pctExSocial = (sumExSocial26 / totSrc) * 100;
+    const pctInHome = (sumInHome26 / totSrc) * 100;
+    const pctInFolder = (sumInFolder26 / totSrc) * 100;
+    const pctInDetail = (sumInDetail26 / totSrc) * 100;
+    const pctInOther = (sumInOther26 / totSrc) * 100;
+
+    const pctExDirectYoY = sumExDirect25 > 0 ? ((sumExDirect26 - sumExDirect25) / sumExDirect25) * 100 : 0;
+    const pctExGoogleYoY = sumExGoogle25 > 0 ? ((sumExGoogle26 - sumExGoogle25) / sumExGoogle25) * 100 : 0;
+    const pctExSocialYoY = sumExSocial25 > 0 ? ((sumExSocial26 - sumExSocial25) / sumExSocial25) * 100 : 0;
+    const pctInHomeYoY = sumInHome25 > 0 ? ((sumInHome26 - sumInHome25) / sumInHome25) * 100 : 0;
+    const pctInFolderYoY = sumInFolder25 > 0 ? ((sumInFolder26 - sumInFolder25) / sumInFolder25) * 100 : 0;
+    const pctInDetailYoY = sumInDetail25 > 0 ? ((sumInDetail26 - sumInDetail25) / sumInDetail25) * 100 : 0;
+    const pctInOtherYoY = sumInOther25 > 0 ? ((sumInOther26 - sumInOther25) / sumInOther25) * 100 : 0;
+
+    // Platforms / Devices
+    const totPlat = sumMobile26 + sumPC26 + sumApp26 + sumTablet26 + sumOtherPlatform26 || sumPV26 || 1;
+    const pctMobile = (sumMobile26 / totPlat) * 100;
+    const pctPC = (sumPC26 / totPlat) * 100;
+    const pctApp = (sumApp26 / totPlat) * 100;
+    const pctTablet = (sumTablet26 / totPlat) * 100;
+    const pctOtherPlatform = (sumOtherPlatform26 / totPlat) * 100;
+
+    const pctMobileYoY = sumMobile25 > 0 ? ((sumMobile26 - sumMobile25) / sumMobile25) * 100 : 0;
+    const pctPCYoY = sumPC25 > 0 ? ((sumPC26 - sumPC25) / sumPC25) * 100 : 0;
+    const pctAppYoY = sumApp25 > 0 ? ((sumApp26 - sumApp25) / sumApp25) * 100 : 0;
+    const pctTabletYoY = sumTablet25 > 0 ? ((sumTablet26 - sumTablet25) / sumTablet25) * 100 : 0;
+    const pctOtherPlatformYoY = sumOtherPlatform25 > 0 ? ((sumOtherPlatform26 - sumOtherPlatform25) / sumOtherPlatform25) * 100 : 0;
+
+    // Markets
+    const totMarket = sumDO26 + sumOV26 || sumPV26 || 1;
+    const pctDO = (sumDO26 / totMarket) * 100;
+    const pctOV = (sumOV26 / totMarket) * 100;
+    const pctDOYoY = sumDO25 > 0 ? ((sumDO26 - sumDO25) / sumDO25) * 100 : 0;
+    const pctOVYoY = sumOV25 > 0 ? ((sumOV26 - sumOV25) / sumOV25) * 100 : 0;
 
     items.push({
       folderId: fId,
@@ -727,11 +983,20 @@ export function computeFolderRankingYoY(
       curArticles: sumArts26,
       t8Articles: sumArts26,
       median2026Articles: sumArts25,
+
+      // Layers
       curDetail: sumDetail26,
       t8Detail: sumDetail26,
       median2026Detail: sumDetail25,
       deltaMedianDetail: deltaDetail,
-      pctMedianDetail: pctDetail,
+      pctMedianDetail: pctDetailYoY,
+      curListing: sumListing26,
+      pctListingShare,
+      pctDetailShare,
+      pctListingYoY,
+      pctDetailYoY,
+
+      // Readers
       curNew: sumNew26,
       curReturn: sumReturn26,
       curLover: sumLover26,
@@ -741,6 +1006,55 @@ export function computeFolderRankingYoY(
       pctNewYoY,
       pctReturnYoY,
       pctLoverYoY,
+
+      // Sources
+      curExDirect: sumExDirect26,
+      curExGoogle: sumExGoogle26,
+      curExSocial: sumExSocial26,
+      curInHome: sumInHome26,
+      curInFolder: sumInFolder26,
+      curInDetail: sumInDetail26,
+      curInOther: sumInOther26,
+      pctExDirect,
+      pctExGoogle,
+      pctExSocial,
+      pctInHome,
+      pctInFolder,
+      pctInDetail,
+      pctInOther,
+      pctExDirectYoY,
+      pctExGoogleYoY,
+      pctExSocialYoY,
+      pctInHomeYoY,
+      pctInFolderYoY,
+      pctInDetailYoY,
+      pctInOtherYoY,
+
+      // Platforms / Devices
+      curMobile: sumMobile26,
+      curPC: sumPC26,
+      curApp: sumApp26,
+      curTablet: sumTablet26,
+      curOtherPlatform: sumOtherPlatform26,
+      pctMobile,
+      pctPC,
+      pctApp,
+      pctTablet,
+      pctOtherPlatform,
+      pctMobileYoY,
+      pctPCYoY,
+      pctAppYoY,
+      pctTabletYoY,
+      pctOtherPlatformYoY,
+
+      // Markets
+      curDO: sumDO26,
+      curOV: sumOV26,
+      pctDO,
+      pctOV,
+      pctDOYoY,
+      pctOVYoY,
+
       trend: monthlyPVs26,
     });
   }

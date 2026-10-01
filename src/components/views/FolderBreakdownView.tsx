@@ -110,7 +110,7 @@ export const FolderBreakdownView: React.FC<FolderBreakdownViewProps> = ({
   }, [allRankingList, activeSite, showOnlySelectedFolder, selectedFolder]);
 
   // Pills and toolbar controls
-  const [viewPerspective, setViewPerspective] = useState<'pv' | 'readers'>('pv');
+  const [viewPerspective, setViewPerspective] = useState<'pv' | 'readers' | 'sources' | 'platforms' | 'layers'>('pv');
   const [filterType, setFilterType] = useState<'all' | 'vne' | 'ngoisao' | 'english' | 'tiasang' | 'drop' | 'gain'>('all');
   const [searchTerm, setSearchTerm] = useState('');
   const [showChart, setShowChart] = useState(false);
@@ -361,8 +361,8 @@ export const FolderBreakdownView: React.FC<FolderBreakdownViewProps> = ({
       <div className="flex flex-wrap items-center justify-between gap-2.5 pt-1">
         {/* Left Side: Perspective + Search + Clear */}
         <div className="flex items-center gap-2 flex-wrap text-xs">
-          {/* Perspective Toggle: PV vs Loại độc giả */}
-          <div className="flex items-center bg-slate-100 p-0.5 rounded-lg border border-slate-200/80">
+          {/* Perspective Toggle */}
+          <div className="flex items-center bg-slate-100 p-0.5 rounded-lg border border-slate-200/80 flex-wrap gap-0.5">
             <button
               onClick={() => setViewPerspective('pv')}
               className={`px-2.5 py-1 rounded-md text-[11px] font-medium transition cursor-pointer ${
@@ -381,7 +381,37 @@ export const FolderBreakdownView: React.FC<FolderBreakdownViewProps> = ({
                   : 'text-slate-600 hover:text-slate-900'
               }`}
             >
-              Loại độc giả (3 Cột)
+              Loại độc giả (3 nhóm)
+            </button>
+            <button
+              onClick={() => setViewPerspective('sources')}
+              className={`px-2.5 py-1 rounded-md text-[11px] font-medium transition cursor-pointer ${
+                viewPerspective === 'sources'
+                  ? 'bg-white text-slate-900 shadow-2xs font-semibold'
+                  : 'text-slate-600 hover:text-slate-900'
+              }`}
+            >
+              Nguồn truy cập
+            </button>
+            <button
+              onClick={() => setViewPerspective('platforms')}
+              className={`px-2.5 py-1 rounded-md text-[11px] font-medium transition cursor-pointer ${
+                viewPerspective === 'platforms'
+                  ? 'bg-white text-slate-900 shadow-2xs font-semibold'
+                  : 'text-slate-600 hover:text-slate-900'
+              }`}
+            >
+              Nền tảng & Thiết bị
+            </button>
+            <button
+              onClick={() => setViewPerspective('layers')}
+              className={`px-2.5 py-1 rounded-md text-[11px] font-medium transition cursor-pointer ${
+                viewPerspective === 'layers'
+                  ? 'bg-white text-slate-900 shadow-2xs font-semibold'
+                  : 'text-slate-600 hover:text-slate-900'
+              }`}
+            >
+              Lớp trang
             </button>
           </div>
 
@@ -795,6 +825,243 @@ export const FolderBreakdownView: React.FC<FolderBreakdownViewProps> = ({
                 )}
                 <th className="py-3 px-3 text-center font-sans">Thao Tác</th>
               </tr>
+            ) : viewPerspective === 'sources' ? (
+              <tr>
+                <th className="py-3 px-3 w-12 text-center">#</th>
+                <th className="py-3 px-4 font-sans min-w-[200px]">Folder</th>
+                <th className="py-3 px-3 text-right font-sans">Tổng PV</th>
+                <th className="py-3 px-3 text-right font-sans min-w-[105px]">
+                  <div className="font-bold text-slate-800">Direct</div>
+                  <div className="text-[9px] text-slate-500 font-normal">{isYoYMode ? 'Trực tiếp (% YoY)' : 'Trực tiếp'}</div>
+                </th>
+                <th className="py-3 px-3 text-right font-sans min-w-[115px]">
+                  <div className="font-bold text-slate-800">Google</div>
+                  <div className="text-[9px] text-slate-500 font-normal">{isYoYMode ? 'Search+Disc (% YoY)' : 'Search+Disc'}</div>
+                </th>
+                <th className="py-3 px-3 text-right font-sans min-w-[105px]">
+                  <div className="font-bold text-slate-800">Social</div>
+                  <div className="text-[9px] text-slate-500 font-normal">{isYoYMode ? 'Mạng XH (% YoY)' : 'Mạng XH'}</div>
+                </th>
+                <th className="py-3 px-3 text-right font-sans min-w-[105px]">
+                  <div className="font-bold text-slate-800">In-Home</div>
+                  <div className="text-[9px] text-slate-500 font-normal">{isYoYMode ? 'Từ Home (% YoY)' : 'Từ Home'}</div>
+                </th>
+                <th className="py-3 px-3 text-right font-sans min-w-[105px]">
+                  <div className="font-bold text-slate-800">In-Folder</div>
+                  <div className="text-[9px] text-slate-500 font-normal">{isYoYMode ? 'Từ Folder (% YoY)' : 'Từ Folder'}</div>
+                </th>
+                <th className="py-3 px-3 text-right font-sans min-w-[105px]">
+                  <div className="font-bold text-slate-800">In-Detail</div>
+                  <div className="text-[9px] text-slate-500 font-normal">{isYoYMode ? 'Từ Detail (% YoY)' : 'Từ Detail'}</div>
+                </th>
+                <th className="py-3 px-3 text-right font-sans min-w-[105px]">
+                  <div className="font-bold text-slate-800">In-Other</div>
+                  <div className="text-[9px] text-slate-500 font-normal">{isYoYMode ? 'Khác/Tag (% YoY)' : 'Khác/Tag'}</div>
+                </th>
+                {isYoYMode && (
+                  <th className="py-2.5 px-3 text-center font-sans min-w-[175px]">
+                    <div className="flex items-center justify-center gap-1.5">
+                      <span className="font-semibold text-slate-700">Xu Hướng</span>
+                      <div className="inline-flex bg-slate-200/90 p-0.5 rounded text-[10px] font-medium">
+                        <button
+                          type="button"
+                          onClick={(e) => { e.stopPropagation(); setSparkMode('yoy'); }}
+                          className={`px-1.5 py-0.5 rounded transition cursor-pointer ${
+                            sparkMode === 'yoy'
+                              ? 'bg-white text-blue-700 shadow-2xs font-bold'
+                              : 'text-slate-600 hover:text-slate-900'
+                          }`}
+                          title="So sánh cùng kỳ 2026 vs 2025 theo từng tháng"
+                        >
+                          YoY
+                        </button>
+                        <button
+                          type="button"
+                          onClick={(e) => { e.stopPropagation(); setSparkMode('longterm'); }}
+                          className={`px-1.5 py-0.5 rounded transition cursor-pointer ${
+                            sparkMode === 'longterm'
+                              ? 'bg-white text-blue-700 shadow-2xs font-bold'
+                              : 'text-slate-600 hover:text-slate-900'
+                          }`}
+                          title="Đường xu hướng dài hạn liên tục từ 2025 đến 2026"
+                        >
+                          2025→2026
+                        </button>
+                      </div>
+                    </div>
+                    <div className="text-[9px] font-normal text-slate-400 flex items-center justify-center gap-1 mt-0.5 whitespace-nowrap">
+                      {sparkMode === 'yoy' ? (
+                        <>
+                          <span className="text-emerald-600 font-bold">● '26 &ge; '25</span>
+                          <span>|</span>
+                          <span className="text-rose-600 font-bold">● '26 &lt; '25</span>
+                          <span>|</span>
+                          <span className="text-slate-400">--- '25</span>
+                        </>
+                      ) : (
+                        <>
+                          <span className="text-slate-500 font-medium">Xám: '25</span>
+                          <span>→</span>
+                          <span className="text-blue-600 font-bold">Xanh: '26</span>
+                          <span>|</span>
+                          <span className="text-amber-500 font-semibold">--- Trend</span>
+                        </>
+                      )}
+                    </div>
+                  </th>
+                )}
+                <th className="py-3 px-3 text-center font-sans">Thao Tác</th>
+              </tr>
+            ) : viewPerspective === 'platforms' ? (
+              <tr>
+                <th className="py-3 px-3 w-12 text-center">#</th>
+                <th className="py-3 px-4 font-sans min-w-[200px]">Folder</th>
+                <th className="py-3 px-3 text-right font-sans">Tổng PV</th>
+                <th className="py-3 px-3 text-right font-sans min-w-[115px]">
+                  <div className="font-bold text-slate-800">Mobile Web</div>
+                  <div className="text-[9px] text-slate-500 font-normal">{isYoYMode ? 'Di động (% YoY)' : 'Web di động'}</div>
+                </th>
+                <th className="py-3 px-3 text-right font-sans min-w-[115px]">
+                  <div className="font-bold text-slate-800">PC Desktop</div>
+                  <div className="text-[9px] text-slate-500 font-normal">{isYoYMode ? 'Máy tính (% YoY)' : 'Máy tính'}</div>
+                </th>
+                <th className="py-3 px-3 text-right font-sans min-w-[115px]">
+                  <div className="font-bold text-slate-800">App VnE</div>
+                  <div className="text-[9px] text-slate-500 font-normal">{isYoYMode ? 'Ứng dụng (% YoY)' : 'Ứng dụng'}</div>
+                </th>
+                <th className="py-3 px-3 text-right font-sans min-w-[95px]">
+                  <div className="font-bold text-slate-800">Tablet</div>
+                  <div className="text-[9px] text-slate-500 font-normal">{isYoYMode ? 'Máy tính bảng (% YoY)' : 'Máy tính bảng'}</div>
+                </th>
+                <th className="py-3 px-3 text-right font-sans min-w-[95px]">
+                  <div className="font-bold text-slate-800">Khác</div>
+                  <div className="text-[9px] text-slate-500 font-normal">{isYoYMode ? 'Nền tảng khác (% YoY)' : 'Nền tảng khác'}</div>
+                </th>
+                {isYoYMode && (
+                  <th className="py-2.5 px-3 text-center font-sans min-w-[175px]">
+                    <div className="flex items-center justify-center gap-1.5">
+                      <span className="font-semibold text-slate-700">Xu Hướng</span>
+                      <div className="inline-flex bg-slate-200/90 p-0.5 rounded text-[10px] font-medium">
+                        <button
+                          type="button"
+                          onClick={(e) => { e.stopPropagation(); setSparkMode('yoy'); }}
+                          className={`px-1.5 py-0.5 rounded transition cursor-pointer ${
+                            sparkMode === 'yoy'
+                              ? 'bg-white text-blue-700 shadow-2xs font-bold'
+                              : 'text-slate-600 hover:text-slate-900'
+                          }`}
+                          title="So sánh cùng kỳ 2026 vs 2025 theo từng tháng"
+                        >
+                          YoY
+                        </button>
+                        <button
+                          type="button"
+                          onClick={(e) => { e.stopPropagation(); setSparkMode('longterm'); }}
+                          className={`px-1.5 py-0.5 rounded transition cursor-pointer ${
+                            sparkMode === 'longterm'
+                              ? 'bg-white text-blue-700 shadow-2xs font-bold'
+                              : 'text-slate-600 hover:text-slate-900'
+                          }`}
+                          title="Đường xu hướng dài hạn liên tục từ 2025 đến 2026"
+                        >
+                          2025→2026
+                        </button>
+                      </div>
+                    </div>
+                    <div className="text-[9px] font-normal text-slate-400 flex items-center justify-center gap-1 mt-0.5 whitespace-nowrap">
+                      {sparkMode === 'yoy' ? (
+                        <>
+                          <span className="text-emerald-600 font-bold">● '26 &ge; '25</span>
+                          <span>|</span>
+                          <span className="text-rose-600 font-bold">● '26 &lt; '25</span>
+                          <span>|</span>
+                          <span className="text-slate-400">--- '25</span>
+                        </>
+                      ) : (
+                        <>
+                          <span className="text-slate-500 font-medium">Xám: '25</span>
+                          <span>→</span>
+                          <span className="text-blue-600 font-bold">Xanh: '26</span>
+                          <span>|</span>
+                          <span className="text-amber-500 font-semibold">--- Trend</span>
+                        </>
+                      )}
+                    </div>
+                  </th>
+                )}
+                <th className="py-3 px-3 text-center font-sans">Thao Tác</th>
+              </tr>
+            ) : viewPerspective === 'layers' ? (
+              <tr>
+                <th className="py-3 px-3 w-12 text-center">#</th>
+                <th className="py-3 px-4 font-sans min-w-[200px]">Folder</th>
+                <th className="py-3 px-3 text-right font-sans">Tổng PV</th>
+                <th className="py-3 px-3 text-right font-sans min-w-[130px]">
+                  <div className="font-bold text-slate-800">Bài viết (Detail)</div>
+                  <div className="text-[9px] text-slate-500 font-normal">{isYoYMode ? 'Detail (% YoY)' : 'Trang Detail'}</div>
+                </th>
+                <th className="py-3 px-3 text-right font-sans min-w-[130px]">
+                  <div className="font-bold text-slate-800">Danh mục (Listing)</div>
+                  <div className="text-[9px] text-slate-500 font-normal">{isYoYMode ? 'Listing (% YoY)' : 'Trang Listing'}</div>
+                </th>
+                <th className="py-3 px-3 text-right font-sans min-w-[95px]">
+                  <div>% Detail</div>
+                  <div className="text-[9px] text-slate-400 font-normal">Tỷ trọng</div>
+                </th>
+                {isYoYMode && (
+                  <th className="py-2.5 px-3 text-center font-sans min-w-[175px]">
+                    <div className="flex items-center justify-center gap-1.5">
+                      <span className="font-semibold text-slate-700">Xu Hướng</span>
+                      <div className="inline-flex bg-slate-200/90 p-0.5 rounded text-[10px] font-medium">
+                        <button
+                          type="button"
+                          onClick={(e) => { e.stopPropagation(); setSparkMode('yoy'); }}
+                          className={`px-1.5 py-0.5 rounded transition cursor-pointer ${
+                            sparkMode === 'yoy'
+                              ? 'bg-white text-blue-700 shadow-2xs font-bold'
+                              : 'text-slate-600 hover:text-slate-900'
+                          }`}
+                          title="So sánh cùng kỳ 2026 vs 2025 theo từng tháng"
+                        >
+                          YoY
+                        </button>
+                        <button
+                          type="button"
+                          onClick={(e) => { e.stopPropagation(); setSparkMode('longterm'); }}
+                          className={`px-1.5 py-0.5 rounded transition cursor-pointer ${
+                            sparkMode === 'longterm'
+                              ? 'bg-white text-blue-700 shadow-2xs font-bold'
+                              : 'text-slate-600 hover:text-slate-900'
+                          }`}
+                          title="Đường xu hướng dài hạn liên tục từ 2025 đến 2026"
+                        >
+                          2025→2026
+                        </button>
+                      </div>
+                    </div>
+                    <div className="text-[9px] font-normal text-slate-400 flex items-center justify-center gap-1 mt-0.5 whitespace-nowrap">
+                      {sparkMode === 'yoy' ? (
+                        <>
+                          <span className="text-emerald-600 font-bold">● '26 &ge; '25</span>
+                          <span>|</span>
+                          <span className="text-rose-600 font-bold">● '26 &lt; '25</span>
+                          <span>|</span>
+                          <span className="text-slate-400">--- '25</span>
+                        </>
+                      ) : (
+                        <>
+                          <span className="text-slate-500 font-medium">Xám: '25</span>
+                          <span>→</span>
+                          <span className="text-blue-600 font-bold">Xanh: '26</span>
+                          <span>|</span>
+                          <span className="text-amber-500 font-semibold">--- Trend</span>
+                        </>
+                      )}
+                    </div>
+                  </th>
+                )}
+                <th className="py-3 px-3 text-center font-sans">Thao Tác</th>
+              </tr>
             ) : (
               <tr>
                 <th className="py-3 px-3 w-12 text-center">#</th>
@@ -872,7 +1139,18 @@ export const FolderBreakdownView: React.FC<FolderBreakdownViewProps> = ({
           <tbody className="divide-y divide-slate-100 font-mono text-xs">
             {displayedRows.length === 0 ? (
               <tr>
-                <td colSpan={isYoYMode ? (viewPerspective === 'readers' ? 9 : 8) : (viewPerspective === 'readers' ? 8 : 7)} className="text-center py-8 text-slate-400 font-sans">
+                <td
+                  colSpan={
+                    viewPerspective === 'sources'
+                      ? isYoYMode ? 12 : 11
+                      : viewPerspective === 'platforms'
+                      ? isYoYMode ? 10 : 9
+                      : viewPerspective === 'readers'
+                      ? isYoYMode ? 9 : 8
+                      : isYoYMode ? 8 : 7
+                  }
+                  className="text-center py-8 text-slate-400 font-sans"
+                >
                   Không tìm thấy folder phù hợp với điều kiện tìm kiếm/lọc.
                 </td>
               </tr>
@@ -1010,6 +1288,194 @@ export const FolderBreakdownView: React.FC<FolderBreakdownViewProps> = ({
                         </td>
                         <td className="py-3 px-3 text-right font-mono text-slate-800">
                           {formatPercent(item.pctLover || 0, false)}
+                        </td>
+                        {isYoYMode && (
+                          <td className="py-3.5 px-3 text-center align-middle font-sans">
+                            <YoYMonthlySparkline
+                              data={getFolderYoYSeries(item.folderId, item.folderName, item.siteName)}
+                              longTermData={getFolderLongTermSeries(item.folderId, item.folderName, item.siteName)}
+                              mode={sparkMode}
+                            />
+                          </td>
+                        )}
+                      </>
+                    ) : viewPerspective === 'sources' ? (
+                      <>
+                        <td className="py-3 px-3 text-right font-bold text-slate-900">
+                          {formatNumber(item.curPV)}
+                        </td>
+                        <td className="py-3 px-3 text-right">
+                          <div className="font-bold text-slate-800">{formatNumber(item.curExDirect || 0)}</div>
+                          {isYoYMode ? (
+                            <div className={`text-[10px] font-semibold ${(item.pctExDirectYoY || 0) > 0 ? 'text-emerald-600' : (item.pctExDirectYoY || 0) < 0 ? 'text-rose-600' : 'text-slate-400'}`}>
+                              {formatPercent(item.pctExDirectYoY || 0)}
+                            </div>
+                          ) : (
+                            <div className="text-[10px] text-slate-400">{formatPercent(item.pctExDirect || 0, false)}</div>
+                          )}
+                        </td>
+                        <td className="py-3 px-3 text-right">
+                          <div className="font-bold text-slate-800">{formatNumber(item.curExGoogle || 0)}</div>
+                          {isYoYMode ? (
+                            <div className={`text-[10px] font-semibold ${(item.pctExGoogleYoY || 0) > 0 ? 'text-emerald-600' : (item.pctExGoogleYoY || 0) < 0 ? 'text-rose-600' : 'text-slate-400'}`}>
+                              {formatPercent(item.pctExGoogleYoY || 0)}
+                            </div>
+                          ) : (
+                            <div className="text-[10px] text-slate-400">{formatPercent(item.pctExGoogle || 0, false)}</div>
+                          )}
+                        </td>
+                        <td className="py-3 px-3 text-right">
+                          <div className="font-bold text-slate-800">{formatNumber(item.curExSocial || 0)}</div>
+                          {isYoYMode ? (
+                            <div className={`text-[10px] font-semibold ${(item.pctExSocialYoY || 0) > 0 ? 'text-emerald-600' : (item.pctExSocialYoY || 0) < 0 ? 'text-rose-600' : 'text-slate-400'}`}>
+                              {formatPercent(item.pctExSocialYoY || 0)}
+                            </div>
+                          ) : (
+                            <div className="text-[10px] text-slate-400">{formatPercent(item.pctExSocial || 0, false)}</div>
+                          )}
+                        </td>
+                        <td className="py-3 px-3 text-right">
+                          <div className="font-bold text-slate-800">{formatNumber(item.curInHome || 0)}</div>
+                          {isYoYMode ? (
+                            <div className={`text-[10px] font-semibold ${(item.pctInHomeYoY || 0) > 0 ? 'text-emerald-600' : (item.pctInHomeYoY || 0) < 0 ? 'text-rose-600' : 'text-slate-400'}`}>
+                              {formatPercent(item.pctInHomeYoY || 0)}
+                            </div>
+                          ) : (
+                            <div className="text-[10px] text-slate-400">{formatPercent(item.pctInHome || 0, false)}</div>
+                          )}
+                        </td>
+                        <td className="py-3 px-3 text-right">
+                          <div className="font-bold text-slate-800">{formatNumber(item.curInFolder || 0)}</div>
+                          {isYoYMode ? (
+                            <div className={`text-[10px] font-semibold ${(item.pctInFolderYoY || 0) > 0 ? 'text-emerald-600' : (item.pctInFolderYoY || 0) < 0 ? 'text-rose-600' : 'text-slate-400'}`}>
+                              {formatPercent(item.pctInFolderYoY || 0)}
+                            </div>
+                          ) : (
+                            <div className="text-[10px] text-slate-400">{formatPercent(item.pctInFolder || 0, false)}</div>
+                          )}
+                        </td>
+                        <td className="py-3 px-3 text-right">
+                          <div className="font-bold text-slate-800">{formatNumber(item.curInDetail || 0)}</div>
+                          {isYoYMode ? (
+                            <div className={`text-[10px] font-semibold ${(item.pctInDetailYoY || 0) > 0 ? 'text-emerald-600' : (item.pctInDetailYoY || 0) < 0 ? 'text-rose-600' : 'text-slate-400'}`}>
+                              {formatPercent(item.pctInDetailYoY || 0)}
+                            </div>
+                          ) : (
+                            <div className="text-[10px] text-slate-400">{formatPercent(item.pctInDetail || 0, false)}</div>
+                          )}
+                        </td>
+                        <td className="py-3 px-3 text-right">
+                          <div className="font-bold text-slate-800">{formatNumber(item.curInOther || 0)}</div>
+                          {isYoYMode ? (
+                            <div className={`text-[10px] font-semibold ${(item.pctInOtherYoY || 0) > 0 ? 'text-emerald-600' : (item.pctInOtherYoY || 0) < 0 ? 'text-rose-600' : 'text-slate-400'}`}>
+                              {formatPercent(item.pctInOtherYoY || 0)}
+                            </div>
+                          ) : (
+                            <div className="text-[10px] text-slate-400">{formatPercent(item.pctInOther || 0, false)}</div>
+                          )}
+                        </td>
+                        {isYoYMode && (
+                          <td className="py-3.5 px-3 text-center align-middle font-sans">
+                            <YoYMonthlySparkline
+                              data={getFolderYoYSeries(item.folderId, item.folderName, item.siteName)}
+                              longTermData={getFolderLongTermSeries(item.folderId, item.folderName, item.siteName)}
+                              mode={sparkMode}
+                            />
+                          </td>
+                        )}
+                      </>
+                    ) : viewPerspective === 'platforms' ? (
+                      <>
+                        <td className="py-3 px-3 text-right font-bold text-slate-900">
+                          {formatNumber(item.curPV)}
+                        </td>
+                        <td className="py-3 px-3 text-right">
+                          <div className="font-bold text-slate-800">{formatNumber(item.curMobile || 0)}</div>
+                          {isYoYMode ? (
+                            <div className={`text-[10px] font-semibold ${(item.pctMobileYoY || 0) > 0 ? 'text-emerald-600' : (item.pctMobileYoY || 0) < 0 ? 'text-rose-600' : 'text-slate-400'}`}>
+                              {formatPercent(item.pctMobileYoY || 0)}
+                            </div>
+                          ) : (
+                            <div className="text-[10px] text-slate-400">{formatPercent(item.pctMobile || 0, false)}</div>
+                          )}
+                        </td>
+                        <td className="py-3 px-3 text-right">
+                          <div className="font-bold text-slate-800">{formatNumber(item.curPC || 0)}</div>
+                          {isYoYMode ? (
+                            <div className={`text-[10px] font-semibold ${(item.pctPCYoY || 0) > 0 ? 'text-emerald-600' : (item.pctPCYoY || 0) < 0 ? 'text-rose-600' : 'text-slate-400'}`}>
+                              {formatPercent(item.pctPCYoY || 0)}
+                            </div>
+                          ) : (
+                            <div className="text-[10px] text-slate-400">{formatPercent(item.pctPC || 0, false)}</div>
+                          )}
+                        </td>
+                        <td className="py-3 px-3 text-right">
+                          <div className="font-bold text-slate-800">{formatNumber(item.curApp || 0)}</div>
+                          {isYoYMode ? (
+                            <div className={`text-[10px] font-semibold ${(item.pctAppYoY || 0) > 0 ? 'text-emerald-600' : (item.pctAppYoY || 0) < 0 ? 'text-rose-600' : 'text-slate-400'}`}>
+                              {formatPercent(item.pctAppYoY || 0)}
+                            </div>
+                          ) : (
+                            <div className="text-[10px] text-slate-400">{formatPercent(item.pctApp || 0, false)}</div>
+                          )}
+                        </td>
+                        <td className="py-3 px-3 text-right">
+                          <div className="font-bold text-slate-800">{formatNumber(item.curTablet || 0)}</div>
+                          {isYoYMode ? (
+                            <div className={`text-[10px] font-semibold ${(item.pctTabletYoY || 0) > 0 ? 'text-emerald-600' : (item.pctTabletYoY || 0) < 0 ? 'text-rose-600' : 'text-slate-400'}`}>
+                              {formatPercent(item.pctTabletYoY || 0)}
+                            </div>
+                          ) : (
+                            <div className="text-[10px] text-slate-400">{formatPercent(item.pctTablet || 0, false)}</div>
+                          )}
+                        </td>
+                        <td className="py-3 px-3 text-right">
+                          <div className="font-bold text-slate-800">{formatNumber(item.curOtherPlatform || 0)}</div>
+                          {isYoYMode ? (
+                            <div className={`text-[10px] font-semibold ${(item.pctOtherPlatformYoY || 0) > 0 ? 'text-emerald-600' : (item.pctOtherPlatformYoY || 0) < 0 ? 'text-rose-600' : 'text-slate-400'}`}>
+                              {formatPercent(item.pctOtherPlatformYoY || 0)}
+                            </div>
+                          ) : (
+                            <div className="text-[10px] text-slate-400">{formatPercent(item.pctOtherPlatform || 0, false)}</div>
+                          )}
+                        </td>
+                        {isYoYMode && (
+                          <td className="py-3.5 px-3 text-center align-middle font-sans">
+                            <YoYMonthlySparkline
+                              data={getFolderYoYSeries(item.folderId, item.folderName, item.siteName)}
+                              longTermData={getFolderLongTermSeries(item.folderId, item.folderName, item.siteName)}
+                              mode={sparkMode}
+                            />
+                          </td>
+                        )}
+                      </>
+                    ) : viewPerspective === 'layers' ? (
+                      <>
+                        <td className="py-3 px-3 text-right font-bold text-slate-900">
+                          {formatNumber(item.curPV)}
+                        </td>
+                        <td className="py-3 px-3 text-right">
+                          <div className="font-bold text-slate-800">{formatNumber(item.curDetail || 0)}</div>
+                          {isYoYMode ? (
+                            <div className={`text-[10px] font-semibold ${(item.pctDetailYoY || 0) > 0 ? 'text-emerald-600' : (item.pctDetailYoY || 0) < 0 ? 'text-rose-600' : 'text-slate-400'}`}>
+                              {formatPercent(item.pctDetailYoY || 0)}
+                            </div>
+                          ) : (
+                            <div className="text-[10px] text-slate-400">{formatPercent(item.pctDetailShare || 0, false)}</div>
+                          )}
+                        </td>
+                        <td className="py-3 px-3 text-right">
+                          <div className="font-bold text-slate-800">{formatNumber(item.curListing || 0)}</div>
+                          {isYoYMode ? (
+                            <div className={`text-[10px] font-semibold ${(item.pctListingYoY || 0) > 0 ? 'text-emerald-600' : (item.pctListingYoY || 0) < 0 ? 'text-rose-600' : 'text-slate-400'}`}>
+                              {formatPercent(item.pctListingYoY || 0)}
+                            </div>
+                          ) : (
+                            <div className="text-[10px] text-slate-400">{formatPercent(item.pctListingShare || 0, false)}</div>
+                          )}
+                        </td>
+                        <td className="py-3 px-3 text-right font-mono text-slate-800">
+                          {formatPercent(item.pctDetailShare || 0, false)}
                         </td>
                         {isYoYMode && (
                           <td className="py-3.5 px-3 text-center align-middle font-sans">
