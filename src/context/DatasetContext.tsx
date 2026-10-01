@@ -102,7 +102,7 @@ export const DatasetProvider: React.FC<{ children: React.ReactNode }> = ({ child
     return {
       url: DEFAULT_GSHEET_URL,
       sheetTitle: 'Báo cáo ban (Sheet 1 - gid=0)',
-      autoSync: false,
+      autoSync: true,
       syncMode: 'replace',
     };
   });

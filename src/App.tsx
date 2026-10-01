@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import { getMonthlyRecordsForScope } from './utils/timeSeriesAnalytics';
 import { ExecutiveHeader } from './components/ExecutiveHeader';
 import { ExecutiveDropSummary } from './components/ExecutiveDropSummary';
@@ -35,7 +35,28 @@ function DashboardContent() {
   // Primary state: site, category (catename), and month
   const [selectedSite, setSelectedSite] = useState<string>('ALL');
   const [selectedCate, setSelectedCate] = useState<string>('ALL');
-  const [selectedMonth, setSelectedMonth] = useState<string>('8/2026');
+
+  // Derive latest month from dataset
+  const latestMonthInDataset = useMemo(() => {
+    const months2026 = Array.from(new Set(dataset.map((r) => r.month))).filter((m) => m && m.endsWith('/2026'));
+    if (months2026.length === 0) return '9/2026';
+    return months2026.sort((a, b) => {
+      const [m1] = a.split('/').map(Number);
+      const [m2] = b.split('/').map(Number);
+      return m1 - m2;
+    })[months2026.length - 1];
+  }, [dataset]);
+
+  const [selectedMonth, setSelectedMonth] = useState<string>(() => latestMonthInDataset || '9/2026');
+
+  useEffect(() => {
+    if (latestMonthInDataset) {
+      setSelectedMonth((prev) => {
+        const monthExists = dataset.some((r) => r.month === prev);
+        return monthExists ? prev : latestMonthInDataset;
+      });
+    }
+  }, [dataset, latestMonthInDataset]);
 
   // Modals
   const [isReportOpen, setIsReportOpen] = useState<boolean>(false);
