@@ -411,6 +411,7 @@ export interface FolderComparisonItem {
   pctDetailShare?: number;
   pctListingYoY?: number;
   pctDetailYoY?: number;
+  pctMedianListing?: number;
 
   // Loại độc giả (Readers)
   curNew?: number;
@@ -422,6 +423,9 @@ export interface FolderComparisonItem {
   pctNewYoY?: number;
   pctReturnYoY?: number;
   pctLoverYoY?: number;
+  pctMedianNew?: number;
+  pctMedianReturn?: number;
+  pctMedianLover?: number;
 
   // Nguồn truy cập (Traffic Sources)
   curExDirect?: number;
@@ -445,6 +449,13 @@ export interface FolderComparisonItem {
   pctInFolderYoY?: number;
   pctInDetailYoY?: number;
   pctInOtherYoY?: number;
+  pctMedianExDirect?: number;
+  pctMedianExGoogle?: number;
+  pctMedianExSocial?: number;
+  pctMedianInHome?: number;
+  pctMedianInFolder?: number;
+  pctMedianInDetail?: number;
+  pctMedianInOther?: number;
 
   // Nền tảng & Thiết bị (Platforms / Devices)
   curMobile?: number;
@@ -462,6 +473,11 @@ export interface FolderComparisonItem {
   pctAppYoY?: number;
   pctTabletYoY?: number;
   pctOtherPlatformYoY?: number;
+  pctMedianMobile?: number;
+  pctMedianPC?: number;
+  pctMedianApp?: number;
+  pctMedianTablet?: number;
+  pctMedianOtherPlatform?: number;
 
   // Thị trường (Markets)
   curDO?: number;
@@ -470,6 +486,8 @@ export interface FolderComparisonItem {
   pctOV?: number;
   pctDOYoY?: number;
   pctOVYoY?: number;
+  pctMedianDO?: number;
+  pctMedianOV?: number;
 
   trend: number[];
 }
@@ -522,6 +540,7 @@ export function computeFolderRanking(
     const pvs = recs2026.map((r) => r.pageviews || 0);
     const arts = recs2026.map((r) => r.articles || 0);
     const details = recs2026.map((r) => r.pDetail ?? 0);
+    const listings = recs2026.map((r) => r.pListing ?? 0);
 
     const curPV = pvs[safeIdx] || 0;
     const median2026PV = calculateMedian(pvs);
@@ -536,15 +555,23 @@ export function computeFolderRanking(
     const deltaMedianDetail = curDetail - median2026Detail;
     const pctMedianDetail = median2026Detail > 0 ? (deltaMedianDetail / median2026Detail) * 100 : 0;
 
+    const curListing = listings[safeIdx] || 0;
+    const median2026Listing = calculateMedian(listings);
+    const deltaMedianListing = curListing - median2026Listing;
+    const pctMedianListing = median2026Listing > 0 ? (deltaMedianListing / median2026Listing) * 100 : 0;
+
     const curRec = recs2026[safeIdx];
 
     // Layers
-    const curListing = curRec.pListing || 0;
     const totLayer = curListing + curDetail || curPV || 1;
     const pctListingShare = (curListing / totLayer) * 100;
     const pctDetailShare = (curDetail / totLayer) * 100;
 
     // Readers
+    const news = recs2026.map((r) => r.pNew || 0);
+    const rets = recs2026.map((r) => r.pReturn || 0);
+    const lovs = recs2026.map((r) => r.pLover || 0);
+
     const curNew = curRec.pNew || 0;
     const curReturn = curRec.pReturn || 0;
     const curLover = curRec.pLover || 0;
@@ -553,7 +580,22 @@ export function computeFolderRanking(
     const pctReturn = (curReturn / totReader) * 100;
     const pctLover = (curLover / totReader) * 100;
 
+    const medNew = calculateMedian(news);
+    const medReturn = calculateMedian(rets);
+    const medLover = calculateMedian(lovs);
+    const pctMedianNew = medNew > 0 ? ((curNew - medNew) / medNew) * 100 : 0;
+    const pctMedianReturn = medReturn > 0 ? ((curReturn - medReturn) / medReturn) * 100 : 0;
+    const pctMedianLover = medLover > 0 ? ((curLover - medLover) / medLover) * 100 : 0;
+
     // Traffic Sources
+    const directs = recs2026.map((r) => r.pExDirect || 0);
+    const googles = recs2026.map((r) => r.pExGoogle || 0);
+    const socials = recs2026.map((r) => r.pExSocial || 0);
+    const homes = recs2026.map((r) => r.pInHome || 0);
+    const folders = recs2026.map((r) => r.pInFolder || 0);
+    const detailsIn = recs2026.map((r) => r.pInDetail || 0);
+    const others = recs2026.map((r) => (r.pInOther || 0) + (r.pInTagTopic24h || 0));
+
     const curExDirect = curRec.pExDirect || 0;
     const curExGoogle = curRec.pExGoogle || 0;
     const curExSocial = curRec.pExSocial || 0;
@@ -570,7 +612,29 @@ export function computeFolderRanking(
     const pctInDetail = (curInDetail / totSrc) * 100;
     const pctInOther = (curInOther / totSrc) * 100;
 
+    const medExDirect = calculateMedian(directs);
+    const medExGoogle = calculateMedian(googles);
+    const medExSocial = calculateMedian(socials);
+    const medInHome = calculateMedian(homes);
+    const medInFolder = calculateMedian(folders);
+    const medInDetail = calculateMedian(detailsIn);
+    const medInOther = calculateMedian(others);
+
+    const pctMedianExDirect = medExDirect > 0 ? ((curExDirect - medExDirect) / medExDirect) * 100 : 0;
+    const pctMedianExGoogle = medExGoogle > 0 ? ((curExGoogle - medExGoogle) / medExGoogle) * 100 : 0;
+    const pctMedianExSocial = medExSocial > 0 ? ((curExSocial - medExSocial) / medExSocial) * 100 : 0;
+    const pctMedianInHome = medInHome > 0 ? ((curInHome - medInHome) / medInHome) * 100 : 0;
+    const pctMedianInFolder = medInFolder > 0 ? ((curInFolder - medInFolder) / medInFolder) * 100 : 0;
+    const pctMedianInDetail = medInDetail > 0 ? ((curInDetail - medInDetail) / medInDetail) * 100 : 0;
+    const pctMedianInOther = medInOther > 0 ? ((curInOther - medInOther) / medInOther) * 100 : 0;
+
     // Platforms / Devices
+    const mobiles = recs2026.map((r) => r.pMobile || 0);
+    const pcs = recs2026.map((r) => r.pPC || 0);
+    const apps = recs2026.map((r) => r.pApp || 0);
+    const tablets = recs2026.map((r) => r.pTablet || 0);
+    const othersPlat = recs2026.map((r) => r.pOtherPlatform || 0);
+
     const curMobile = curRec.pMobile || 0;
     const curPC = curRec.pPC || 0;
     const curApp = curRec.pApp || 0;
@@ -583,12 +647,32 @@ export function computeFolderRanking(
     const pctTablet = (curTablet / totPlat) * 100;
     const pctOtherPlatform = (curOtherPlatform / totPlat) * 100;
 
+    const medMobile = calculateMedian(mobiles);
+    const medPC = calculateMedian(pcs);
+    const medApp = calculateMedian(apps);
+    const medTablet = calculateMedian(tablets);
+    const medOtherPlatform = calculateMedian(othersPlat);
+
+    const pctMedianMobile = medMobile > 0 ? ((curMobile - medMobile) / medMobile) * 100 : 0;
+    const pctMedianPC = medPC > 0 ? ((curPC - medPC) / medPC) * 100 : 0;
+    const pctMedianApp = medApp > 0 ? ((curApp - medApp) / medApp) * 100 : 0;
+    const pctMedianTablet = medTablet > 0 ? ((curTablet - medTablet) / medTablet) * 100 : 0;
+    const pctMedianOtherPlatform = medOtherPlatform > 0 ? ((curOtherPlatform - medOtherPlatform) / medOtherPlatform) * 100 : 0;
+
     // Markets
+    const dos = recs2026.map((r) => r.pDO || 0);
+    const ovs = recs2026.map((r) => r.pOV || 0);
+
     const curDO = curRec.pDO || 0;
     const curOV = curRec.pOV || 0;
     const totMarket = curDO + curOV || curPV || 1;
     const pctDO = (curDO / totMarket) * 100;
     const pctOV = (curOV / totMarket) * 100;
+
+    const medDO = calculateMedian(dos);
+    const medOV = calculateMedian(ovs);
+    const pctMedianDO = medDO > 0 ? ((curDO - medDO) / medDO) * 100 : 0;
+    const pctMedianOV = medOV > 0 ? ((curOV - medOV) / medOV) * 100 : 0;
 
     items.push({
       folderId: fId,
@@ -610,12 +694,16 @@ export function computeFolderRanking(
       curListing,
       pctListingShare,
       pctDetailShare,
+      pctMedianListing,
       curNew,
       curReturn,
       curLover,
       pctNew,
       pctReturn,
       pctLover,
+      pctMedianNew,
+      pctMedianReturn,
+      pctMedianLover,
       curExDirect,
       curExGoogle,
       curExSocial,
@@ -630,6 +718,13 @@ export function computeFolderRanking(
       pctInFolder,
       pctInDetail,
       pctInOther,
+      pctMedianExDirect,
+      pctMedianExGoogle,
+      pctMedianExSocial,
+      pctMedianInHome,
+      pctMedianInFolder,
+      pctMedianInDetail,
+      pctMedianInOther,
       curMobile,
       curPC,
       curApp,
@@ -640,10 +735,17 @@ export function computeFolderRanking(
       pctApp,
       pctTablet,
       pctOtherPlatform,
+      pctMedianMobile,
+      pctMedianPC,
+      pctMedianApp,
+      pctMedianTablet,
+      pctMedianOtherPlatform,
       curDO,
       curOV,
       pctDO,
       pctOV,
+      pctMedianDO,
+      pctMedianOV,
       trend: pvs,
     });
   }

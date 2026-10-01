@@ -1184,7 +1184,17 @@ export const FolderBreakdownView: React.FC<FolderBreakdownViewProps> = ({
                               {formatPercent(item.pctNewYoY || 0)}
                             </div>
                           ) : (
-                            <div className="text-[10px] text-slate-400">{formatPercent(item.pctNew || 0, false)}</div>
+                            <div
+                              className={`text-[10px] font-semibold ${
+                                (item.pctMedianNew || 0) > 0
+                                  ? 'text-emerald-600'
+                                  : (item.pctMedianNew || 0) < 0
+                                  ? 'text-rose-600'
+                                  : 'text-slate-400'
+                              }`}
+                            >
+                              {formatPercent(item.pctMedianNew || 0)}
+                            </div>
                           )}
                         </td>
                         <td className="py-3 px-3 text-right">
@@ -1202,7 +1212,17 @@ export const FolderBreakdownView: React.FC<FolderBreakdownViewProps> = ({
                               {formatPercent(item.pctReturnYoY || 0)}
                             </div>
                           ) : (
-                            <div className="text-[10px] text-slate-400">{formatPercent(item.pctReturn || 0, false)}</div>
+                            <div
+                              className={`text-[10px] font-semibold ${
+                                (item.pctMedianReturn || 0) > 0
+                                  ? 'text-emerald-600'
+                                  : (item.pctMedianReturn || 0) < 0
+                                  ? 'text-rose-600'
+                                  : 'text-slate-400'
+                              }`}
+                            >
+                              {formatPercent(item.pctMedianReturn || 0)}
+                            </div>
                           )}
                         </td>
                         <td className="py-3 px-3 text-right">
@@ -1220,7 +1240,17 @@ export const FolderBreakdownView: React.FC<FolderBreakdownViewProps> = ({
                               {formatPercent(item.pctLoverYoY || 0)}
                             </div>
                           ) : (
-                            <div className="text-[10px] text-slate-400">{formatPercent(item.pctLover || 0, false)}</div>
+                            <div
+                              className={`text-[10px] font-semibold ${
+                                (item.pctMedianLover || 0) > 0
+                                  ? 'text-emerald-600'
+                                  : (item.pctMedianLover || 0) < 0
+                                  ? 'text-rose-600'
+                                  : 'text-slate-400'
+                              }`}
+                            >
+                              {formatPercent(item.pctMedianLover || 0)}
+                            </div>
                           )}
                         </td>
                         <td className="py-3 px-3 text-right font-mono text-slate-800">
@@ -1248,7 +1278,9 @@ export const FolderBreakdownView: React.FC<FolderBreakdownViewProps> = ({
                               {formatPercent(item.pctExDirectYoY || 0)}
                             </div>
                           ) : (
-                            <div className="text-[10px] text-slate-400">{formatPercent(item.pctExDirect || 0, false)}</div>
+                            <div className={`text-[10px] font-semibold ${(item.pctMedianExDirect || 0) > 0 ? 'text-emerald-600' : (item.pctMedianExDirect || 0) < 0 ? 'text-rose-600' : 'text-slate-400'}`}>
+                              {formatPercent(item.pctMedianExDirect || 0)}
+                            </div>
                           )}
                         </td>
                         <td className="py-3 px-3 text-right">
@@ -1258,7 +1290,9 @@ export const FolderBreakdownView: React.FC<FolderBreakdownViewProps> = ({
                               {formatPercent(item.pctExGoogleYoY || 0)}
                             </div>
                           ) : (
-                            <div className="text-[10px] text-slate-400">{formatPercent(item.pctExGoogle || 0, false)}</div>
+                            <div className={`text-[10px] font-semibold ${(item.pctMedianExGoogle || 0) > 0 ? 'text-emerald-600' : (item.pctMedianExGoogle || 0) < 0 ? 'text-rose-600' : 'text-slate-400'}`}>
+                              {formatPercent(item.pctMedianExGoogle || 0)}
+                            </div>
                           )}
                         </td>
                         <td className="py-3 px-3 text-right">
@@ -1268,7 +1302,9 @@ export const FolderBreakdownView: React.FC<FolderBreakdownViewProps> = ({
                               {formatPercent(item.pctExSocialYoY || 0)}
                             </div>
                           ) : (
-                            <div className="text-[10px] text-slate-400">{formatPercent(item.pctExSocial || 0, false)}</div>
+                            <div className={`text-[10px] font-semibold ${(item.pctMedianExSocial || 0) > 0 ? 'text-emerald-600' : (item.pctMedianExSocial || 0) < 0 ? 'text-rose-600' : 'text-slate-400'}`}>
+                              {formatPercent(item.pctMedianExSocial || 0)}
+                            </div>
                           )}
                         </td>
                         <td className="py-3 px-3 text-right">
@@ -1278,7 +1314,9 @@ export const FolderBreakdownView: React.FC<FolderBreakdownViewProps> = ({
                               {formatPercent(item.pctInHomeYoY || 0)}
                             </div>
                           ) : (
-                            <div className="text-[10px] text-slate-400">{formatPercent(item.pctInHome || 0, false)}</div>
+                            <div className={`text-[10px] font-semibold ${(item.pctMedianInHome || 0) > 0 ? 'text-emerald-600' : (item.pctMedianInHome || 0) < 0 ? 'text-rose-600' : 'text-slate-400'}`}>
+                              {formatPercent(item.pctMedianInHome || 0)}
+                            </div>
                           )}
                         </td>
                         <td className="py-3 px-3 text-right">
@@ -1288,7 +1326,9 @@ export const FolderBreakdownView: React.FC<FolderBreakdownViewProps> = ({
                               {formatPercent(item.pctInFolderYoY || 0)}
                             </div>
                           ) : (
-                            <div className="text-[10px] text-slate-400">{formatPercent(item.pctInFolder || 0, false)}</div>
+                            <div className={`text-[10px] font-semibold ${(item.pctMedianInFolder || 0) > 0 ? 'text-emerald-600' : (item.pctMedianInFolder || 0) < 0 ? 'text-rose-600' : 'text-slate-400'}`}>
+                              {formatPercent(item.pctMedianInFolder || 0)}
+                            </div>
                           )}
                         </td>
                         <td className="py-3 px-3 text-right">
@@ -1298,7 +1338,9 @@ export const FolderBreakdownView: React.FC<FolderBreakdownViewProps> = ({
                               {formatPercent(item.pctInDetailYoY || 0)}
                             </div>
                           ) : (
-                            <div className="text-[10px] text-slate-400">{formatPercent(item.pctInDetail || 0, false)}</div>
+                            <div className={`text-[10px] font-semibold ${(item.pctMedianInDetail || 0) > 0 ? 'text-emerald-600' : (item.pctMedianInDetail || 0) < 0 ? 'text-rose-600' : 'text-slate-400'}`}>
+                              {formatPercent(item.pctMedianInDetail || 0)}
+                            </div>
                           )}
                         </td>
                         <td className="py-3 px-3 text-right">
@@ -1308,7 +1350,9 @@ export const FolderBreakdownView: React.FC<FolderBreakdownViewProps> = ({
                               {formatPercent(item.pctInOtherYoY || 0)}
                             </div>
                           ) : (
-                            <div className="text-[10px] text-slate-400">{formatPercent(item.pctInOther || 0, false)}</div>
+                            <div className={`text-[10px] font-semibold ${(item.pctMedianInOther || 0) > 0 ? 'text-emerald-600' : (item.pctMedianInOther || 0) < 0 ? 'text-rose-600' : 'text-slate-400'}`}>
+                              {formatPercent(item.pctMedianInOther || 0)}
+                            </div>
                           )}
                         </td>
                         {isYoYMode && (
@@ -1333,7 +1377,9 @@ export const FolderBreakdownView: React.FC<FolderBreakdownViewProps> = ({
                               {formatPercent(item.pctMobileYoY || 0)}
                             </div>
                           ) : (
-                            <div className="text-[10px] text-slate-400">{formatPercent(item.pctMobile || 0, false)}</div>
+                            <div className={`text-[10px] font-semibold ${(item.pctMedianMobile || 0) > 0 ? 'text-emerald-600' : (item.pctMedianMobile || 0) < 0 ? 'text-rose-600' : 'text-slate-400'}`}>
+                              {formatPercent(item.pctMedianMobile || 0)}
+                            </div>
                           )}
                         </td>
                         <td className="py-3 px-3 text-right">
@@ -1343,7 +1389,9 @@ export const FolderBreakdownView: React.FC<FolderBreakdownViewProps> = ({
                               {formatPercent(item.pctPCYoY || 0)}
                             </div>
                           ) : (
-                            <div className="text-[10px] text-slate-400">{formatPercent(item.pctPC || 0, false)}</div>
+                            <div className={`text-[10px] font-semibold ${(item.pctMedianPC || 0) > 0 ? 'text-emerald-600' : (item.pctMedianPC || 0) < 0 ? 'text-rose-600' : 'text-slate-400'}`}>
+                              {formatPercent(item.pctMedianPC || 0)}
+                            </div>
                           )}
                         </td>
                         <td className="py-3 px-3 text-right">
@@ -1353,7 +1401,9 @@ export const FolderBreakdownView: React.FC<FolderBreakdownViewProps> = ({
                               {formatPercent(item.pctAppYoY || 0)}
                             </div>
                           ) : (
-                            <div className="text-[10px] text-slate-400">{formatPercent(item.pctApp || 0, false)}</div>
+                            <div className={`text-[10px] font-semibold ${(item.pctMedianApp || 0) > 0 ? 'text-emerald-600' : (item.pctMedianApp || 0) < 0 ? 'text-rose-600' : 'text-slate-400'}`}>
+                              {formatPercent(item.pctMedianApp || 0)}
+                            </div>
                           )}
                         </td>
                         <td className="py-3 px-3 text-right">
@@ -1363,7 +1413,9 @@ export const FolderBreakdownView: React.FC<FolderBreakdownViewProps> = ({
                               {formatPercent(item.pctTabletYoY || 0)}
                             </div>
                           ) : (
-                            <div className="text-[10px] text-slate-400">{formatPercent(item.pctTablet || 0, false)}</div>
+                            <div className={`text-[10px] font-semibold ${(item.pctMedianTablet || 0) > 0 ? 'text-emerald-600' : (item.pctMedianTablet || 0) < 0 ? 'text-rose-600' : 'text-slate-400'}`}>
+                              {formatPercent(item.pctMedianTablet || 0)}
+                            </div>
                           )}
                         </td>
                         <td className="py-3 px-3 text-right">
@@ -1373,7 +1425,9 @@ export const FolderBreakdownView: React.FC<FolderBreakdownViewProps> = ({
                               {formatPercent(item.pctOtherPlatformYoY || 0)}
                             </div>
                           ) : (
-                            <div className="text-[10px] text-slate-400">{formatPercent(item.pctOtherPlatform || 0, false)}</div>
+                            <div className={`text-[10px] font-semibold ${(item.pctMedianOtherPlatform || 0) > 0 ? 'text-emerald-600' : (item.pctMedianOtherPlatform || 0) < 0 ? 'text-rose-600' : 'text-slate-400'}`}>
+                              {formatPercent(item.pctMedianOtherPlatform || 0)}
+                            </div>
                           )}
                         </td>
                         {isYoYMode && (
@@ -1398,7 +1452,9 @@ export const FolderBreakdownView: React.FC<FolderBreakdownViewProps> = ({
                               {formatPercent(item.pctDetailYoY || 0)}
                             </div>
                           ) : (
-                            <div className="text-[10px] text-slate-400">{formatPercent(item.pctDetailShare || 0, false)}</div>
+                            <div className={`text-[10px] font-semibold ${(item.pctMedianDetail || 0) > 0 ? 'text-emerald-600' : (item.pctMedianDetail || 0) < 0 ? 'text-rose-600' : 'text-slate-400'}`}>
+                              {formatPercent(item.pctMedianDetail || 0)}
+                            </div>
                           )}
                         </td>
                         <td className="py-3 px-3 text-right">
@@ -1408,7 +1464,9 @@ export const FolderBreakdownView: React.FC<FolderBreakdownViewProps> = ({
                               {formatPercent(item.pctListingYoY || 0)}
                             </div>
                           ) : (
-                            <div className="text-[10px] text-slate-400">{formatPercent(item.pctListingShare || 0, false)}</div>
+                            <div className={`text-[10px] font-semibold ${(item.pctMedianListing || 0) > 0 ? 'text-emerald-600' : (item.pctMedianListing || 0) < 0 ? 'text-rose-600' : 'text-slate-400'}`}>
+                              {formatPercent(item.pctMedianListing || 0)}
+                            </div>
                           )}
                         </td>
                         <td className="py-3 px-3 text-right font-mono text-slate-800">
