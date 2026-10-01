@@ -56,7 +56,6 @@ export const VietnamMarketOverviewView: React.FC<Props> = ({
     'dantri',
     'thanhnien',
   ]);
-  const [timeRange, setTimeRange] = useState<'all' | '2026' | '2025'>('all');
 
   // Editable publisher records state (persisted to localStorage)
   const [publishersData, setPublishersData] = useState<PublisherVisitRecord[]>(() => {
@@ -156,16 +155,9 @@ export const VietnamMarketOverviewView: React.FC<Props> = ({
     return processedData.items.find((p) => p.id === 'vnexpress');
   }, [processedData]);
 
-  // Trendline Chart Data (supports all months or selected range)
+  // Trendline Chart Data (shows all 20 months continuously)
   const trendChartData = useMemo(() => {
-    const monthsToUse =
-      timeRange === '2026'
-        ? MARKET_2026_MONTHS
-        : timeRange === '2025'
-        ? MARKET_2025_MONTHS
-        : MARKET_ALL_MONTHS;
-
-    return monthsToUse.map((m) => {
+    return MARKET_ALL_MONTHS.map((m) => {
       const is2025 = m.endsWith('/2025');
       const monthTotal = publishersData.reduce(
         (sum, pub) => sum + (is2025 ? (pub.monthlyVisits2025[m] ?? 0) : (pub.monthlyVisits[m] ?? 0)),
@@ -186,7 +178,7 @@ export const VietnamMarketOverviewView: React.FC<Props> = ({
 
       return pt;
     });
-  }, [publishersData, totalMarketMedian2026, timeRange]);
+  }, [publishersData, totalMarketMedian2026]);
 
   // Lấy danh sách 8 báo lớn nhất thị trường theo số liệu lượt truy cập
   const top8Publishers = useMemo(() => {
@@ -458,59 +450,10 @@ export const VietnamMarketOverviewView: React.FC<Props> = ({
       {/* 2. Chart Đường Xu Hướng (Trendline Chart) */}
       <div className="bg-white border border-slate-200/90 rounded-2xl p-5 shadow-xs space-y-4">
         {/* Top Header of Chart */}
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-slate-100">
-          <div>
-            <h2 className="text-base font-bold text-slate-900 tracking-tight flex items-center gap-2 flex-wrap">
-              <span>Biểu Đồ Đường Xu Hướng Lượt Truy Cập</span>
-              <span className="text-xs px-2.5 py-0.5 rounded-full bg-blue-50 text-blue-700 font-semibold border border-blue-200">
-                {timeRange === 'all'
-                  ? 'Toàn bộ 20 tháng (2025 - 2026)'
-                  : timeRange === '2026'
-                  ? 'Năm 2026 (8 tháng)'
-                  : 'Năm 2025 (12 tháng)'}
-              </span>
-            </h2>
-            <p className="text-xs text-slate-500 mt-0.5">
-              So sánh quỹ đạo phát triển lượt visit giữa Toàn thị trường và các cơ quan báo chí qua từng tháng
-            </p>
-          </div>
-
-          {/* Time range selector */}
-          <div className="inline-flex bg-slate-100 p-1 rounded-xl text-xs font-semibold border border-slate-200/70 shrink-0 self-start sm:self-center">
-            <button
-              type="button"
-              onClick={() => setTimeRange('all')}
-              className={`px-3 py-1.5 rounded-lg transition cursor-pointer ${
-                timeRange === 'all'
-                  ? 'bg-white text-blue-700 shadow-xs font-bold'
-                  : 'text-slate-600 hover:text-slate-900'
-              }`}
-            >
-              Tất cả (2025 - 2026)
-            </button>
-            <button
-              type="button"
-              onClick={() => setTimeRange('2026')}
-              className={`px-3 py-1.5 rounded-lg transition cursor-pointer ${
-                timeRange === '2026'
-                  ? 'bg-white text-blue-700 shadow-xs font-bold'
-                  : 'text-slate-600 hover:text-slate-900'
-              }`}
-            >
-              Năm 2026
-            </button>
-            <button
-              type="button"
-              onClick={() => setTimeRange('2025')}
-              className={`px-3 py-1.5 rounded-lg transition cursor-pointer ${
-                timeRange === '2025'
-                  ? 'bg-white text-blue-700 shadow-xs font-bold'
-                  : 'text-slate-600 hover:text-slate-900'
-              }`}
-            >
-              Năm 2025
-            </button>
-          </div>
+        <div className="pb-2.5 border-b border-slate-100">
+          <h2 className="text-base font-bold text-slate-900 tracking-tight">
+            Biểu Đồ Đường Xu Hướng Lượt Truy Cập
+          </h2>
         </div>
 
         {/* Checkbox Controls Box: 8 BÁO LỚN NHẤT + TOÀN THỊ TRƯỜNG */}
