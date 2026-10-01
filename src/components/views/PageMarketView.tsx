@@ -133,8 +133,8 @@ export const PageMarketView: React.FC<Props> = ({ monthlyData, selectedMonth, is
             <div className="flex items-center justify-between mb-3 text-xs">
               <span className="font-bold text-slate-800">
                 {isYoYMode
-                  ? 'Xu hướng lưu lượng giữa Detail vs Listing từ 2025 đến tháng mới nhất (Triệu PV)'
-                  : 'Xu hướng lưu lượng giữa Detail vs Listing qua 8 tháng (Triệu PV)'}
+                  ? 'Xu hướng lưu lượng giữa Detail vs Listing từ 2025 đến 2026 (Triệu PV)'
+                  : 'Xu hướng lưu lượng giữa Detail vs Listing qua các tháng (Triệu PV)'}
               </span>
               <span className="text-slate-500 text-[11px]">Đơn vị: Triệu PV</span>
             </div>
@@ -325,8 +325,8 @@ export const PageMarketView: React.FC<Props> = ({ monthlyData, selectedMonth, is
             <div className="flex items-center justify-between mb-3 text-xs">
               <span className="font-bold text-slate-800">
                 {isYoYMode
-                  ? 'Xu hướng lưu lượng theo thị trường từ 2025 đến tháng mới nhất (Triệu PV)'
-                  : 'Xu hướng lưu lượng theo thị trường qua 8 tháng (Triệu PV)'}
+                  ? 'Xu hướng lưu lượng theo thị trường từ 2025 đến 2026 (Triệu PV)'
+                  : 'Xu hướng lưu lượng theo thị trường qua các tháng (Triệu PV)'}
               </span>
               <span className="text-slate-500 text-[11px]">Đơn vị: Triệu PV</span>
             </div>

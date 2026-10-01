@@ -292,7 +292,7 @@ export const VietnamMarketOverviewView: React.FC<Props> = ({
               >
                 {[...MARKET_2026_MONTHS].reverse().map((m) => (
                   <option key={m} value={m}>
-                    Tháng {m} {m === '8/2026' ? '(Mới nhất)' : ''}
+                    Tháng {m}
                   </option>
                 ))}
               </select>

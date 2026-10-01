@@ -272,8 +272,8 @@ export const ReaderSegmentsView: React.FC<Props> = ({
           <div className="flex items-center justify-between text-xs">
             <span className="font-bold text-slate-800">
               {isYoYMode
-                ? 'Đường xu hướng lượt xem theo loại độc giả từ 2025 đến tháng mới nhất (Triệu PV)'
-                : 'Đường xu hướng lượt xem của 3 nhóm độc giả qua 8 tháng (Triệu PV)'}
+                ? 'Đường xu hướng lượt xem theo loại độc giả từ 2025 đến 2026 (Triệu PV)'
+                : 'Đường xu hướng lượt xem của 3 nhóm độc giả qua các tháng (Triệu PV)'}
             </span>
             <span className="text-slate-500 text-[11px]">Đơn vị: Triệu Pageviews</span>
           </div>

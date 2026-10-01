@@ -349,8 +349,8 @@ export const ArticleProductionView: React.FC<Props> = ({ monthlyData, selectedMo
           <div className="flex items-center justify-between mb-3 text-xs">
             <span className="font-bold text-slate-800">
               {isYoYMode
-                ? 'Xu hướng sản lượng bài viết và số bài Build Top từ 2025 đến tháng mới nhất'
-                : 'Xu hướng sản lượng bài viết và số bài Build Top qua 8 tháng'}
+                ? 'Xu hướng sản lượng bài viết và số bài Build Top từ 2025 đến 2026'
+                : 'Xu hướng sản lượng bài viết và số bài Build Top qua các tháng'}
             </span>
             <span className="text-slate-500 text-[11px]">Đơn vị: Bài viết</span>
           </div>

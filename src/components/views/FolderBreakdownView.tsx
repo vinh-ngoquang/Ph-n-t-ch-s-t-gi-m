@@ -598,8 +598,8 @@ export const FolderBreakdownView: React.FC<FolderBreakdownViewProps> = ({
             <span className="font-bold text-slate-800">
               {isYoYMode
                 ? (isSingleFolderActive && selectedFolder
-                  ? `Đường xu hướng từ 2025 đến tháng mới nhất: Ban ${selectedFolder.folderName} (Triệu PV)`
-                  : 'Đường xu hướng từ 2025 đến tháng mới nhất: Top Chuyên mục lớn nhất (Triệu PV)')
+                  ? `Đường xu hướng từ 2025 đến 2026: Ban ${selectedFolder.folderName} (Triệu PV)`
+                  : 'Đường xu hướng từ 2025 đến 2026: Top Chuyên mục lớn nhất (Triệu PV)')
                 : (isSingleFolderActive && selectedFolder
                   ? `Đường xu hướng 2026: Ban ${selectedFolder.folderName} (Triệu PV so với Trung vị)`
                   : 'Đường xu hướng 2026: Top Chuyên mục lớn nhất (Triệu PV)')}

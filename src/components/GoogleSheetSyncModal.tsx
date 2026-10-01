@@ -104,7 +104,7 @@ export const GoogleSheetSyncModal: React.FC<GoogleSheetSyncModalProps> = ({ isOp
                 Đồng Bộ Dữ Liệu Tự Động Từ Google Sheets
               </h3>
               <p className="text-xs text-slate-500">
-                Tự động tải số liệu mới nhất mỗi khi mở trang mà không cần đẩy file Excel thủ công
+                Tự động tải số liệu mỗi khi mở trang mà không cần đẩy file Excel thủ công
               </p>
             </div>
           </div>
@@ -252,7 +252,7 @@ export const GoogleSheetSyncModal: React.FC<GoogleSheetSyncModalProps> = ({ isOp
               <div>
                 <span className="text-xs font-bold text-slate-800 block">Tự động đồng bộ khi mở trang</span>
                 <span className="text-[11px] text-slate-500">
-                  Mỗi khi mở ứng dụng, hệ thống sẽ tự động tải số liệu mới nhất trong nền.
+                  Mỗi khi mở ứng dụng, hệ thống sẽ tự động tải số liệu trong nền.
                 </span>
               </div>
             </label>

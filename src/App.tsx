@@ -128,6 +128,28 @@ function DashboardContent() {
     return 'Toàn Cảnh Báo Chí Việt Nam';
   }, [mainDashboard]);
 
+  // Determine available 2026 months from dataset
+  const available2026Months = useMemo(() => {
+    const months = new Set<string>();
+    dataset.forEach((r) => {
+      if (r.month && r.month.includes('/2026')) months.add(r.month.trim());
+    });
+    return Array.from(months).sort((a, b) => {
+      const [m1] = a.split('/').map(Number);
+      const [m2] = b.split('/').map(Number);
+      return m1 - m2;
+    });
+  }, [dataset]);
+
+  // Keep selectedMonth updated if new month arrives
+  React.useEffect(() => {
+    if (available2026Months.length > 0) {
+      if (!available2026Months.includes(selectedMonth)) {
+        setSelectedMonth(available2026Months[available2026Months.length - 1]);
+      }
+    }
+  }, [available2026Months, selectedMonth]);
+
   return (
     <div className="min-h-screen bg-slate-50 text-slate-800 font-sans antialiased flex selection:bg-rose-600 selection:text-white">
       {/* ─── 1. LEFT SIDEBAR NAVIGATION (VnExpress Internal Theme) ─── */}
@@ -149,6 +171,7 @@ function DashboardContent() {
         <TopNavBar
           title={headerTitle}
           onOpenMobileSidebar={() => setIsMobileOpen(true)}
+          onOpenGoogleSheetModal={() => setIsGoogleSheetModalOpen(true)}
         />
 
         {/* Workspace Content */}

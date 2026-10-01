@@ -58,11 +58,35 @@ export const ExecutiveHeader: React.FC<Props> = ({
   hideImportAndExport = false,
 }) => {
   const [showMonthlyTable, setShowMonthlyTable] = useState(false);
+  const [syncToast, setSyncToast] = useState<{ message: string; type: 'success' | 'error' } | null>(null);
   const {
     dataset,
     googleSheetConfig,
     isSyncingSheet,
+    syncFromGoogleSheet,
   } = useDataset();
+
+  const handleQuickRefresh = async () => {
+    if (!googleSheetConfig?.url) {
+      onOpenGoogleSheetSync();
+      return;
+    }
+    try {
+      const res = await syncFromGoogleSheet(googleSheetConfig.url, googleSheetConfig.syncMode || 'replace');
+      const latestMo = res.summary.months[res.summary.months.length - 1] || '';
+      setSyncToast({
+        message: `Đã làm mới dữ liệu thành công (${res.records.length} dòng${latestMo ? ` • Tháng: ${latestMo}` : ''})!`,
+        type: 'success',
+      });
+      setTimeout(() => setSyncToast(null), 4000);
+    } catch (err: any) {
+      setSyncToast({
+        message: err?.message || 'Lỗi khi đồng bộ Google Sheets.',
+        type: 'error',
+      });
+      setTimeout(() => setSyncToast(null), 4500);
+    }
+  };
   const months2026 = monthlyData.filter((d) => d.year === 2026);
   const months2025 = monthlyData.filter((d) => d.year === 2025);
 
@@ -264,7 +288,7 @@ export const ExecutiveHeader: React.FC<Props> = ({
 
           {/* Action buttons on the right */}
           <div className="flex items-center gap-2 flex-wrap shrink-0">
-            {/* Google Sheets Sync Button */}
+            {/* Google Sheets Config Button */}
             <button
               onClick={onOpenGoogleSheetSync}
               className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg font-medium text-xs transition shadow-xs cursor-pointer whitespace-nowrap ${
@@ -272,10 +296,10 @@ export const ExecutiveHeader: React.FC<Props> = ({
                   ? 'bg-emerald-50 text-emerald-800 border border-emerald-300 hover:bg-emerald-100'
                   : 'bg-emerald-700 hover:bg-emerald-800 text-white'
               }`}
-              title={googleSheetConfig?.url ? `Đang kết nối: ${googleSheetConfig.url}` : 'Đồng bộ tự động từ Google Sheets'}
+              title={googleSheetConfig?.url ? `Đang kết nối: ${googleSheetConfig.url}` : 'Cấu hình đồng bộ Google Sheets'}
             >
-              <RefreshCw className={`w-3.5 h-3.5 ${isSyncingSheet ? 'animate-spin' : ''}`} />
-              <span>{googleSheetConfig?.url ? 'Google Sheets' : 'Đồng Bộ Sheets'}</span>
+              <FileSpreadsheet className="w-3.5 h-3.5 text-emerald-600" />
+              <span>{googleSheetConfig?.url ? 'Google Sheets' : 'Cấu hình Sheets'}</span>
             </button>
 
             {/* Bảng Các Tháng 2026 */}
@@ -335,7 +359,7 @@ export const ExecutiveHeader: React.FC<Props> = ({
               >
                 {availableMonths.map((m) => (
                   <option key={m.value} value={m.value}>
-                    {m.label} {m.value === '8/2026' ? '(Mới nhất)' : ''}
+                    {m.label}
                   </option>
                 ))}
               </select>
@@ -624,11 +648,6 @@ export const ExecutiveHeader: React.FC<Props> = ({
                             {isSelected && (
                               <span className="px-1.5 py-0.5 rounded text-[10px] font-bold bg-blue-600 text-white shadow-2xs">
                                 Đang chọn
-                              </span>
-                            )}
-                            {m.month === '8/2026' && !isSelected && (
-                              <span className="px-1.5 py-0.5 rounded text-[10px] font-medium bg-slate-100 text-slate-600 border border-slate-200">
-                                Mới nhất
                               </span>
                             )}
                           </div>

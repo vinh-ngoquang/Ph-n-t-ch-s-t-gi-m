@@ -171,8 +171,8 @@ export const PlatformsView: React.FC<Props> = ({ monthlyData, selectedMonth, isY
           <div className="flex items-center justify-between mb-3 text-xs">
             <span className="font-bold text-slate-800">
               {isYoYMode
-                ? 'Đường xu hướng lượt xem trên từng nền tảng từ 2025 đến tháng mới nhất (Triệu PV)'
-                : 'Đường xu hướng lượt xem trên từng nền tảng qua 8 tháng (Triệu PV)'}
+                ? 'Đường xu hướng lượt xem trên từng nền tảng từ 2025 đến 2026 (Triệu PV)'
+                : 'Đường xu hướng lượt xem trên từng nền tảng qua các tháng (Triệu PV)'}
             </span>
             <span className="text-slate-500 text-[11px]">Đơn vị: Triệu Pageviews</span>
           </div>

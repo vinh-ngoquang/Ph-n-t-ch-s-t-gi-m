@@ -682,8 +682,8 @@ export const TrafficSourcesView: React.FC<Props> = ({
           <div className="flex items-center justify-between mb-3 text-xs">
             <span className="font-bold text-slate-800">
               {isYoYMode
-                ? 'Đường xu hướng các nguồn truy cập từ 2025 đến tháng mới nhất (Triệu PV)'
-                : 'Đường xu hướng các nguồn truy cập qua 8 tháng (Triệu PV)'}
+                ? 'Đường xu hướng các nguồn truy cập từ 2025 đến 2026 (Triệu PV)'
+                : 'Đường xu hướng các nguồn truy cập qua các tháng (Triệu PV)'}
             </span>
             <span className="text-slate-500 text-[11px]">Đơn vị: Triệu Pageviews</span>
           </div>
@@ -1238,7 +1238,7 @@ export const TrafficSourcesView: React.FC<Props> = ({
               </div>
               <p className="text-xs text-slate-600 mt-1 font-sans">
                 {isYoYMode
-                  ? 'Phân tích xu hướng Search & Discover từ 2025 đến tháng mới nhất (Triệu PV)'
+                  ? 'Phân tích xu hướng Search & Discover từ 2025 đến 2026 (Triệu PV)'
                   : 'Phân tích xu hướng Search & Discover qua các tháng năm 2026 (Triệu PV)'}
               </p>
             </div>
