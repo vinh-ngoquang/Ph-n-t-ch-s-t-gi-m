@@ -447,7 +447,9 @@ export const FolderBreakdownView: React.FC<FolderBreakdownViewProps> = ({
             onChange={(e) => setSortBy(e.target.value as any)}
             className="bg-transparent text-slate-800 text-xs font-semibold focus:outline-none cursor-pointer"
           >
-            <option value="deficit">Giảm sâu nhất vs Trung vị (Mặc định)</option>
+            <option value="deficit">
+              {isYoYMode ? 'Giảm sâu nhất (Tuyệt đối)' : 'Giảm sâu nhất vs Trung vị (Mặc định)'}
+            </option>
             <option value="volume">Lượng Pageview cao nhất</option>
             <option value="articles">Sản lượng bài viết cao nhất</option>
             <option value="growth">Tăng trưởng tốt nhất</option>
@@ -488,7 +490,7 @@ export const FolderBreakdownView: React.FC<FolderBreakdownViewProps> = ({
             <div className="bg-white border border-slate-200/90 rounded-xl p-4 shadow-xs">
               <div className="flex items-center justify-between">
                 <span className="text-xs font-medium text-slate-500">
-                  Sụt Giảm vs. Trung Vị 2026 ({selectedFolder.folderName})
+                  {isYoYMode ? 'Sụt Giảm vs. Cùng Kỳ 2025' : 'Sụt Giảm vs. Trung Vị 2026'} ({selectedFolder.folderName})
                 </span>
                 <span
                   className={`px-2 py-0.5 rounded text-[10px] font-semibold ${
