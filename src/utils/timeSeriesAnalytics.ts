@@ -410,6 +410,9 @@ export interface FolderComparisonItem {
   pctNew?: number;
   pctReturn?: number;
   pctLover?: number;
+  pctNewYoY?: number;
+  pctReturnYoY?: number;
+  pctLoverYoY?: number;
   trend: number[];
 }
 
@@ -664,6 +667,9 @@ export function computeFolderRankingYoY(
     let sumNew26 = 0;
     let sumReturn26 = 0;
     let sumLover26 = 0;
+    let sumNew25 = 0;
+    let sumReturn25 = 0;
+    let sumLover25 = 0;
 
     const monthlyPVs26: number[] = [];
 
@@ -684,6 +690,9 @@ export function computeFolderRankingYoY(
       sumPV25 += match?.pageviews || 0;
       sumArts25 += match?.articles || 0;
       sumDetail25 += match?.pDetail || 0;
+      sumNew25 += match?.pNew || 0;
+      sumReturn25 += match?.pReturn || 0;
+      sumLover25 += match?.pLover || 0;
     });
 
     const deltaPV = sumPV26 - sumPV25;
@@ -696,6 +705,15 @@ export function computeFolderRankingYoY(
     const pctNew = (sumNew26 / totReader) * 100;
     const pctReturn = (sumReturn26 / totReader) * 100;
     const pctLover = (sumLover26 / totReader) * 100;
+
+    const deltaNew = sumNew26 - sumNew25;
+    const pctNewYoY = sumNew25 > 0 ? (deltaNew / sumNew25) * 100 : 0;
+
+    const deltaReturn = sumReturn26 - sumReturn25;
+    const pctReturnYoY = sumReturn25 > 0 ? (deltaReturn / sumReturn25) * 100 : 0;
+
+    const deltaLover = sumLover26 - sumLover25;
+    const pctLoverYoY = sumLover25 > 0 ? (deltaLover / sumLover25) * 100 : 0;
 
     items.push({
       folderId: fId,
@@ -720,6 +738,9 @@ export function computeFolderRankingYoY(
       pctNew,
       pctReturn,
       pctLover,
+      pctNewYoY,
+      pctReturnYoY,
+      pctLoverYoY,
       trend: monthlyPVs26,
     });
   }

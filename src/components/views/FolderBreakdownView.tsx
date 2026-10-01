@@ -721,15 +721,21 @@ export const FolderBreakdownView: React.FC<FolderBreakdownViewProps> = ({
                 <th className="py-3 px-3 text-right font-sans">Tổng PV</th>
                 <th className="py-3 px-3 text-right font-sans min-w-[120px]">
                   <div className="font-bold text-slate-800">P- New</div>
-                  <div className="text-[9px] text-slate-500 font-normal">Độc giả mới</div>
+                  <div className="text-[9px] text-slate-500 font-normal">
+                    {isYoYMode ? 'Độc giả mới (% YoY)' : 'Độc giả mới'}
+                  </div>
                 </th>
                 <th className="py-3 px-3 text-right font-sans min-w-[120px]">
                   <div className="font-bold text-slate-800">P- Return</div>
-                  <div className="text-[9px] text-slate-500 font-normal">Quay lại</div>
+                  <div className="text-[9px] text-slate-500 font-normal">
+                    {isYoYMode ? 'Quay lại (% YoY)' : 'Quay lại'}
+                  </div>
                 </th>
                 <th className="py-3 px-3 text-right font-sans min-w-[120px]">
                   <div className="font-bold text-slate-800">P- Lover</div>
-                  <div className="text-[9px] text-slate-500 font-normal">Trung thành</div>
+                  <div className="text-[9px] text-slate-500 font-normal">
+                    {isYoYMode ? 'Trung thành (% YoY)' : 'Trung thành'}
+                  </div>
                 </th>
                 <th className="py-3 px-3 text-right font-sans min-w-[90px]">
                   <div>% Lover</div>
@@ -950,18 +956,60 @@ export const FolderBreakdownView: React.FC<FolderBreakdownViewProps> = ({
                         </td>
                         <td className="py-3 px-3 text-right">
                           <div className="font-bold text-slate-800">{formatNumber(item.curNew || 0)}</div>
-                          <div className="text-[10px] text-slate-400">{formatPercent(item.pctNew || 0)}</div>
+                          {isYoYMode ? (
+                            <div
+                              className={`text-[10px] font-semibold ${
+                                (item.pctNewYoY || 0) > 0
+                                  ? 'text-emerald-600'
+                                  : (item.pctNewYoY || 0) < 0
+                                  ? 'text-rose-600'
+                                  : 'text-slate-400'
+                              }`}
+                            >
+                              {formatPercent(item.pctNewYoY || 0)}
+                            </div>
+                          ) : (
+                            <div className="text-[10px] text-slate-400">{formatPercent(item.pctNew || 0, false)}</div>
+                          )}
                         </td>
                         <td className="py-3 px-3 text-right">
                           <div className="font-bold text-slate-800">{formatNumber(item.curReturn || 0)}</div>
-                          <div className="text-[10px] text-slate-400">{formatPercent(item.pctReturn || 0)}</div>
+                          {isYoYMode ? (
+                            <div
+                              className={`text-[10px] font-semibold ${
+                                (item.pctReturnYoY || 0) > 0
+                                  ? 'text-emerald-600'
+                                  : (item.pctReturnYoY || 0) < 0
+                                  ? 'text-rose-600'
+                                  : 'text-slate-400'
+                              }`}
+                            >
+                              {formatPercent(item.pctReturnYoY || 0)}
+                            </div>
+                          ) : (
+                            <div className="text-[10px] text-slate-400">{formatPercent(item.pctReturn || 0, false)}</div>
+                          )}
                         </td>
                         <td className="py-3 px-3 text-right">
                           <div className="font-bold text-slate-800">{formatNumber(item.curLover || 0)}</div>
-                          <div className="text-[10px] text-slate-400">{formatPercent(item.pctLover || 0)}</div>
+                          {isYoYMode ? (
+                            <div
+                              className={`text-[10px] font-semibold ${
+                                (item.pctLoverYoY || 0) > 0
+                                  ? 'text-emerald-600'
+                                  : (item.pctLoverYoY || 0) < 0
+                                  ? 'text-rose-600'
+                                  : 'text-slate-400'
+                              }`}
+                            >
+                              {formatPercent(item.pctLoverYoY || 0)}
+                            </div>
+                          ) : (
+                            <div className="text-[10px] text-slate-400">{formatPercent(item.pctLover || 0, false)}</div>
+                          )}
                         </td>
                         <td className="py-3 px-3 text-right font-mono text-slate-800">
-                          {formatPercent(item.pctLover || 0)}
+                          {formatPercent(item.pctLover || 0, false)}
                         </td>
                         {isYoYMode && (
                           <td className="py-3.5 px-3 text-center align-middle font-sans">
