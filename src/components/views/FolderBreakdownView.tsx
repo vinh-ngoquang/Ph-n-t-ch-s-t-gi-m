@@ -381,7 +381,7 @@ export const FolderBreakdownView: React.FC<FolderBreakdownViewProps> = ({
                   : 'text-slate-600 hover:text-slate-900'
               }`}
             >
-              Loại độc giả (3 nhóm)
+              Loại độc giả
             </button>
             <button
               onClick={() => setViewPerspective('sources')}
@@ -401,7 +401,7 @@ export const FolderBreakdownView: React.FC<FolderBreakdownViewProps> = ({
                   : 'text-slate-600 hover:text-slate-900'
               }`}
             >
-              Nền tảng & Thiết bị
+              Nền tảng thiết bị
             </button>
             <button
               onClick={() => setViewPerspective('layers')}
@@ -749,28 +749,10 @@ export const FolderBreakdownView: React.FC<FolderBreakdownViewProps> = ({
                 <th className="py-3 px-3 w-12 text-center">#</th>
                 <th className="py-3 px-4 font-sans min-w-[200px]">Folder</th>
                 <th className="py-3 px-3 text-right font-sans">Tổng PV</th>
-                <th className="py-3 px-3 text-right font-sans min-w-[120px]">
-                  <div className="font-bold text-slate-800">P- New</div>
-                  <div className="text-[9px] text-slate-500 font-normal">
-                    {isYoYMode ? 'Độc giả mới (% YoY)' : 'Độc giả mới'}
-                  </div>
-                </th>
-                <th className="py-3 px-3 text-right font-sans min-w-[120px]">
-                  <div className="font-bold text-slate-800">P- Return</div>
-                  <div className="text-[9px] text-slate-500 font-normal">
-                    {isYoYMode ? 'Quay lại (% YoY)' : 'Quay lại'}
-                  </div>
-                </th>
-                <th className="py-3 px-3 text-right font-sans min-w-[120px]">
-                  <div className="font-bold text-slate-800">P- Lover</div>
-                  <div className="text-[9px] text-slate-500 font-normal">
-                    {isYoYMode ? 'Trung thành (% YoY)' : 'Trung thành'}
-                  </div>
-                </th>
-                <th className="py-3 px-3 text-right font-sans min-w-[90px]">
-                  <div>% Lover</div>
-                  <div className="text-[9px] text-slate-400 font-normal">Tỷ trọng</div>
-                </th>
+                <th className="py-3 px-3 text-right font-sans min-w-[110px]">P- New</th>
+                <th className="py-3 px-3 text-right font-sans min-w-[110px]">P- Return</th>
+                <th className="py-3 px-3 text-right font-sans min-w-[110px]">P- Lover</th>
+                <th className="py-3 px-3 text-right font-sans min-w-[90px]">% Lover</th>
                 {isYoYMode && (
                   <th className="py-2.5 px-3 text-center font-sans min-w-[175px]">
                     <div className="flex items-center justify-center gap-1.5">
@@ -830,34 +812,13 @@ export const FolderBreakdownView: React.FC<FolderBreakdownViewProps> = ({
                 <th className="py-3 px-3 w-12 text-center">#</th>
                 <th className="py-3 px-4 font-sans min-w-[200px]">Folder</th>
                 <th className="py-3 px-3 text-right font-sans">Tổng PV</th>
-                <th className="py-3 px-3 text-right font-sans min-w-[105px]">
-                  <div className="font-bold text-slate-800">Direct</div>
-                  <div className="text-[9px] text-slate-500 font-normal">{isYoYMode ? 'Trực tiếp (% YoY)' : 'Trực tiếp'}</div>
-                </th>
-                <th className="py-3 px-3 text-right font-sans min-w-[115px]">
-                  <div className="font-bold text-slate-800">Google</div>
-                  <div className="text-[9px] text-slate-500 font-normal">{isYoYMode ? 'Search+Disc (% YoY)' : 'Search+Disc'}</div>
-                </th>
-                <th className="py-3 px-3 text-right font-sans min-w-[105px]">
-                  <div className="font-bold text-slate-800">Social</div>
-                  <div className="text-[9px] text-slate-500 font-normal">{isYoYMode ? 'Mạng XH (% YoY)' : 'Mạng XH'}</div>
-                </th>
-                <th className="py-3 px-3 text-right font-sans min-w-[105px]">
-                  <div className="font-bold text-slate-800">In-Home</div>
-                  <div className="text-[9px] text-slate-500 font-normal">{isYoYMode ? 'Từ Home (% YoY)' : 'Từ Home'}</div>
-                </th>
-                <th className="py-3 px-3 text-right font-sans min-w-[105px]">
-                  <div className="font-bold text-slate-800">In-Folder</div>
-                  <div className="text-[9px] text-slate-500 font-normal">{isYoYMode ? 'Từ Folder (% YoY)' : 'Từ Folder'}</div>
-                </th>
-                <th className="py-3 px-3 text-right font-sans min-w-[105px]">
-                  <div className="font-bold text-slate-800">In-Detail</div>
-                  <div className="text-[9px] text-slate-500 font-normal">{isYoYMode ? 'Từ Detail (% YoY)' : 'Từ Detail'}</div>
-                </th>
-                <th className="py-3 px-3 text-right font-sans min-w-[105px]">
-                  <div className="font-bold text-slate-800">In-Other</div>
-                  <div className="text-[9px] text-slate-500 font-normal">{isYoYMode ? 'Khác/Tag (% YoY)' : 'Khác/Tag'}</div>
-                </th>
+                <th className="py-3 px-3 text-right font-sans min-w-[100px]">Direct</th>
+                <th className="py-3 px-3 text-right font-sans min-w-[100px]">Google</th>
+                <th className="py-3 px-3 text-right font-sans min-w-[100px]">Social</th>
+                <th className="py-3 px-3 text-right font-sans min-w-[100px]">In-Home</th>
+                <th className="py-3 px-3 text-right font-sans min-w-[100px]">In-Folder</th>
+                <th className="py-3 px-3 text-right font-sans min-w-[100px]">In-Detail</th>
+                <th className="py-3 px-3 text-right font-sans min-w-[100px]">In-Other</th>
                 {isYoYMode && (
                   <th className="py-2.5 px-3 text-center font-sans min-w-[175px]">
                     <div className="flex items-center justify-center gap-1.5">
@@ -917,26 +878,11 @@ export const FolderBreakdownView: React.FC<FolderBreakdownViewProps> = ({
                 <th className="py-3 px-3 w-12 text-center">#</th>
                 <th className="py-3 px-4 font-sans min-w-[200px]">Folder</th>
                 <th className="py-3 px-3 text-right font-sans">Tổng PV</th>
-                <th className="py-3 px-3 text-right font-sans min-w-[115px]">
-                  <div className="font-bold text-slate-800">Mobile Web</div>
-                  <div className="text-[9px] text-slate-500 font-normal">{isYoYMode ? 'Di động (% YoY)' : 'Web di động'}</div>
-                </th>
-                <th className="py-3 px-3 text-right font-sans min-w-[115px]">
-                  <div className="font-bold text-slate-800">PC Desktop</div>
-                  <div className="text-[9px] text-slate-500 font-normal">{isYoYMode ? 'Máy tính (% YoY)' : 'Máy tính'}</div>
-                </th>
-                <th className="py-3 px-3 text-right font-sans min-w-[115px]">
-                  <div className="font-bold text-slate-800">App VnE</div>
-                  <div className="text-[9px] text-slate-500 font-normal">{isYoYMode ? 'Ứng dụng (% YoY)' : 'Ứng dụng'}</div>
-                </th>
-                <th className="py-3 px-3 text-right font-sans min-w-[95px]">
-                  <div className="font-bold text-slate-800">Tablet</div>
-                  <div className="text-[9px] text-slate-500 font-normal">{isYoYMode ? 'Máy tính bảng (% YoY)' : 'Máy tính bảng'}</div>
-                </th>
-                <th className="py-3 px-3 text-right font-sans min-w-[95px]">
-                  <div className="font-bold text-slate-800">Khác</div>
-                  <div className="text-[9px] text-slate-500 font-normal">{isYoYMode ? 'Nền tảng khác (% YoY)' : 'Nền tảng khác'}</div>
-                </th>
+                <th className="py-3 px-3 text-right font-sans min-w-[105px]">Mobile</th>
+                <th className="py-3 px-3 text-right font-sans min-w-[105px]">PC</th>
+                <th className="py-3 px-3 text-right font-sans min-w-[105px]">App</th>
+                <th className="py-3 px-3 text-right font-sans min-w-[95px]">Tablet</th>
+                <th className="py-3 px-3 text-right font-sans min-w-[110px]">Other Platform</th>
                 {isYoYMode && (
                   <th className="py-2.5 px-3 text-center font-sans min-w-[175px]">
                     <div className="flex items-center justify-center gap-1.5">
@@ -996,18 +942,9 @@ export const FolderBreakdownView: React.FC<FolderBreakdownViewProps> = ({
                 <th className="py-3 px-3 w-12 text-center">#</th>
                 <th className="py-3 px-4 font-sans min-w-[200px]">Folder</th>
                 <th className="py-3 px-3 text-right font-sans">Tổng PV</th>
-                <th className="py-3 px-3 text-right font-sans min-w-[130px]">
-                  <div className="font-bold text-slate-800">Bài viết (Detail)</div>
-                  <div className="text-[9px] text-slate-500 font-normal">{isYoYMode ? 'Detail (% YoY)' : 'Trang Detail'}</div>
-                </th>
-                <th className="py-3 px-3 text-right font-sans min-w-[130px]">
-                  <div className="font-bold text-slate-800">Danh mục (Listing)</div>
-                  <div className="text-[9px] text-slate-500 font-normal">{isYoYMode ? 'Listing (% YoY)' : 'Trang Listing'}</div>
-                </th>
-                <th className="py-3 px-3 text-right font-sans min-w-[95px]">
-                  <div>% Detail</div>
-                  <div className="text-[9px] text-slate-400 font-normal">Tỷ trọng</div>
-                </th>
+                <th className="py-3 px-3 text-right font-sans min-w-[110px]">Detail</th>
+                <th className="py-3 px-3 text-right font-sans min-w-[110px]">Listing</th>
+                <th className="py-3 px-3 text-right font-sans min-w-[95px]">% Detail</th>
                 {isYoYMode && (
                   <th className="py-2.5 px-3 text-center font-sans min-w-[175px]">
                     <div className="flex items-center justify-center gap-1.5">
