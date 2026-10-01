@@ -188,11 +188,16 @@ export const VietnamMarketOverviewView: React.FC<Props> = ({
     });
   }, [publishersData, totalMarketMedian2026, timeRange]);
 
-  // Checkbox helpers for multi-select
-  const allPublisherIds = useMemo(() => ['market', ...publishersData.map((p) => p.id)], [publishersData]);
+  // Lấy danh sách 8 báo lớn nhất thị trường theo số liệu lượt truy cập
+  const top8Publishers = useMemo(() => {
+    return processedData.items.slice(0, 8);
+  }, [processedData.items]);
+
+  const top8Ids = useMemo(() => ['market', ...top8Publishers.map((p) => p.id)], [top8Publishers]);
+
   const isAllSelected = useMemo(
-    () => allPublisherIds.length > 0 && allPublisherIds.every((id) => selectedPublishers.includes(id)),
-    [allPublisherIds, selectedPublishers]
+    () => top8Ids.length > 0 && top8Ids.every((id) => selectedPublishers.includes(id)),
+    [top8Ids, selectedPublishers]
   );
 
   const togglePublisher = (id: string) => {
@@ -205,18 +210,17 @@ export const VietnamMarketOverviewView: React.FC<Props> = ({
     if (isAllSelected) {
       setSelectedPublishers(['market', 'vnexpress']);
     } else {
-      setSelectedPublishers(allPublisherIds);
+      setSelectedPublishers(top8Ids);
     }
   };
 
   const selectTop5 = () => {
-    const top5Ids = processedData.items.slice(0, 5).map((p) => p.id);
+    const top5Ids = top8Publishers.slice(0, 5).map((p) => p.id);
     setSelectedPublishers(['market', ...top5Ids]);
   };
 
-  const selectTop10 = () => {
-    const top10Ids = processedData.items.slice(0, 10).map((p) => p.id);
-    setSelectedPublishers(['market', ...top10Ids]);
+  const selectAllTop8 = () => {
+    setSelectedPublishers(top8Ids);
   };
 
   const clearAllPublishers = () => {
@@ -548,10 +552,10 @@ export const VietnamMarketOverviewView: React.FC<Props> = ({
                   onChange={handleToggleSelectAll}
                   className="rounded text-blue-600 focus:ring-blue-500 w-3.5 h-3.5 cursor-pointer"
                 />
-                <span>Chọn tất cả (All)</span>
+                <span>Chọn tất cả (8 báo + Thị trường)</span>
               </label>
               <span className="text-[11px] text-slate-500 font-sans">
-                (Đang hiển thị {selectedPublishers.length}/{allPublisherIds.length} đường xu hướng)
+                (Đang hiển thị {selectedPublishers.filter((id) => top8Ids.includes(id)).length}/{top8Ids.length} đối tượng)
               </span>
             </div>
 
@@ -566,29 +570,22 @@ export const VietnamMarketOverviewView: React.FC<Props> = ({
               </button>
               <button
                 type="button"
-                onClick={selectTop10}
+                onClick={selectAllTop8}
                 className="px-2.5 py-1 text-[11px] font-semibold bg-white text-slate-700 hover:bg-slate-100 hover:text-slate-900 border border-slate-200 rounded-lg shadow-2xs transition cursor-pointer"
               >
-                Top 10 báo
-              </button>
-              <button
-                type="button"
-                onClick={() => setSelectedPublishers(allPublisherIds)}
-                className="px-2.5 py-1 text-[11px] font-semibold bg-white text-slate-700 hover:bg-slate-100 hover:text-slate-900 border border-slate-200 rounded-lg shadow-2xs transition cursor-pointer"
-              >
-                Tất cả
+                Tất cả 8 báo
               </button>
               <button
                 type="button"
                 onClick={clearAllPublishers}
                 className="px-2.5 py-1 text-[11px] font-semibold bg-white text-rose-600 hover:bg-rose-50 border border-rose-200 rounded-lg shadow-2xs transition cursor-pointer"
               >
-                Bỏ chọn báo
+                Chỉ xem Toàn thị trường
               </button>
             </div>
           </div>
 
-          {/* Publisher and Market Checkboxes Grid */}
+          {/* Publisher and Market Checkboxes Grid: 8 BÁO LỚN NHẤT */}
           <div className="flex flex-wrap gap-2 max-h-40 overflow-y-auto pr-1">
             {/* 1. Market Total Checkbox */}
             <label
@@ -612,8 +609,8 @@ export const VietnamMarketOverviewView: React.FC<Props> = ({
               <span>Toàn thị trường</span>
             </label>
 
-            {/* 2. Individual Publisher Checkboxes (ranked by visits) */}
-            {processedData.items.map((pub) => {
+            {/* 2. Top 8 Publishers Checkboxes */}
+            {top8Publishers.map((pub) => {
               const isChecked = selectedPublishers.includes(pub.id);
               return (
                 <label
@@ -623,7 +620,7 @@ export const VietnamMarketOverviewView: React.FC<Props> = ({
                       ? 'bg-white text-slate-900 border-slate-400 font-semibold shadow-2xs'
                       : 'bg-white/70 text-slate-500 border-slate-200 hover:border-slate-300 hover:text-slate-700'
                   }`}
-                  title={`${pub.name} - ${formatNumber(pub.visits)} visits`}
+                  title={`${pub.name} - ${formatNumber(pub.visits)} visits (Hạng #${pub.rank})`}
                 >
                   <input
                     type="checkbox"
@@ -635,7 +632,7 @@ export const VietnamMarketOverviewView: React.FC<Props> = ({
                     className="w-2.5 h-2.5 rounded-full shrink-0"
                     style={{ backgroundColor: pub.color || '#64748b' }}
                   />
-                  <span className="truncate max-w-[130px]">{pub.name}</span>
+                  <span className="truncate max-w-[140px]">{pub.name}</span>
                   <span className="text-[10px] text-slate-400 font-mono">#{pub.rank}</span>
                 </label>
               );
@@ -718,8 +715,8 @@ export const VietnamMarketOverviewView: React.FC<Props> = ({
                 />
               )}
 
-              {/* Individual Publisher Lines */}
-              {publishersData.map((pub) => {
+              {/* Individual Publisher Lines (Top 8 Báo) */}
+              {top8Publishers.map((pub) => {
                 if (!selectedPublishers.includes(pub.id)) return null;
                 return (
                   <Line
