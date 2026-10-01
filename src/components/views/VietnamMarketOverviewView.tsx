@@ -1,7 +1,9 @@
 import React, { useState, useMemo } from 'react';
 import {
   VIETNAM_PUBLISHERS_VISITS,
+  MARKET_2025_MONTHS,
   MARKET_2026_MONTHS,
+  MARKET_ALL_MONTHS,
   PublisherVisitRecord,
   calculate2026MedianVisit,
   calculateTotalMarket2026Median,
@@ -44,7 +46,17 @@ export const VietnamMarketOverviewView: React.FC<Props> = ({
   const [publisherSearch, setPublisherSearch] = useState<string>('');
   const [sortField, setSortField] = useState<SortColumn>('visits');
   const [sortAsc, setSortAsc] = useState<boolean>(false);
-  const [chartViewMode, setChartViewMode] = useState<'market' | 'top5'>('market');
+
+  // Selected publishers for chart comparison (supports 'market' + any publisher IDs)
+  const [selectedPublishers, setSelectedPublishers] = useState<string[]>([
+    'market',
+    'vnexpress',
+    'tuoitre',
+    '24h',
+    'dantri',
+    'thanhnien',
+  ]);
+  const [timeRange, setTimeRange] = useState<'all' | '2026' | '2025'>('all');
 
   // Editable publisher records state (persisted to localStorage)
   const [publishersData, setPublishersData] = useState<PublisherVisitRecord[]>(() => {
@@ -144,34 +156,72 @@ export const VietnamMarketOverviewView: React.FC<Props> = ({
     return processedData.items.find((p) => p.id === 'vnexpress');
   }, [processedData]);
 
-  // Trendline Chart Data (1/2026 to 8/2026)
+  // Trendline Chart Data (supports all months or selected range)
   const trendChartData = useMemo(() => {
-    return MARKET_2026_MONTHS.map((m) => {
+    const monthsToUse =
+      timeRange === '2026'
+        ? MARKET_2026_MONTHS
+        : timeRange === '2025'
+        ? MARKET_2025_MONTHS
+        : MARKET_ALL_MONTHS;
+
+    return monthsToUse.map((m) => {
+      const is2025 = m.endsWith('/2025');
       const monthTotal = publishersData.reduce(
-        (sum, pub) => sum + (pub.monthlyVisits[m] ?? 0),
+        (sum, pub) => sum + (is2025 ? (pub.monthlyVisits2025[m] ?? 0) : (pub.monthlyVisits[m] ?? 0)),
         0
       );
 
-      const vne = publishersData.find((p) => p.id === 'vnexpress')?.monthlyVisits[m] ?? 0;
-      const dantri = publishersData.find((p) => p.id === 'dantri')?.monthlyVisits[m] ?? 0;
-      const b24h = publishersData.find((p) => p.id === '24h')?.monthlyVisits[m] ?? 0;
-      const tuoitre = publishersData.find((p) => p.id === 'tuoitre')?.monthlyVisits[m] ?? 0;
-      const thanhnien = publishersData.find((p) => p.id === 'thanhnien')?.monthlyVisits[m] ?? 0;
-
-      return {
+      const pt: any = {
         monthKey: m,
-        label: `Tháng ${m}`,
-        shortLabel: `T${m.split('/')[0]}`,
+        label: `T${m.split('/')[0]}/${m.split('/')[1]?.slice(2)}`,
+        fullLabel: `Tháng ${m}`,
         totalMarket: monthTotal,
         median2026: totalMarketMedian2026,
-        vnexpress: vne,
-        dantri,
-        b24h,
-        tuoitre,
-        thanhnien,
       };
+
+      publishersData.forEach((pub) => {
+        pt[pub.id] = is2025 ? (pub.monthlyVisits2025[m] ?? 0) : (pub.monthlyVisits[m] ?? 0);
+      });
+
+      return pt;
     });
-  }, [publishersData, totalMarketMedian2026]);
+  }, [publishersData, totalMarketMedian2026, timeRange]);
+
+  // Checkbox helpers for multi-select
+  const allPublisherIds = useMemo(() => ['market', ...publishersData.map((p) => p.id)], [publishersData]);
+  const isAllSelected = useMemo(
+    () => allPublisherIds.length > 0 && allPublisherIds.every((id) => selectedPublishers.includes(id)),
+    [allPublisherIds, selectedPublishers]
+  );
+
+  const togglePublisher = (id: string) => {
+    setSelectedPublishers((prev) =>
+      prev.includes(id) ? prev.filter((p) => p !== id) : [...prev, id]
+    );
+  };
+
+  const handleToggleSelectAll = () => {
+    if (isAllSelected) {
+      setSelectedPublishers(['market', 'vnexpress']);
+    } else {
+      setSelectedPublishers(allPublisherIds);
+    }
+  };
+
+  const selectTop5 = () => {
+    const top5Ids = processedData.items.slice(0, 5).map((p) => p.id);
+    setSelectedPublishers(['market', ...top5Ids]);
+  };
+
+  const selectTop10 = () => {
+    const top10Ids = processedData.items.slice(0, 10).map((p) => p.id);
+    setSelectedPublishers(['market', ...top10Ids]);
+  };
+
+  const clearAllPublishers = () => {
+    setSelectedPublishers(['market']);
+  };
 
   // Filter and sort items for the table
   const displayedPublishers = useMemo(() => {
@@ -430,87 +480,216 @@ export const VietnamMarketOverviewView: React.FC<Props> = ({
       </div>
 
       {/* 2. Chart Đường Xu Hướng (Trendline Chart) */}
-      <div className="bg-white border border-slate-200/90 rounded-2xl p-5 shadow-xs space-y-3">
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-2 border-b border-slate-100">
+      <div className="bg-white border border-slate-200/90 rounded-2xl p-5 shadow-xs space-y-4">
+        {/* Top Header of Chart */}
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-slate-100">
           <div>
-            <h2 className="text-base font-bold text-slate-900 tracking-tight">
-              Biểu Đồ Đường Xu Hướng Lượt Truy Cập (Năm 2026)
+            <h2 className="text-base font-bold text-slate-900 tracking-tight flex items-center gap-2 flex-wrap">
+              <span>Biểu Đồ Đường Xu Hướng Lượt Truy Cập</span>
+              <span className="text-xs px-2.5 py-0.5 rounded-full bg-blue-50 text-blue-700 font-semibold border border-blue-200">
+                {timeRange === 'all'
+                  ? 'Toàn bộ 20 tháng (2025 - 2026)'
+                  : timeRange === '2026'
+                  ? 'Năm 2026 (8 tháng)'
+                  : 'Năm 2025 (12 tháng)'}
+              </span>
             </h2>
             <p className="text-xs text-slate-500 mt-0.5">
-              Quỹ đạo phát triển lượt visit qua các tháng năm 2026 đối sánh với mốc Trung vị 2026 ({formatNumber(totalMarketMedian2026)})
+              So sánh quỹ đạo phát triển lượt visit giữa Toàn thị trường và các cơ quan báo chí qua từng tháng
             </p>
           </div>
 
-          {/* Toggle view mode */}
-          <div className="inline-flex bg-slate-100 p-1 rounded-xl text-xs font-semibold border border-slate-200/70">
+          {/* Time range selector */}
+          <div className="inline-flex bg-slate-100 p-1 rounded-xl text-xs font-semibold border border-slate-200/70 shrink-0 self-start sm:self-center">
             <button
               type="button"
-              onClick={() => setChartViewMode('market')}
+              onClick={() => setTimeRange('all')}
               className={`px-3 py-1.5 rounded-lg transition cursor-pointer ${
-                chartViewMode === 'market'
+                timeRange === 'all'
                   ? 'bg-white text-blue-700 shadow-xs font-bold'
                   : 'text-slate-600 hover:text-slate-900'
               }`}
             >
-              Toàn thị trường
+              Tất cả (2025 - 2026)
             </button>
             <button
               type="button"
-              onClick={() => setChartViewMode('top5')}
+              onClick={() => setTimeRange('2026')}
               className={`px-3 py-1.5 rounded-lg transition cursor-pointer ${
-                chartViewMode === 'top5'
+                timeRange === '2026'
                   ? 'bg-white text-blue-700 shadow-xs font-bold'
                   : 'text-slate-600 hover:text-slate-900'
               }`}
             >
-              Top 5 báo dẫn đầu
+              Năm 2026
+            </button>
+            <button
+              type="button"
+              onClick={() => setTimeRange('2025')}
+              className={`px-3 py-1.5 rounded-lg transition cursor-pointer ${
+                timeRange === '2025'
+                  ? 'bg-white text-blue-700 shadow-xs font-bold'
+                  : 'text-slate-600 hover:text-slate-900'
+              }`}
+            >
+              Năm 2025
             </button>
           </div>
         </div>
 
+        {/* Checkbox Controls Box */}
+        <div className="bg-slate-50/70 rounded-xl p-3.5 border border-slate-200/80 space-y-3">
+          <div className="flex flex-wrap items-center justify-between gap-2 border-b border-slate-200/60 pb-2.5">
+            <div className="flex items-center gap-3">
+              <label className="flex items-center gap-2 cursor-pointer select-none font-bold text-xs text-slate-800 hover:text-blue-600 transition">
+                <input
+                  type="checkbox"
+                  checked={isAllSelected}
+                  onChange={handleToggleSelectAll}
+                  className="rounded text-blue-600 focus:ring-blue-500 w-3.5 h-3.5 cursor-pointer"
+                />
+                <span>Chọn tất cả (All)</span>
+              </label>
+              <span className="text-[11px] text-slate-500 font-sans">
+                (Đang hiển thị {selectedPublishers.length}/{allPublisherIds.length} đường xu hướng)
+              </span>
+            </div>
+
+            {/* Quick Filter Buttons */}
+            <div className="flex items-center gap-1.5 flex-wrap">
+              <button
+                type="button"
+                onClick={selectTop5}
+                className="px-2.5 py-1 text-[11px] font-semibold bg-white text-slate-700 hover:bg-slate-100 hover:text-slate-900 border border-slate-200 rounded-lg shadow-2xs transition cursor-pointer"
+              >
+                Top 5 báo
+              </button>
+              <button
+                type="button"
+                onClick={selectTop10}
+                className="px-2.5 py-1 text-[11px] font-semibold bg-white text-slate-700 hover:bg-slate-100 hover:text-slate-900 border border-slate-200 rounded-lg shadow-2xs transition cursor-pointer"
+              >
+                Top 10 báo
+              </button>
+              <button
+                type="button"
+                onClick={() => setSelectedPublishers(allPublisherIds)}
+                className="px-2.5 py-1 text-[11px] font-semibold bg-white text-slate-700 hover:bg-slate-100 hover:text-slate-900 border border-slate-200 rounded-lg shadow-2xs transition cursor-pointer"
+              >
+                Tất cả
+              </button>
+              <button
+                type="button"
+                onClick={clearAllPublishers}
+                className="px-2.5 py-1 text-[11px] font-semibold bg-white text-rose-600 hover:bg-rose-50 border border-rose-200 rounded-lg shadow-2xs transition cursor-pointer"
+              >
+                Bỏ chọn báo
+              </button>
+            </div>
+          </div>
+
+          {/* Publisher and Market Checkboxes Grid */}
+          <div className="flex flex-wrap gap-2 max-h-40 overflow-y-auto pr-1">
+            {/* 1. Market Total Checkbox */}
+            <label
+              className={`inline-flex items-center gap-2 px-2.5 py-1.5 rounded-lg border text-xs font-semibold cursor-pointer select-none transition ${
+                selectedPublishers.includes('market')
+                  ? 'bg-blue-600 text-white border-blue-600 shadow-2xs'
+                  : 'bg-white text-slate-700 border-slate-200 hover:border-slate-300'
+              }`}
+            >
+              <input
+                type="checkbox"
+                checked={selectedPublishers.includes('market')}
+                onChange={() => togglePublisher('market')}
+                className="sr-only"
+              />
+              <span
+                className={`w-2.5 h-2.5 rounded-full ${
+                  selectedPublishers.includes('market') ? 'bg-white' : 'bg-blue-600'
+                }`}
+              />
+              <span>Toàn thị trường</span>
+            </label>
+
+            {/* 2. Individual Publisher Checkboxes (ranked by visits) */}
+            {processedData.items.map((pub) => {
+              const isChecked = selectedPublishers.includes(pub.id);
+              return (
+                <label
+                  key={pub.id}
+                  className={`inline-flex items-center gap-2 px-2.5 py-1.5 rounded-lg border text-xs font-medium cursor-pointer select-none transition ${
+                    isChecked
+                      ? 'bg-white text-slate-900 border-slate-400 font-semibold shadow-2xs'
+                      : 'bg-white/70 text-slate-500 border-slate-200 hover:border-slate-300 hover:text-slate-700'
+                  }`}
+                  title={`${pub.name} - ${formatNumber(pub.visits)} visits`}
+                >
+                  <input
+                    type="checkbox"
+                    checked={isChecked}
+                    onChange={() => togglePublisher(pub.id)}
+                    className="rounded text-blue-600 focus:ring-blue-500 w-3.5 h-3.5 cursor-pointer"
+                  />
+                  <span
+                    className="w-2.5 h-2.5 rounded-full shrink-0"
+                    style={{ backgroundColor: pub.color || '#64748b' }}
+                  />
+                  <span className="truncate max-w-[130px]">{pub.name}</span>
+                  <span className="text-[10px] text-slate-400 font-mono">#{pub.rank}</span>
+                </label>
+              );
+            })}
+          </div>
+        </div>
+
         {/* Recharts Container */}
-        <div className="w-full h-72 sm:h-80 pt-2">
+        <div className="w-full h-80 sm:h-96 pt-2">
           <ResponsiveContainer width="100%" height="100%">
-            {chartViewMode === 'market' ? (
-              <LineChart data={trendChartData} margin={{ top: 15, right: 25, left: 15, bottom: 5 }}>
-                <CartesianGrid strokeDasharray="3 3" stroke="#f1f5f9" />
-                <XAxis
-                  dataKey="label"
-                  stroke="#94a3b8"
-                  fontSize={11}
-                  tickLine={false}
-                />
-                <YAxis
-                  stroke="#94a3b8"
-                  fontSize={11}
-                  tickLine={false}
-                  tickFormatter={(val) => `${(val / 1000000).toFixed(0)}M`}
-                  domain={['dataMin - 15000000', 'dataMax + 15000000']}
-                />
-                <Tooltip
-                  formatter={(value: any, name: any) => {
-                    const num = Number(value) || 0;
-                    if (name === 'totalMarket') return [formatNumber(num) + ' visits', 'Tổng thị trường'];
-                    if (name === 'median2026') return [formatNumber(num) + ' visits', 'Mốc Trung vị 2026'];
-                    return [formatNumber(num) + ' visits', name];
-                  }}
-                  labelStyle={{ fontWeight: 'bold', color: '#0f172a' }}
-                  contentStyle={{
-                    backgroundColor: '#ffffff',
-                    borderColor: '#e2e8f0',
-                    borderRadius: '12px',
-                    fontSize: '12px',
-                    boxShadow: '0 10px 15px -3px rgba(0, 0, 0, 0.1)',
-                  }}
-                />
-                <Legend
-                  formatter={(value) => {
-                    if (value === 'totalMarket') return 'Lượt Visit Toàn Thị Trường';
-                    if (value === 'median2026') return `Chuẩn Trung vị 2026 (${formatNumber(totalMarketMedian2026)})`;
-                    return value;
-                  }}
-                  wrapperStyle={{ fontSize: '12px', paddingTop: '10px' }}
-                />
+            <LineChart data={trendChartData} margin={{ top: 15, right: 25, left: 15, bottom: 5 }}>
+              <CartesianGrid strokeDasharray="3 3" stroke="#f1f5f9" />
+              <XAxis
+                dataKey="label"
+                stroke="#94a3b8"
+                fontSize={11}
+                tickLine={false}
+              />
+              <YAxis
+                stroke="#94a3b8"
+                fontSize={11}
+                tickLine={false}
+                tickFormatter={(val) => `${(val / 1000000).toFixed(0)}M`}
+              />
+              <Tooltip
+                formatter={(value: any, name: any) => {
+                  const num = Number(value) || 0;
+                  return [formatNumber(num) + ' visits', name];
+                }}
+                labelFormatter={(label, payload) => {
+                  const point = payload?.[0]?.payload;
+                  return point?.fullLabel || label;
+                }}
+                itemSorter={(item) => -(Number(item.value) || 0)}
+                labelStyle={{ fontWeight: 'bold', color: '#0f172a' }}
+                contentStyle={{
+                  backgroundColor: '#ffffff',
+                  borderColor: '#e2e8f0',
+                  borderRadius: '12px',
+                  fontSize: '12px',
+                  boxShadow: '0 10px 15px -3px rgba(0, 0, 0, 0.1)',
+                }}
+              />
+              <Legend
+                formatter={(value) => {
+                  if (value === 'totalMarket') return 'Lượt Visit Toàn Thị Trường';
+                  if (value === 'median2026') return `Chuẩn Trung vị 2026 (${formatNumber(totalMarketMedian2026)})`;
+                  return value;
+                }}
+                wrapperStyle={{ fontSize: '11px', paddingTop: '10px' }}
+              />
+
+              {/* Reference Line for 2026 Total Market Median if Market is selected */}
+              {selectedPublishers.includes('market') && (
                 <ReferenceLine
                   y={totalMarketMedian2026}
                   stroke="#64748b"
@@ -520,92 +699,42 @@ export const VietnamMarketOverviewView: React.FC<Props> = ({
                     value: `Trung vị 2026: ${formatNumber(totalMarketMedian2026)}`,
                     position: 'insideTopRight',
                     fill: '#475569',
-                    fontSize: 11,
+                    fontSize: 10,
                     fontWeight: 600,
                   }}
                 />
+              )}
+
+              {/* Total Market Line */}
+              {selectedPublishers.includes('market') && (
                 <Line
                   type="monotone"
                   dataKey="totalMarket"
-                  name="totalMarket"
+                  name="Toàn thị trường"
                   stroke="#2563eb"
                   strokeWidth={3}
-                  dot={{ r: 4, fill: '#2563eb', strokeWidth: 2, stroke: '#ffffff' }}
-                  activeDot={{ r: 6, stroke: '#1d4ed8', strokeWidth: 2 }}
+                  dot={{ r: 3, fill: '#2563eb', strokeWidth: 2, stroke: '#ffffff' }}
+                  activeDot={{ r: 5, stroke: '#1d4ed8', strokeWidth: 2 }}
                 />
-              </LineChart>
-            ) : (
-              <LineChart data={trendChartData} margin={{ top: 15, right: 25, left: 15, bottom: 5 }}>
-                <CartesianGrid strokeDasharray="3 3" stroke="#f1f5f9" />
-                <XAxis
-                  dataKey="label"
-                  stroke="#94a3b8"
-                  fontSize={11}
-                  tickLine={false}
-                />
-                <YAxis
-                  stroke="#94a3b8"
-                  fontSize={11}
-                  tickLine={false}
-                  tickFormatter={(val) => `${(val / 1000000).toFixed(0)}M`}
-                />
-                <Tooltip
-                  formatter={(value: any, name: any) => {
-                    const num = Number(value) || 0;
-                    return [formatNumber(num) + ' visits', name];
-                  }}
-                  labelStyle={{ fontWeight: 'bold', color: '#0f172a' }}
-                  contentStyle={{
-                    backgroundColor: '#ffffff',
-                    borderColor: '#e2e8f0',
-                    borderRadius: '12px',
-                    fontSize: '12px',
-                    boxShadow: '0 10px 15px -3px rgba(0, 0, 0, 0.1)',
-                  }}
-                />
-                <Legend wrapperStyle={{ fontSize: '12px', paddingTop: '10px' }} />
-                <Line
-                  type="monotone"
-                  dataKey="vnexpress"
-                  name="VnExpress"
-                  stroke="#9f224e"
-                  strokeWidth={3}
-                  dot={{ r: 3.5, fill: '#9f224e' }}
-                />
-                <Line
-                  type="monotone"
-                  dataKey="dantri"
-                  name="Dân Trí"
-                  stroke="#008837"
-                  strokeWidth={2}
-                  dot={{ r: 3, fill: '#008837' }}
-                />
-                <Line
-                  type="monotone"
-                  dataKey="b24h"
-                  name="Báo 24h"
-                  stroke="#e31b23"
-                  strokeWidth={2}
-                  dot={{ r: 3, fill: '#e31b23' }}
-                />
-                <Line
-                  type="monotone"
-                  dataKey="tuoitre"
-                  name="Tuổi Trẻ"
-                  stroke="#0284c7"
-                  strokeWidth={2}
-                  dot={{ r: 3, fill: '#0284c7' }}
-                />
-                <Line
-                  type="monotone"
-                  dataKey="thanhnien"
-                  name="Thanh Niên"
-                  stroke="#d97706"
-                  strokeWidth={2}
-                  dot={{ r: 3, fill: '#d97706' }}
-                />
-              </LineChart>
-            )}
+              )}
+
+              {/* Individual Publisher Lines */}
+              {publishersData.map((pub) => {
+                if (!selectedPublishers.includes(pub.id)) return null;
+                return (
+                  <Line
+                    key={pub.id}
+                    type="monotone"
+                    dataKey={pub.id}
+                    name={pub.name}
+                    stroke={pub.color || '#64748b'}
+                    strokeWidth={pub.id === 'vnexpress' ? 3 : 2}
+                    dot={{ r: 2.5, fill: pub.color || '#64748b' }}
+                    activeDot={{ r: 4.5 }}
+                  />
+                );
+              })}
+            </LineChart>
           </ResponsiveContainer>
         </div>
       </div>

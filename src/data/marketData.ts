@@ -21,6 +21,11 @@ export const MARKET_2026_MONTHS = [
   "1/2026", "2/2026", "3/2026", "4/2026", "5/2026", "6/2026", "7/2026", "8/2026",
 ];
 
+export const MARKET_ALL_MONTHS = [
+  ...MARKET_2025_MONTHS,
+  ...MARKET_2026_MONTHS,
+];
+
 // Calculation helper for median of 2025 visits
 export function calculate2025MedianVisit(visits2025: Record<string, number>): number {
   const vals = MARKET_2025_MONTHS.map((m) => visits2025[m] ?? 0).filter((v) => v > 0);
