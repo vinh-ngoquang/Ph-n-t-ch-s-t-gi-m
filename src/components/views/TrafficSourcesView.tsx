@@ -117,6 +117,7 @@ export const TrafficSourcesView: React.FC<Props> = ({
   }, [monthlyData, selectedMonth, isYoYMode]);
 
   // Google Details: Bóc tách Search & Discover cấu thành nên P- Ex-Google (Dữ liệu tham khảo)
+  // Google Details: Bóc tách Search & Discover (Chỉ lấy khi thực sự có dữ liệu ghi nhận, không tự suy diễn tỷ lệ)
   const googleDetails = useMemo(() => {
     if (!isSearchDiscoverAllowed) return null;
 
@@ -130,69 +131,98 @@ export const TrafficSourcesView: React.FC<Props> = ({
     const safeTargetIdx = targetIdx >= 0 ? targetIdx : months2026.length - 1;
     const curPoint = months2026[safeTargetIdx] || months2026[months2026.length - 1];
 
-    const getSearchVal = (rec: NewsRecord) => {
-      if (rec.pExGoogleSearch !== undefined && rec.pExGoogleSearch > 0) return rec.pExGoogleSearch;
-      return Math.round((rec.pExGoogle || 0) * 0.62);
-    };
+    if (!curPoint) return null;
 
-    const getDiscoverVal = (rec: NewsRecord) => {
-      if (rec.pExGoogleDiscover !== undefined && rec.pExGoogleDiscover > 0) return rec.pExGoogleDiscover;
-      return Math.round((rec.pExGoogle || 0) * 0.38);
-    };
+    const curGoogleTotal = curPoint.record.pExGoogle || 0;
 
-    let curGoogleTotal = 0;
+    // Lọc các tháng thực sự có dữ liệu Search / Discover ghi nhận - TUYỆT ĐỐI KHÔNG TỰ SUY DIỄN TỶ LỆ
+    const monthsSource = isYoYMode ? monthlyData : months2026;
+    const monthsWithGoogleData = monthsSource.filter((d) => {
+      const s = d.record.pExGoogleSearch;
+      const disc = d.record.pExGoogleDiscover;
+      return (s !== undefined && s !== null && s > 0) || (disc !== undefined && disc !== null && disc > 0);
+    });
+
+    const isFromSheet = monthsWithGoogleData.length > 0;
+
+    // Chuỗi số liệu thực tế
+    const searchSeries = monthsWithGoogleData
+      .map((d) => d.record.pExGoogleSearch)
+      .filter((v): v is number => v !== undefined && v !== null && v > 0);
+    const discoverSeries = monthsWithGoogleData
+      .map((d) => d.record.pExGoogleDiscover)
+      .filter((v): v is number => v !== undefined && v !== null && v > 0);
+
+    const medSearch = searchSeries.length > 0 ? calculateMedian(searchSeries) : 0;
+    const medDiscover = discoverSeries.length > 0 ? calculateMedian(discoverSeries) : 0;
+
+    const hasCurSearch = curPoint.record.pExGoogleSearch !== undefined && curPoint.record.pExGoogleSearch !== null && curPoint.record.pExGoogleSearch > 0;
+    const hasCurDiscover = curPoint.record.pExGoogleDiscover !== undefined && curPoint.record.pExGoogleDiscover !== null && curPoint.record.pExGoogleDiscover > 0;
+
     let curSearch = 0;
     let curDiscover = 0;
-    let medSearch = 0;
-    let medDiscover = 0;
+    let deltaSearch: number | null = null;
+    let deltaDiscover: number | null = null;
+    let pctSearch: number | null = null;
+    let pctDiscover: number | null = null;
 
     if (isYoYMode) {
-      months2026.forEach((d) => {
-        curGoogleTotal += d.record.pExGoogle || 0;
-        curSearch += getSearchVal(d.record);
-        curDiscover += getDiscoverVal(d.record);
-      });
-      matched2025.forEach((d) => {
-        medSearch += getSearchVal(d.record);
-        medDiscover += getDiscoverVal(d.record);
-      });
-    } else {
-      curGoogleTotal = curPoint?.record.pExGoogle || 0;
-      curSearch = getSearchVal(curPoint.record);
-      curDiscover = getDiscoverVal(curPoint.record);
+      let sumSearch26 = 0;
+      let sumDiscover26 = 0;
+      let sumSearch25 = 0;
+      let sumDiscover25 = 0;
+      let has26Search = false;
+      let has26Discover = false;
 
-      const searchSeries = months2026.map((d) => getSearchVal(d.record));
-      const discoverSeries = months2026.map((d) => getDiscoverVal(d.record));
-      medSearch = calculateMedian(searchSeries);
-      medDiscover = calculateMedian(discoverSeries);
+      months2026.forEach((d) => {
+        if (d.record.pExGoogleSearch && d.record.pExGoogleSearch > 0) {
+          sumSearch26 += d.record.pExGoogleSearch;
+          has26Search = true;
+        }
+        if (d.record.pExGoogleDiscover && d.record.pExGoogleDiscover > 0) {
+          sumDiscover26 += d.record.pExGoogleDiscover;
+          has26Discover = true;
+        }
+      });
+
+      matched2025.forEach((d) => {
+        if (d.record.pExGoogleSearch && d.record.pExGoogleSearch > 0) {
+          sumSearch25 += d.record.pExGoogleSearch;
+        }
+        if (d.record.pExGoogleDiscover && d.record.pExGoogleDiscover > 0) {
+          sumDiscover25 += d.record.pExGoogleDiscover;
+        }
+      });
+
+      curSearch = sumSearch26;
+      curDiscover = sumDiscover26;
+      if (has26Search && sumSearch25 > 0) {
+        deltaSearch = curSearch - sumSearch25;
+        pctSearch = (deltaSearch / sumSearch25) * 100;
+      }
+      if (has26Discover && sumDiscover25 > 0) {
+        deltaDiscover = curDiscover - sumDiscover25;
+        pctDiscover = (deltaDiscover / sumDiscover25) * 100;
+      }
+    } else {
+      curSearch = hasCurSearch ? (curPoint.record.pExGoogleSearch as number) : 0;
+      curDiscover = hasCurDiscover ? (curPoint.record.pExGoogleDiscover as number) : 0;
+
+      if (hasCurSearch && medSearch > 0) {
+        deltaSearch = curSearch - medSearch;
+        pctSearch = (deltaSearch / medSearch) * 100;
+      }
+      if (hasCurDiscover && medDiscover > 0) {
+        deltaDiscover = curDiscover - medDiscover;
+        pctDiscover = (deltaDiscover / medDiscover) * 100;
+      }
     }
 
-    const hasRawSearch = curPoint?.record.pExGoogleSearch !== undefined && curPoint?.record.pExGoogleSearch > 0;
-    const hasRawDiscover = curPoint?.record.pExGoogleDiscover !== undefined && curPoint?.record.pExGoogleDiscover > 0;
-    const isFromSheet = hasRawSearch || hasRawDiscover;
-
-    const deltaSearch = curSearch - medSearch;
-    const pctSearch = medSearch > 0 ? (deltaSearch / medSearch) * 100 : 0;
-
-    const deltaDiscover = curDiscover - medDiscover;
-    const pctDiscover = medDiscover > 0 ? (deltaDiscover / medDiscover) * 100 : 0;
-
     const curMonthLabel = isYoYMode ? 'Tổng 2026' : (curPoint?.shortLabel || '');
-    const totalDeltaGoogle = (curSearch + curDiscover) - (medSearch + medDiscover);
-    const totalPctDeltaGoogle = (medSearch + medDiscover) > 0 ? (totalDeltaGoogle / (medSearch + medDiscover)) * 100 : 0;
 
-    const primaryDriver: 'search' | 'discover' = deltaSearch >= deltaDiscover ? 'search' : 'discover';
-    const primaryDriverLabel = primaryDriver === 'search' ? 'Google Search' : 'Google Discover';
-
-    const trendInsightText = isYoYMode
-      ? `Tổng lũy kế 2026 so với Cùng kỳ 2025: Tìm kiếm chủ động (Search) đạt ${formatNumber(curSearch)} PV (${formatDelta(deltaSearch)} so với cùng kỳ), Đề xuất di động (Discover) đạt ${formatNumber(curDiscover)} PV (${formatDelta(deltaDiscover)} so với cùng kỳ).`
-      : `Xu hướng tham khảo trong tháng ${curMonthLabel}: Tìm kiếm chủ động (Search) đạt ${formatNumber(curSearch)} PV (${formatDelta(deltaSearch)} so với chuẩn), trong khi Đề xuất di động (Discover) đạt ${formatNumber(curDiscover)} PV (${formatDelta(deltaDiscover)} so với chuẩn).`;
-
-    const targetGoogleMonths = isYoYMode ? monthlyData : months2026;
-    const trendSearchDiscover = targetGoogleMonths.map((d) => {
-      const sVal = getSearchVal(d.record);
-      const dVal = getDiscoverVal(d.record);
-
+    const trendSearchDiscover = monthsWithGoogleData.map((d) => {
+      const sVal = Number(d.record.pExGoogleSearch) || 0;
+      const dVal = Number(d.record.pExGoogleDiscover) || 0;
       return {
         month: isYoYMode ? d.label : d.shortLabel,
         rawMonth: d.month,
@@ -203,8 +233,13 @@ export const TrafficSourcesView: React.FC<Props> = ({
       };
     });
 
+    const earliestDataMonth = monthsWithGoogleData.length > 0 ? (isYoYMode ? monthsWithGoogleData[0].label : monthsWithGoogleData[0].shortLabel) : 'T1';
+    const latestDataMonth = monthsWithGoogleData.length > 0 ? (isYoYMode ? monthsWithGoogleData[monthsWithGoogleData.length - 1].label : monthsWithGoogleData[monthsWithGoogleData.length - 1].shortLabel) : 'T8';
+
     return {
       isFromSheet,
+      hasCurSearch,
+      hasCurDiscover,
       curMonthLabel,
       curGoogleTotal,
       curSearch,
@@ -215,12 +250,10 @@ export const TrafficSourcesView: React.FC<Props> = ({
       deltaDiscover,
       pctSearch,
       pctDiscover,
-      totalDeltaGoogle,
-      totalPctDeltaGoogle,
-      primaryDriver,
-      primaryDriverLabel,
-      trendInsightText,
       trendSearchDiscover,
+      earliestDataMonth,
+      latestDataMonth,
+      countRecordedMonths: monthsWithGoogleData.length,
     };
   }, [monthlyData, selectedMonth, isYoYMode, isSearchDiscoverAllowed]);
 
@@ -423,8 +456,8 @@ export const TrafficSourcesView: React.FC<Props> = ({
     return availableMonthNums.map((mNum) => {
       const d26 = months2026.find((d) => d.monthNum === mNum);
       const d25 = months2025.find((d) => d.monthNum === mNum);
-      const v26 = d26 ? (d26.record.pExGoogleSearch && d26.record.pExGoogleSearch > 0 ? d26.record.pExGoogleSearch : Math.round((d26.record.pExGoogle || 0) * 0.62)) : 0;
-      const v25 = d25 ? (d25.record.pExGoogleSearch && d25.record.pExGoogleSearch > 0 ? d25.record.pExGoogleSearch : Math.round((d25.record.pExGoogle || 0) * 0.62)) : 0;
+      const v26 = Number(d26?.record.pExGoogleSearch) || 0;
+      const v25 = Number(d25?.record.pExGoogleSearch) || 0;
       return { monthNum: mNum, monthLabel: `T${mNum}`, val2026: v26, val2025: v25 };
     });
   };
@@ -433,8 +466,8 @@ export const TrafficSourcesView: React.FC<Props> = ({
     return availableMonthNums.map((mNum) => {
       const d26 = months2026.find((d) => d.monthNum === mNum);
       const d25 = months2025.find((d) => d.monthNum === mNum);
-      const v26 = d26 ? (d26.record.pExGoogleDiscover && d26.record.pExGoogleDiscover > 0 ? d26.record.pExGoogleDiscover : Math.round((d26.record.pExGoogle || 0) * 0.38)) : 0;
-      const v25 = d25 ? (d25.record.pExGoogleDiscover && d25.record.pExGoogleDiscover > 0 ? d25.record.pExGoogleDiscover : Math.round((d25.record.pExGoogle || 0) * 0.38)) : 0;
+      const v26 = Number(d26?.record.pExGoogleDiscover) || 0;
+      const v25 = Number(d25?.record.pExGoogleDiscover) || 0;
       return { monthNum: mNum, monthLabel: `T${mNum}`, val2026: v26, val2025: v25 };
     });
   };
@@ -498,17 +531,21 @@ export const TrafficSourcesView: React.FC<Props> = ({
   };
 
   const getGoogleSearchLongTermSeries = (): LongTermPoint[] => {
-    return monthlyData.map((d) => {
-      const v = d.record.pExGoogleSearch && d.record.pExGoogleSearch > 0 ? d.record.pExGoogleSearch : Math.round((d.record.pExGoogle || 0) * 0.62);
-      return { month: d.month, monthLabel: d.label, year: d.year, val: v };
-    });
+    return monthlyData.map((d) => ({
+      month: d.month,
+      monthLabel: d.label,
+      year: d.year,
+      val: Number(d.record.pExGoogleSearch) || 0,
+    }));
   };
 
   const getGoogleDiscoverLongTermSeries = (): LongTermPoint[] => {
-    return monthlyData.map((d) => {
-      const v = d.record.pExGoogleDiscover && d.record.pExGoogleDiscover > 0 ? d.record.pExGoogleDiscover : Math.round((d.record.pExGoogle || 0) * 0.38);
-      return { month: d.month, monthLabel: d.label, year: d.year, val: v };
-    });
+    return monthlyData.map((d) => ({
+      month: d.month,
+      monthLabel: d.label,
+      year: d.year,
+      val: Number(d.record.pExGoogleDiscover) || 0,
+    }));
   };
 
   const getDirectBrandnameLongTermSeries = (): LongTermPoint[] => {
@@ -950,7 +987,13 @@ export const TrafficSourcesView: React.FC<Props> = ({
                           —
                         </td>
                         <td className="py-2.5 px-4 text-right font-mono">
-                          <div className="font-bold text-slate-900">{formatNumber(googleDetails.curSearch)}</div>
+                          {googleDetails.hasCurSearch || (isYoYMode && googleDetails.curSearch > 0) ? (
+                            <div className="font-bold text-slate-900">{formatNumber(googleDetails.curSearch)}</div>
+                          ) : (
+                            <div className="text-xs text-slate-500 font-sans italic">
+                              Chưa ghi nhận
+                            </div>
+                          )}
                         </td>
                         <td className="py-2.5 px-4 text-right font-mono">
                           <div className="font-semibold text-slate-700">{formatNumber(googleDetails.medSearch)}</div>
@@ -959,9 +1002,13 @@ export const TrafficSourcesView: React.FC<Props> = ({
                           </div>
                         </td>
                         <td className="py-2.5 px-4 text-right font-mono">
-                          <div className={`font-bold ${googleDetails.deltaSearch >= 0 ? 'text-emerald-600' : 'text-rose-600'}`}>
-                            {formatDelta(googleDetails.deltaSearch)} ({formatPercent(googleDetails.pctSearch)})
-                          </div>
+                          {googleDetails.deltaSearch !== null && googleDetails.pctSearch !== null ? (
+                            <div className={`font-bold ${googleDetails.deltaSearch >= 0 ? 'text-emerald-600' : 'text-rose-600'}`}>
+                              {formatDelta(googleDetails.deltaSearch)} ({formatPercent(googleDetails.pctSearch)})
+                            </div>
+                          ) : (
+                            <div className="text-slate-400 font-sans text-xs">—</div>
+                          )}
                         </td>
                         {isYoYMode && (
                           <td className="py-2.5 px-3 text-center align-middle">
@@ -987,7 +1034,13 @@ export const TrafficSourcesView: React.FC<Props> = ({
                           —
                         </td>
                         <td className="py-2.5 px-4 text-right font-mono">
-                          <div className="font-bold text-slate-900">{formatNumber(googleDetails.curDiscover)}</div>
+                          {googleDetails.hasCurDiscover || (isYoYMode && googleDetails.curDiscover > 0) ? (
+                            <div className="font-bold text-slate-900">{formatNumber(googleDetails.curDiscover)}</div>
+                          ) : (
+                            <div className="text-xs text-slate-500 font-sans italic">
+                              Chưa ghi nhận
+                            </div>
+                          )}
                         </td>
                         <td className="py-2.5 px-4 text-right font-mono">
                           <div className="font-semibold text-slate-700">{formatNumber(googleDetails.medDiscover)}</div>
@@ -996,9 +1049,13 @@ export const TrafficSourcesView: React.FC<Props> = ({
                           </div>
                         </td>
                         <td className="py-2.5 px-4 text-right font-mono">
-                          <div className={`font-bold ${googleDetails.deltaDiscover >= 0 ? 'text-emerald-600' : 'text-rose-600'}`}>
-                            {formatDelta(googleDetails.deltaDiscover)} ({formatPercent(googleDetails.pctDiscover)})
-                          </div>
+                          {googleDetails.deltaDiscover !== null && googleDetails.pctDiscover !== null ? (
+                            <div className={`font-bold ${googleDetails.deltaDiscover >= 0 ? 'text-emerald-600' : 'text-rose-600'}`}>
+                              {formatDelta(googleDetails.deltaDiscover)} ({formatPercent(googleDetails.pctDiscover)})
+                            </div>
+                          ) : (
+                            <div className="text-slate-400 font-sans text-xs">—</div>
+                          )}
                         </td>
                         {isYoYMode && (
                           <td className="py-2.5 px-3 text-center align-middle">
@@ -1306,7 +1363,7 @@ export const TrafficSourcesView: React.FC<Props> = ({
                     iconType="circle"
                     wrapperStyle={{ fontSize: '11px', paddingBottom: '8px' }}
                   />
-                  {googleDetails.curMonthLabel && (
+                  {(googleDetails.hasCurSearch || googleDetails.hasCurDiscover || isYoYMode) && googleDetails.curMonthLabel && (
                     <ReferenceLine
                       x={googleDetails.curMonthLabel}
                       stroke="#dc2626"
