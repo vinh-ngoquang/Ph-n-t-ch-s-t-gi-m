@@ -1,4 +1,14 @@
 import React, { useState, useMemo } from 'react';
+import {
+  ResponsiveContainer,
+  LineChart,
+  Line,
+  XAxis,
+  YAxis,
+  Tooltip,
+  Legend,
+  CartesianGrid,
+} from 'recharts';
 import { MonthlyDataPoint, calculateMedian, isSpecialPublication } from '../utils/timeSeriesAnalytics';
 import { formatNumber, formatPercent, formatDelta } from '../utils/formatters';
 import {
@@ -15,6 +25,7 @@ import {
   Pencil,
   Table2,
   Users,
+  LineChart as LineChartIcon,
 } from 'lucide-react';
 import { useDataset } from '../context/DatasetContext';
 
@@ -58,6 +69,8 @@ export const ExecutiveHeader: React.FC<Props> = ({
   hideImportAndExport = false,
 }) => {
   const [showMonthlyTable, setShowMonthlyTable] = useState(false);
+  const [showTrendChart, setShowTrendChart] = useState(false);
+  const [chartViewMode, setChartViewMode] = useState<'dual' | 'traffic' | 'content'>('dual');
   const [syncToast, setSyncToast] = useState<{ message: string; type: 'success' | 'error' } | null>(null);
   const {
     dataset,
@@ -216,6 +229,39 @@ export const ExecutiveHeader: React.FC<Props> = ({
   const pctYoYBuildTop = buildTop2025Sum > 0 ? (deltaYoYBuildTop / buildTop2025Sum) * 100 : 0;
   const yoyBuildRate = art2026Sum > 0 ? (buildTop2026Sum / art2026Sum) * 100 : 0;
 
+  // Chronological full time series from 2025 to present
+  const fullTimeSeriesData = useMemo(() => {
+    const sorted = [...monthlyData].sort((a, b) => {
+      if (a.year !== b.year) return a.year - b.year;
+      return a.monthNum - b.monthNum;
+    });
+
+    return sorted.map((d) => {
+      const pv = d.record.pageviews || 0;
+      const ss = d.record.sessions || 0;
+      const art = d.record.articles || 0;
+      const bt = d.record.aBuildTop || 0;
+      const rate = art > 0 ? Number(((bt / art) * 100).toFixed(1)) : 0;
+      const pvPerSession = ss > 0 ? Number((pv / ss).toFixed(2)) : 0;
+
+      return {
+        month: d.month,
+        monthLabel: `T${d.monthNum}/${String(d.year).slice(-2)}`,
+        shortLabel: `T${d.monthNum}`,
+        year: d.year,
+        monthNum: d.monthNum,
+        pageviews: pv,
+        pageviewsM: Number((pv / 1_000_000).toFixed(2)),
+        sessions: ss,
+        sessionsM: Number((ss / 1_000_000).toFixed(2)),
+        articles: art,
+        buildTop: bt,
+        buildRate: rate,
+        pvPerSession,
+      };
+    });
+  }, [monthlyData]);
+
   const tabs = [
     { id: 'all', name: 'Toàn Bộ Góc Nhìn', icon: Layers },
     { id: 'sources', name: 'Nguồn Truy Cập (8 Nguồn)', icon: Compass },
@@ -302,7 +348,7 @@ export const ExecutiveHeader: React.FC<Props> = ({
               <span>{googleSheetConfig?.url ? 'Google Sheets' : 'Cấu hình Sheets'}</span>
             </button>
 
-            {/* Bảng Các Tháng 2026 */}
+            {/* Bảng Các Tháng 2026 (Monthly mode) */}
             {!isYoYMode && (
               <button
                 onClick={() => setShowMonthlyTable(!showMonthlyTable)}
@@ -315,6 +361,22 @@ export const ExecutiveHeader: React.FC<Props> = ({
               >
                 <Table2 className="w-3.5 h-3.5 text-blue-600" />
                 <span>{showMonthlyTable ? 'Ẩn Bảng Các Tháng' : 'Bảng Các Tháng 2026'}</span>
+              </button>
+            )}
+
+            {/* Biểu đồ Xu hướng 2025 - Nay (YoY Mode) */}
+            {isYoYMode && (
+              <button
+                onClick={() => setShowTrendChart(!showTrendChart)}
+                className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg border font-medium text-xs transition shadow-xs cursor-pointer whitespace-nowrap ${
+                  showTrendChart
+                    ? 'bg-blue-50 text-blue-700 border-blue-300 font-semibold'
+                    : 'bg-white hover:bg-slate-50 text-slate-700 border-slate-200'
+                }`}
+                title="Bật/tắt biểu đồ đường xu hướng các chỉ số hiệu quả từ 2025 đến nay"
+              >
+                <LineChartIcon className="w-3.5 h-3.5 text-blue-600" />
+                <span>{showTrendChart ? 'Ẩn Biểu Đồ Xu Hướng' : 'Biểu Đồ Xu Hướng (2025 - Nay)'}</span>
               </button>
             )}
 
@@ -577,6 +639,331 @@ export const ExecutiveHeader: React.FC<Props> = ({
             </div>
           </div>
         </div>
+
+        {/* Đường Xu Hướng Các Chỉ Số Hoạt Động (2025 -> Nay) trong Tab Historical (YoY) */}
+        {isYoYMode && showTrendChart && (
+          <div className="mt-4 pt-4 border-t border-slate-100 animate-in fade-in duration-200 space-y-3">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2.5">
+              <div>
+                <div className="flex items-center gap-2">
+                  <h3 className="text-xs sm:text-sm font-bold text-slate-900">
+                    Đường Xu Hướng Các Chỉ Số Hoạt Động (2025 → Nay)
+                  </h3>
+                  <span className="px-2 py-0.5 rounded text-[10px] font-semibold bg-blue-50 text-blue-700 border border-blue-200">
+                    {fullTimeSeriesData.length} Tháng
+                  </span>
+                </div>
+                <p className="text-[11px] text-slate-500 mt-0.5">
+                  Diễn biến chuỗi thời gian liên tục từ 2025 đến nay của 4 chỉ số cốt lõi: Tổng Pageview, Tổng Session, Sản lượng bài và Số bài Build Top.
+                </p>
+              </div>
+
+              {/* View Mode Switcher */}
+              <div className="flex items-center bg-slate-100 p-0.5 rounded-lg border border-slate-200 text-xs shrink-0 self-start sm:self-center">
+                <button
+                  onClick={() => setChartViewMode('dual')}
+                  className={`px-2.5 py-1 rounded-md text-[11px] font-medium transition cursor-pointer ${
+                    chartViewMode === 'dual'
+                      ? 'bg-white text-blue-700 shadow-2xs font-bold'
+                      : 'text-slate-600 hover:text-slate-900'
+                  }`}
+                  title="Hiển thị song song 2 biểu đồ phân theo nhóm thang đo"
+                >
+                  2 Biểu đồ Song song
+                </button>
+                <button
+                  onClick={() => setChartViewMode('traffic')}
+                  className={`px-2.5 py-1 rounded-md text-[11px] font-medium transition cursor-pointer ${
+                    chartViewMode === 'traffic'
+                      ? 'bg-white text-blue-700 shadow-2xs font-bold'
+                      : 'text-slate-600 hover:text-slate-900'
+                  }`}
+                  title="Chỉ xem Pageview & Session"
+                >
+                  Pageview & Session
+                </button>
+                <button
+                  onClick={() => setChartViewMode('content')}
+                  className={`px-2.5 py-1 rounded-md text-[11px] font-medium transition cursor-pointer ${
+                    chartViewMode === 'content'
+                      ? 'bg-white text-blue-700 shadow-2xs font-bold'
+                      : 'text-slate-600 hover:text-slate-900'
+                  }`}
+                  title="Chỉ xem Sản lượng bài & Build Top"
+                >
+                  Bài Viết & Build Top
+                </button>
+              </div>
+            </div>
+
+            {/* Chart Area */}
+            {chartViewMode === 'dual' ? (
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+                {/* Chart 1: Traffic (Pageviews & Sessions) */}
+                <div className="bg-slate-50/70 border border-slate-200/80 rounded-xl p-3.5 space-y-2">
+                  <div className="flex items-center justify-between text-xs">
+                    <span className="font-bold text-slate-800">
+                      1. Tổng Pageview & Tổng Session (Triệu lượt)
+                    </span>
+                    <span className="text-[11px] text-slate-400">Đơn vị: Triệu (M)</span>
+                  </div>
+                  <div className="w-full h-64">
+                    <ResponsiveContainer width="100%" height="100%">
+                      <LineChart data={fullTimeSeriesData} margin={{ top: 8, right: 15, left: -10, bottom: 5 }}>
+                        <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" />
+                        <XAxis
+                          dataKey="monthLabel"
+                          stroke="#94a3b8"
+                          tick={{ fill: '#64748b', fontSize: 11 }}
+                        />
+                        <YAxis
+                          stroke="#94a3b8"
+                          tick={{ fill: '#64748b', fontSize: 11 }}
+                          tickFormatter={(v) => `${v}M`}
+                        />
+                        <Tooltip
+                          contentStyle={{
+                            backgroundColor: '#ffffff',
+                            borderColor: '#cbd5e1',
+                            borderRadius: '0.5rem',
+                            color: '#0f172a',
+                            fontSize: '11px',
+                            boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.05)',
+                          }}
+                          formatter={(value: any, name: any, item: any) => {
+                            if (name === 'Tổng Pageview') {
+                              return [`${formatNumber(item.payload.pageviews)} PV (${value}M)`, name];
+                            }
+                            if (name === 'Tổng Session') {
+                              return [`${formatNumber(item.payload.sessions)} Phiên (${value}M)`, name];
+                            }
+                            return [value, name];
+                          }}
+                          labelFormatter={(label) => `Tháng ${label}`}
+                        />
+                        <Legend wrapperStyle={{ fontSize: '11px', paddingTop: '4px' }} />
+                        <Line
+                          type="monotone"
+                          dataKey="pageviewsM"
+                          name="Tổng Pageview"
+                          stroke="#2563eb"
+                          strokeWidth={2.5}
+                          dot={{ r: 3.5, fill: '#2563eb' }}
+                          activeDot={{ r: 5.5 }}
+                        />
+                        <Line
+                          type="monotone"
+                          dataKey="sessionsM"
+                          name="Tổng Session"
+                          stroke="#0891b2"
+                          strokeWidth={2}
+                          dot={{ r: 3, fill: '#0891b2' }}
+                          activeDot={{ r: 5 }}
+                        />
+                      </LineChart>
+                    </ResponsiveContainer>
+                  </div>
+                </div>
+
+                {/* Chart 2: Content Production & Build Top */}
+                <div className="bg-slate-50/70 border border-slate-200/80 rounded-xl p-3.5 space-y-2">
+                  <div className="flex items-center justify-between text-xs">
+                    <span className="font-bold text-slate-800">
+                      2. Sản Lượng Bài Viết & Số Bài Build Top
+                    </span>
+                    <span className="text-[11px] text-slate-400">Đơn vị: Số bài viết</span>
+                  </div>
+                  <div className="w-full h-64">
+                    <ResponsiveContainer width="100%" height="100%">
+                      <LineChart data={fullTimeSeriesData} margin={{ top: 8, right: 15, left: -5, bottom: 5 }}>
+                        <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" />
+                        <XAxis
+                          dataKey="monthLabel"
+                          stroke="#94a3b8"
+                          tick={{ fill: '#64748b', fontSize: 11 }}
+                        />
+                        <YAxis
+                          stroke="#94a3b8"
+                          tick={{ fill: '#64748b', fontSize: 11 }}
+                          tickFormatter={(v) => formatNumber(v)}
+                        />
+                        <Tooltip
+                          contentStyle={{
+                            backgroundColor: '#ffffff',
+                            borderColor: '#cbd5e1',
+                            borderRadius: '0.5rem',
+                            color: '#0f172a',
+                            fontSize: '11px',
+                            boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.05)',
+                          }}
+                          formatter={(value: any, name: any, item: any) => {
+                            if (name === 'Sản Lượng Bài') {
+                              return [`${formatNumber(value)} bài`, name];
+                            }
+                            if (name === 'Số Bài Build Top') {
+                              return [`${formatNumber(value)} bài (${item.payload.buildRate}% sản lượng)`, name];
+                            }
+                            return [formatNumber(value), name];
+                          }}
+                          labelFormatter={(label) => `Tháng ${label}`}
+                        />
+                        <Legend wrapperStyle={{ fontSize: '11px', paddingTop: '4px' }} />
+                        <Line
+                          type="monotone"
+                          dataKey="articles"
+                          name="Sản Lượng Bài"
+                          stroke="#f59e0b"
+                          strokeWidth={2.5}
+                          dot={{ r: 3.5, fill: '#f59e0b' }}
+                          activeDot={{ r: 5.5 }}
+                        />
+                        <Line
+                          type="monotone"
+                          dataKey="buildTop"
+                          name="Số Bài Build Top"
+                          stroke="#9333ea"
+                          strokeWidth={2}
+                          dot={{ r: 3, fill: '#9333ea' }}
+                          activeDot={{ r: 5 }}
+                        />
+                      </LineChart>
+                    </ResponsiveContainer>
+                  </div>
+                </div>
+              </div>
+            ) : chartViewMode === 'traffic' ? (
+              <div className="bg-slate-50/70 border border-slate-200/80 rounded-xl p-4 space-y-2">
+                <div className="flex items-center justify-between text-xs">
+                  <span className="font-bold text-slate-800">
+                    Đường xu hướng Tổng Pageview & Session từ 2025 đến nay (Triệu lượt)
+                  </span>
+                  <span className="text-[11px] text-slate-400">Đơn vị: Triệu (M)</span>
+                </div>
+                <div className="w-full h-72">
+                  <ResponsiveContainer width="100%" height="100%">
+                    <LineChart data={fullTimeSeriesData} margin={{ top: 10, right: 20, left: -5, bottom: 5 }}>
+                      <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" />
+                      <XAxis
+                        dataKey="monthLabel"
+                        stroke="#94a3b8"
+                        tick={{ fill: '#64748b', fontSize: 11 }}
+                      />
+                      <YAxis
+                        stroke="#94a3b8"
+                        tick={{ fill: '#64748b', fontSize: 11 }}
+                        tickFormatter={(v) => `${v}M`}
+                      />
+                      <Tooltip
+                        contentStyle={{
+                          backgroundColor: '#ffffff',
+                          borderColor: '#cbd5e1',
+                          borderRadius: '0.5rem',
+                          color: '#0f172a',
+                          fontSize: '11px',
+                          boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.05)',
+                        }}
+                        formatter={(value: any, name: any, item: any) => {
+                          if (name === 'Tổng Pageview') {
+                            return [`${formatNumber(item.payload.pageviews)} PV (${value}M)`, name];
+                          }
+                          if (name === 'Tổng Session') {
+                            return [`${formatNumber(item.payload.sessions)} Phiên (${value}M)`, name];
+                          }
+                          return [value, name];
+                        }}
+                        labelFormatter={(label) => `Tháng ${label}`}
+                      />
+                      <Legend wrapperStyle={{ fontSize: '11px', paddingTop: '6px' }} />
+                      <Line
+                        type="monotone"
+                        dataKey="pageviewsM"
+                        name="Tổng Pageview"
+                        stroke="#2563eb"
+                        strokeWidth={2.5}
+                        dot={{ r: 4, fill: '#2563eb' }}
+                        activeDot={{ r: 6 }}
+                      />
+                      <Line
+                        type="monotone"
+                        dataKey="sessionsM"
+                        name="Tổng Session"
+                        stroke="#0891b2"
+                        strokeWidth={2}
+                        dot={{ r: 3.5, fill: '#0891b2' }}
+                        activeDot={{ r: 5.5 }}
+                      />
+                    </LineChart>
+                  </ResponsiveContainer>
+                </div>
+              </div>
+            ) : (
+              <div className="bg-slate-50/70 border border-slate-200/80 rounded-xl p-4 space-y-2">
+                <div className="flex items-center justify-between text-xs">
+                  <span className="font-bold text-slate-800">
+                    Đường xu hướng Sản Lượng Bài Viết & Số Bài Build Top từ 2025 đến nay
+                  </span>
+                  <span className="text-[11px] text-slate-400">Đơn vị: Số bài viết</span>
+                </div>
+                <div className="w-full h-72">
+                  <ResponsiveContainer width="100%" height="100%">
+                    <LineChart data={fullTimeSeriesData} margin={{ top: 10, right: 20, left: -5, bottom: 5 }}>
+                      <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" />
+                      <XAxis
+                        dataKey="monthLabel"
+                        stroke="#94a3b8"
+                        tick={{ fill: '#64748b', fontSize: 11 }}
+                      />
+                      <YAxis
+                        stroke="#94a3b8"
+                        tick={{ fill: '#64748b', fontSize: 11 }}
+                        tickFormatter={(v) => formatNumber(v)}
+                      />
+                      <Tooltip
+                        contentStyle={{
+                          backgroundColor: '#ffffff',
+                          borderColor: '#cbd5e1',
+                          borderRadius: '0.5rem',
+                          color: '#0f172a',
+                          fontSize: '11px',
+                          boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.05)',
+                        }}
+                        formatter={(value: any, name: any, item: any) => {
+                          if (name === 'Sản Lượng Bài') {
+                            return [`${formatNumber(value)} bài`, name];
+                          }
+                          if (name === 'Số Bài Build Top') {
+                            return [`${formatNumber(value)} bài (${item.payload.buildRate}% sản lượng)`, name];
+                          }
+                          return [formatNumber(value), name];
+                        }}
+                        labelFormatter={(label) => `Tháng ${label}`}
+                      />
+                      <Legend wrapperStyle={{ fontSize: '11px', paddingTop: '6px' }} />
+                      <Line
+                        type="monotone"
+                        dataKey="articles"
+                        name="Sản Lượng Bài"
+                        stroke="#f59e0b"
+                        strokeWidth={2.5}
+                        dot={{ r: 4, fill: '#f59e0b' }}
+                        activeDot={{ r: 6 }}
+                      />
+                      <Line
+                        type="monotone"
+                        dataKey="buildTop"
+                        name="Số Bài Build Top"
+                        stroke="#9333ea"
+                        strokeWidth={2}
+                        dot={{ r: 3.5, fill: '#9333ea' }}
+                        activeDot={{ r: 5.5 }}
+                      />
+                    </LineChart>
+                  </ResponsiveContainer>
+                </div>
+              </div>
+            )}
+          </div>
+        )}
 
         {/* Bảng so sánh số liệu các tháng năm 2026 vs. Mốc Trung Vị Chu Kỳ */}
         {!isYoYMode && showMonthlyTable && (
